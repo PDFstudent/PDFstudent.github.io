@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="串联输出查询、DAgger 数据闭环、视觉语言动作模型评估，以及人形机器人 MPC 与 WBC 的上下层关系。">
+  <meta property="og:title" content="从 Transformer 到 VLA 与人形控制 · PDFstudent 知识库">
+  <meta property="og:description" content="串联输出查询、DAgger 数据闭环、视觉语言动作模型评估，以及人形机器人 MPC 与 WBC 的上下层关系。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>从 Transformer 到 VLA 与人形控制 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main"><a class="back" href="/">← 返回首页</a><article><header class="article-header"><p class="eyebrow">具身智能 · 2026-10-28</p><h1>从 Transformer 到 VLA 与人形控制</h1><p class="article-summary">串联输出查询、DAgger 数据闭环、视觉语言动作模型评估，以及人形机器人 MPC 与 WBC 的上下层关系。</p><div class="tags"><span class="tag">Transformer</span><span class="tag">VLA</span><span class="tag">DAgger</span><span class="tag">人形机器人</span></div></header><div class="article-body"><h2>输出查询不是固定答案</h2>
+<p>标准 Transformer 主干通常保持序列长度不变。若希望一次并行得到多个动作或轨迹点，需要为这些结果提供对应的查询位置。所谓占位向量，更像“第几个结果应该是什么”的固定岗位，而不是已经写好的答案。</p>
+<p>训练完成后，初始查询向量通常固定；它经过注意力读取图像、语言和状态后形成的隐藏向量会随输入变化，最终输出头才把它转换成具有物理意义的速度、位置或角度。</p>
+<h2>DAgger 的真正价值</h2>
+<p>行为克隆主要学习专家自己访问到的状态，而 DAgger 让当前模型闭环运行，再请专家对模型实际到达的状态给出正确动作。关键不是收集更多普通直行片段，而是覆盖偏离、即将失败、干预和恢复的连续过程。</p>
+<p>发生危险时，模型提出的动作可以作为诊断信息，但不能直接成为模仿学习标签。有效样本应是“模型访问到的状态，加上专家针对此状态重新计算的动作”。如果没有专家标注，危险片段更适合用于风险模型、负样本分析或后续重标。</p>
+<p>实际机器人不应依赖真正发生碰撞来采集数据。更安全的流程是先采用影子模式，再进入低速受限执行，加入独立安全门控和专家接管，最后逐步提高模型控制比例。</p>
+<h2>评估 VLA 本机推理</h2>
+<p>判断一个开源视觉语言动作模型能否在本机推理，不能只看参数量。至少要同时核对模型权重可获得性、输入分辨率、上下文长度、动作块长度、数值精度、推理框架、峰值显存、主存占用和目标控制频率。</p>
+<p>如果完整模型无法实时运行，可以依次考虑降低精度、缩短上下文、减少动作块、使用更小视觉编码器、离线批处理，或把模型放在高层决策而保留传统控制器负责高频闭环。</p>
+<h2>人形机器人的 MPC 与 WBC</h2>
+<p>MPC 使用相对简化的动力学模型预测未来一段时间，规划质心、躯干姿态、落脚和接触力。WBC 使用完整刚体动力学，以更高频率协调支撑脚、摆动脚、躯干和手臂，输出关节加速度、位置或力矩。</p>
+<p>可以把它们理解为“看得远”和“做得准”的分工。MPC 不能单独保证不摔倒，WBC 也不能弥补错误的接触计划；状态估计、接触时序、摩擦约束、执行器带宽和模型一致性必须共同闭环。</p>
+<h2>学习路径</h2>
+<ol>
+<li>掌握浮动基座刚体动力学和接触约束。</li>
+<li>用二次规划实现站立状态下的全身控制。</li>
+<li>加入摆动脚任务与接触切换。</li>
+<li>学习线性倒立摆和质心动力学 MPC。</li>
+<li>最后联调状态估计、MPC、WBC 与底层伺服的频率和时延。</li>
+</ol></div></article></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+  
+</body>
+</html>

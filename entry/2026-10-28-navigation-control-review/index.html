@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="将历史对话中的路线跟随、配置分层、局部控制、视觉交接与故障恢复整理为一套系统方法。">
+  <meta property="og:title" content="机器人导航与运动控制复盘 · PDFstudent 知识库">
+  <meta property="og:description" content="将历史对话中的路线跟随、配置分层、局部控制、视觉交接与故障恢复整理为一套系统方法。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>机器人导航与运动控制复盘 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main"><a class="back" href="/">← 返回首页</a><article><header class="article-header"><p class="eyebrow">导航控制 · 2026-10-28</p><h1>机器人导航与运动控制复盘</h1><p class="article-summary">将历史对话中的路线跟随、配置分层、局部控制、视觉交接与故障恢复整理为一套系统方法。</p><div class="tags"><span class="tag">机器人导航</span><span class="tag">Nav2</span><span class="tag">路径跟随</span><span class="tag">运动控制</span></div></header><div class="article-body"><h2>核心架构</h2>
+<p>导航系统不应被理解为“规划器加控制器”，而应被看作一条闭环链路：任务接口决定意图，配置层选择运动学与安全策略，全局规划产生路线，局部控制生成速度，感知与定位提供约束，状态机负责暂停、恢复和终止。</p>
+<h2>MPPI 与 RPP 的分工</h2>
+<ul>
+<li>MPPI 通过采样多条候选轨迹并叠加多个评价项，适合需要联合考虑路径、障碍、终点姿态和全向运动的场景。</li>
+<li>RPP 从前视点计算曲率，主要输出纵向速度和角速度；它结构简单、行为容易解释，但遇到障碍通常是减速或停车，而不是主动绕行。</li>
+<li>对全向底盘，强制“先原地转向再跟踪”可能限制横向能力。若局部控制器已经支持全向运动，可直接联合优化三个速度分量。</li>
+<li>对指定路线，固定路线语义通常比自由绕障更重要，因此一次规划、严格跟线和停车等待可能比重新规划更合适。</li>
+</ul>
+<h2>配置存在不等于配置生效</h2>
+<p>历史排查中最重要的教训之一，是参数文件里出现某个节点的参数，并不说明运行时真的启动了该节点。验证配置必须沿真实链路进行：检查进程、生命周期状态、话题发布者、最终速度出口和实测反馈。</p>
+<p>合理的配置体系应包含四层：平台默认配置、任务类型配置、运动学模型配置、现场临时覆盖。每层只覆盖差异项，并在启动时输出最终合并结果，避免仿真与实车分别维护两套逐渐漂移的完整文件。</p>
+<h2>安全与障碍处理</h2>
+<p>任务开始前的静态地图全路径校验，与运行期间的局部障碍检测解决不同问题。前者能发现整条路径与固定环境的冲突，后者能对动态障碍停车并在道路恢复后继续。二者应使用一致的车体几何和安全余量。</p>
+<p>简单删除机器人后半平面的全部点云，虽然能绕开车体或拖车自回波，却也会删除真实环境障碍。长期方案应基于车体几何做自过滤，并对铰接部分进行动态扫掠碰撞检查，而不是把整个后方视野变成盲区。</p>
+<h2>精导航与停靠</h2>
+<p>精导航适合显式状态机：粗导航完成、标签捕获、远距横向与航向对齐、最终接近、必要时原地重对齐、停稳确认。每次状态切换都应说明进入条件、控制自由度、失效条件和恢复方向。</p>
+<p>停靠成功后的横向微移不能只是一条速度命令。它需要请求幂等、闭环距离反馈、加减速限制、换向前停稳、纵向漂移保护、超时停止和最终全局位姿复核。微移成功后还应更新停靠锚点，保证下一次离站判断使用最新位置。</p>
+<h2>故障恢复</h2>
+<p>短暂定位心跳抖动本身不一定严重，但如果暂停导航、后端中止回调和任务恢复标志的时序不一致，就可能把瞬时异常放大为任务失败。恢复流程应先建立“任务待恢复”状态，再触发生命周期切换，并把旧目标的异步结果识别为恢复过程的一部分。</p>
+<h2>长期行动项</h2>
+<ul>
+<li>为所有任务类型输出最终生效的控制器、运动模型、速度限制与点云过滤策略。</li>
+<li>为指定路线补充车体和附属结构的动态扫掠验证。</li>
+<li>把定位心跳、完整坐标变换、任务状态和后端结果放到同一条诊断时间线。</li>
+<li>建立仿真与实车共用的接口级测试，差异只留在设备适配层。</li>
+</ul></div></article></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+  
+</body>
+</html>
