@@ -3,12 +3,30 @@
   <url><loc>https://pdfstudent.github.io/</loc></url>
   <url><loc>https://pdfstudent.github.io/topics/</loc></url>
   <url><loc>https://pdfstudent.github.io/about/</loc></url>
-  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-vln-open-source-projects/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-vln-omtrackvla/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-vln-internvla/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-vln-index/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-vln-deployment/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-vln-dagger/</loc></url>
   <url><loc>https://pdfstudent.github.io/entry/2026-10-29-technical-stack-index/</loc></url>
-  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-slam-technology/</loc></url>
-  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-navigation-algorithms/</loc></url>
-  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-model-foundations/</loc></url>
-  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-engineering-practice/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-slam-visual-pose/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-slam-relocalization-fusion/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-slam-pointcloud-diagnostics/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-slam-mapping-keyframes/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-slam-index/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-navigation-index/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-nav-precision-docking/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-nav-local-controllers/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-nav-lifecycle-config/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-nav-global-planning/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-nav-collision-safety/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-model-mpc-wbc/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-model-index/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-model-action-queries/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-engineering-index/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-eng-linux-ops/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-eng-debug-ci/</loc></url>
+  <url><loc>https://pdfstudent.github.io/entry/2026-10-29-eng-build-deploy/</loc></url>
   <url><loc>https://pdfstudent.github.io/entry/2026-10-28-codex-review/</loc></url>
   <url><loc>https://pdfstudent.github.io/entry/2026-10-28-codex-knowledge-vault/</loc></url>
 </urlset>

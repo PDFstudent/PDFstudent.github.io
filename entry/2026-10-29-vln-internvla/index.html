@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="分析低频 System 2、高频 System 1、Pixel Goal、Latent Plan、NavDP、DualVLN 和异步更新。">
+  <meta property="og:title" content="InternVLA-N1 双系统架构 · PDFstudent 知识库">
+  <meta property="og:description" content="分析低频 System 2、高频 System 1、Pixel Goal、Latent Plan、NavDP、DualVLN 和异步更新。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>InternVLA-N1 双系统架构 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main"><a class="back" href="/">← 返回首页</a><article><header class="article-header"><p class="eyebrow">VLN项目 · 2026-10-29</p><h1>InternVLA-N1 双系统架构</h1><p class="article-summary">分析低频 System 2、高频 System 1、Pixel Goal、Latent Plan、NavDP、DualVLN 和异步更新。</p><div class="tags"><span class="tag">InternVLA-N1</span><span class="tag">NavDP</span><span class="tag">DualVLN</span><span class="tag">双系统</span></div></header><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">任务定义</a></li><li class="toc-level-2"><a href="#section-2">双系统分工</a></li><li class="toc-level-2"><a href="#section-3">为什么不能每周期运行大模型</a></li><li class="toc-level-2"><a href="#section-4">Pixel Goal</a></li><li class="toc-level-2"><a href="#section-5">Latent Plan</a></li><li class="toc-level-2"><a href="#section-6">NavDP</a></li><li class="toc-level-2"><a href="#section-7">DualVLN</a></li><li class="toc-level-2"><a href="#section-8">异步计划更新</a></li><li class="toc-level-2"><a href="#section-9">训练阶段</a></li><li class="toc-level-2"><a href="#section-10">跨机器人迁移</a></li><li class="toc-level-2"><a href="#section-11">与 OmTrackVLA 的区别</a></li><li class="toc-level-2"><a href="#section-12">安全边界</a></li></ol></nav><div class="article-body"><h2 id="section-1">任务定义</h2>
+<p>InternVLA-N1 面向长距离视觉语言导航，例如离开房间、沿走廊前进并到达语义目标。它不仅生成短期动作，还要跟踪多步骤指令进度。</p>
+<h2 id="section-2">双系统分工</h2>
+<p>System 2 使用大型视觉语言模型低频理解指令、历史观察和场景语义，输出中期规划意图。System 1 以更高频率根据当前观察和最新意图生成局部轨迹。</p>
+<h2 id="section-3">为什么不能每周期运行大模型</h2>
+<p>大型视觉语言模型延迟高，若控制循环等待其完成，机器人会走一下停一下。异步架构让 System 1 持续运行，System 2 在后台更新。</p>
+<h2 id="section-4">Pixel Goal</h2>
+<p>高层可在当前图像中预测一个二维像素位置，表示下一阶段朝哪里走。这个接口不直接依赖底盘形态，容易跨轮式、四足和人形平台。</p>
+<p>问题是像素没有深度，同一方向可能对应近处障碍或远处门口。</p>
+<h2 id="section-5">Latent Plan</h2>
+<p>Latent Plan 用一组可学习隐变量传递方向、距离、语义目标和任务阶段，比单个像素点信息更丰富。</p>
+<p>代价是可解释性降低。系统仍需要超时、版本号和安全门控，不能让低层永久使用不透明的过期计划。</p>
+<h2 id="section-6">NavDP</h2>
+<p>NavDP 使用 RGB-D、目标条件和历史状态生成未来局部轨迹。深度提供米制几何，更容易评价障碍距离和窄通道。</p>
+<p>其弱点是深度相机的量程、空洞、同步和反光透明物体问题。</p>
+<h2 id="section-7">DualVLN</h2>
+<p>DualVLN 更强调 RGB 输入和双系统联合适配。RGB 部署简单、语义预训练强，但绝对尺度和不可见障碍更难保证。</p>
+<p>模型主要使用 RGB 不等于整机完全不用深度。独立安全层仍可使用激光、深度或局部代价地图。</p>
+<h2 id="section-8">异步计划更新</h2>
+<p>System 2 每次输出应带生成时刻、观察版本和有效期。System 1 需要判断计划是否过期，以及新旧计划切换是否连续。</p>
+<p>高层失联时，本地策略只能在短时间内沿用旧计划；超过门限应减速或停车。</p>
+<h2 id="section-9">训练阶段</h2>
+<p>可先分别训练语言到中期目标、观察到局部轨迹，再加入 Latent Plan 做联合适配。联合训练时高层低频、低层高频的更新节奏应与推理一致。</p>
+<h2 id="section-10">跨机器人迁移</h2>
+<p>中期目标或隐式计划与机器人形态弱耦合，低层 System 1 则必须适配具体运动学、相机高度和控制接口。</p>
+<h2 id="section-11">与 OmTrackVLA 的区别</h2>
+<p>OmTrackVLA 更关注短期目标跟随，网络较轻，输出有限时域路径点。InternVLA-N1 关注长距离指令执行，包含语义规划和局部控制两个频率层。</p>
+<h2 id="section-12">安全边界</h2>
+<p>无论 System 1 使用 RGB 还是 RGB-D，真实机器人都应保留独立碰撞保护、速度限制、急停和网络失联降级。</p></div></article></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+  
+</body>
+</html>

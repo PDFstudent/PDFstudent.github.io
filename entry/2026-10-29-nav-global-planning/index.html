@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="区分目标导航与路线导航，解释多点行为树、最近前向接入、一次规划、地图注册和路线资产。">
+  <meta property="og:title" content="全局规划、指定路线与重规划策略 · PDFstudent 知识库">
+  <meta property="og:description" content="区分目标导航与路线导航，解释多点行为树、最近前向接入、一次规划、地图注册和路线资产。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>全局规划、指定路线与重规划策略 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main"><a class="back" href="/">← 返回首页</a><article><header class="article-header"><p class="eyebrow">导航算法 · 2026-10-29</p><h1>全局规划、指定路线与重规划策略</h1><p class="article-summary">区分目标导航与路线导航，解释多点行为树、最近前向接入、一次规划、地图注册和路线资产。</p><div class="tags"><span class="tag">全局规划</span><span class="tag">指定路线</span><span class="tag">行为树</span><span class="tag">地图资产</span></div></header><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">目标导航与路线导航</a></li><li class="toc-level-2"><a href="#section-2">路线资产的三层表示</a></li><li class="toc-level-2"><a href="#section-3">离线打点</a></li><li class="toc-level-2"><a href="#section-4">实车录制路线</a></li><li class="toc-level-2"><a href="#section-5">多点导航行为树</a></li><li class="toc-level-2"><a href="#section-6">只规划一次</a></li><li class="toc-level-2"><a href="#section-7">从当前位置接入路线</a></li><li class="toc-level-2"><a href="#section-8">接入步骤</a></li><li class="toc-level-2"><a href="#section-9">地图注册</a></li><li class="toc-level-2"><a href="#section-10">规划失败定位</a></li><li class="toc-level-2"><a href="#section-11">仿真验证</a></li></ol></nav><div class="article-body"><h2 id="section-1">目标导航与路线导航</h2>
+<p>普通目标导航只约束终点，规划器可以选择任意可行路径。指定路线表达业务规定的通行走廊、方向和顺序，路径本身就是任务的一部分。</p>
+<p>若把指定路线只转换成终点，规划器可能选择更短但不符合业务的路线。若把每个路径点都当成独立目标，又会造成频繁规划和启停。</p>
+<h2 id="section-2">路线资产的三层表示</h2>
+<p>原始路线保存人工标注的有序位姿；运行前可做重采样和平滑，得到连续可执行路径；控制器只消费当前位置附近的局部路径段。</p>
+<p>三层数据应分别保存来源版本、坐标系、方向和点间距，避免编辑结果与运行路径混淆。</p>
+<h2 id="section-3">离线打点</h2>
+<p>在地图上用带方向的位姿工具记录路径点，比只发布无朝向点更适合路线导航。每个点保存平面位置和航向，可以表达拐弯前后的车体方向。</p>
+<p>粗站点、精站点和指定路线应使用不同资产文件，因为字段、校验和执行语义不同。</p>
+<h2 id="section-4">实车录制路线</h2>
+<p>机器人完成定位后，可以通过遥控沿目标路线移动，在关键位置调用记录接口增量保存全局位姿。</p>
+<p>记录工具应支持开始、追加、撤销最后一点、预览、保存和取消，并在保存时校验点间距、重复点和方向连续性。</p>
+<h2 id="section-5">多点导航行为树</h2>
+<p>多点导航不一定在距离下一个点固定阈值时简单替换目标。实现可能把所有位姿交给规划器生成一条路径，也可能逐段执行。</p>
+<p>需要明确行为树使用的是 NavigateThroughPoses 还是自定义路径执行，失败恢复是针对当前段还是整个路线。</p>
+<h2 id="section-6">只规划一次</h2>
+<p>固定路线任务通常希望开始时生成路径，执行中不被周期重规划改变。一次规划能保持路线稳定，但定位跳变、人工移动机器人或地图更新后，旧路径可能不再适用。</p>
+<p>更合理的规则是默认不周期重规划，只在明确事件发生时触发：定位恢复后位姿变化超过阈值、机器人被遥控移走、路径资产版本变化或控制器请求重新接入。</p>
+<h2 id="section-7">从当前位置接入路线</h2>
+<p>机器人不应总返回路线起点。可以把当前位置投影到路线折线，找到距离最近且方向一致的前向弧长位置，从该位置截取到终点的子路线。</p>
+<p>不能只选欧氏距离最近点。路线可能折返或相邻段空间接近，需要比较路线切向与机器人航向，排除反向段，并设置最大接入距离。</p>
+<h2 id="section-8">接入步骤</h2>
+<ol>
+<li>将当前位置变换到路线坐标系。</li>
+<li>对每条线段求正交投影和线段内比例。</li>
+<li>计算投影距离、累计弧长和切向方向。</li>
+<li>用距离与方向联合评分。</li>
+<li>选择前向可行候选。</li>
+<li>从投影点拼接剩余路线。</li>
+<li>对拼接处做曲率和碰撞检查。</li>
+</ol>
+<h2 id="section-9">地图注册</h2>
+<p>地图 ID 与目录、地图文件和任务资产的关系应由统一注册表管理。站点和路线文件不应重复保存容易漂移的地图 ID。</p>
+<p>运行时先用任务中的地图 ID 查注册表，再定位地图目录及其站点、路线资产。这样修改地图编号时不需要同步改多份资产。</p>
+<h2 id="section-10">规划失败定位</h2>
+<p>失败可能来自起点或终点落在障碍、起终点超出地图、代价地图未更新、容差过小或坐标变换过期。</p>
+<p>日志应分别输出起点代价、终点代价、是否成功投影到自由空间、搜索展开数量和失败阶段，避免只保留“无法生成路径”。</p>
+<h2 id="section-11">仿真验证</h2>
+<p>仿真资产要同时包含与真实地图对应的障碍布局、地图注册、站点和路线文件。只复制路线文件而不保持坐标原点和分辨率一致，会让路线整体偏移。</p>
+<p>测试至少覆盖从路线起点接入、从中段接入、接近折返段、路线前方有障碍和定位跳变后重新接入。</p></div></article></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+  
+</body>
+</html>

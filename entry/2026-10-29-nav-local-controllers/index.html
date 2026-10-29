@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="给出 RPP 曲率与限速公式、MPPI 采样评价机制、终点局部最优和全向 Rotation Shim 取舍。">
+  <meta property="og:title" content="RPP、MPPI 与全向底盘控制 · PDFstudent 知识库">
+  <meta property="og:description" content="给出 RPP 曲率与限速公式、MPPI 采样评价机制、终点局部最优和全向 Rotation Shim 取舍。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>RPP、MPPI 与全向底盘控制 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main"><a class="back" href="/">← 返回首页</a><article><header class="article-header"><p class="eyebrow">导航算法 · 2026-10-29</p><h1>RPP、MPPI 与全向底盘控制</h1><p class="article-summary">给出 RPP 曲率与限速公式、MPPI 采样评价机制、终点局部最优和全向 Rotation Shim 取舍。</p><div class="tags"><span class="tag">RPP</span><span class="tag">MPPI</span><span class="tag">Rotation Shim</span><span class="tag">全向底盘</span></div></header><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">RPP 前视点</a></li><li class="toc-level-2"><a href="#section-2">曲率公式</a></li><li class="toc-level-2"><a href="#section-3">曲率限速</a></li><li class="toc-level-2"><a href="#section-4">障碍限速</a></li><li class="toc-level-2"><a href="#section-5">MPPI 优化变量</a></li><li class="toc-level-2"><a href="#section-6">MPPI 不是全局规划器</a></li><li class="toc-level-2"><a href="#section-7">终点附近零速度局部最优</a></li><li class="toc-level-2"><a href="#section-8">加速度模型</a></li><li class="toc-level-2"><a href="#section-9">Rotation Shim</a></li><li class="toc-level-2"><a href="#section-10">原地旋转碰撞</a></li><li class="toc-level-2"><a href="#section-11">控制器选择</a></li><li class="toc-level-2"><a href="#section-12">调试数据</a></li></ol></nav><div class="article-body"><h2 id="section-1">RPP 前视点</h2>
+<p>RPP 将全局路径裁剪并变换到机器人坐标系，在路径上寻找前视距离对应的点。前视距离可以写成 <code>Ld = clamp(|v| × T, Lmin, Lmax)</code>。</p>
+<p>速度越高，前视越远，控制更平滑；低速时前视缩短，更容易精确跟踪。</p>
+<h2 id="section-2">曲率公式</h2>
+<p>前视点为 <code>(xL, yL)</code> 时，纯跟踪曲率为 <code>k = 2 × yL / (xL² + yL²)</code>。正常跟踪角速度为 <code>w = v × k</code>。</p>
+<p>RPP 的所谓横向控制是通过角速度改变轨迹，不直接输出横向平移速度。</p>
+<h2 id="section-3">曲率限速</h2>
+<p>转弯半径 <code>R = |1 / k|</code>。当半径小于设定尺度时，纵向速度按半径比例降低。弯越急速度越低，可以减少过冲和横向加速度。</p>
+<h2 id="section-4">障碍限速</h2>
+<p>控制器可从代价地图膨胀值反推近似障碍距离，再按距离缩放速度。反推依赖膨胀层参数一致，否则控制器估计的障碍距离不准确。</p>
+<p>这种限速不会自动生成绕障轨迹。最终安全仍依赖前向碰撞预测；预测到碰撞时应拒绝当前命令。</p>
+<h2 id="section-5">MPPI 优化变量</h2>
+<p>MPPI 维护一段未来控制序列，对其加入随机扰动，使用运动模型展开大量候选轨迹，再按总代价对扰动加权更新控制序列。</p>
+<p>总代价可包含路径跟随、目标距离、目标航向、障碍代价、速度偏好、轨迹平滑和运动学约束。</p>
+<h2 id="section-6">MPPI 不是全局规划器</h2>
+<p>它只在有限时域和采样范围内选择局部轨迹。若全局路径穿过不可通行区域、代价地图封死通道或采样范围不足，MPPI 也无法创造可行路径。</p>
+<h2 id="section-7">终点附近零速度局部最优</h2>
+<p>差速机器人到达目标附近时，可能需要先偏离最终航向才能继续减少位置误差。如果目标航向评价项在较远距离就强烈惩罚转向，所有有效运动都可能比停住代价更高。</p>
+<p>解决思路是明确位置与航向的阶段分工：先完成平移，再在位置容差内执行最终旋转，而不是单纯放宽进度检查时间。</p>
+<h2 id="section-8">加速度模型</h2>
+<p>MPPI 展开轨迹时使用内部加速度限制。外部速度平滑器若未启动，其参数不会作用于实际命令。底盘固件还可能有独立斜坡限制。</p>
+<p>应同时记录控制器输出速度和里程计实际速度，估计真实加减速度，再使预测模型与底盘能力接近。</p>
+<h2 id="section-9">Rotation Shim</h2>
+<p>Rotation Shim 在路径跟踪前先把机器人旋转到接近路径方向，适合不能横移的差速底盘。</p>
+<p>全向底盘可以同时输出纵向、横向和角速度，强制原地旋转可能降低效率。若主控制器和下游速度链真正支持横向分量，可让其直接跟踪路径。</p>
+<h2 id="section-10">原地旋转碰撞</h2>
+<p>原地旋转并非天然安全。非圆形车体旋转时会扫过更大区域，Rotation Shim 需要使用完整 footprint 做前向模拟碰撞检查。</p>
+<h2 id="section-11">控制器选择</h2>
+<p>固定业务路线、行为要求清晰且遇障停车时，RPP 简单可解释。需要动态局部绕障、全向运动或多目标权衡时，MPPI 更灵活。</p>
+<p>选择标准应包含任务语义、运动学、障碍策略、算力和可验证性，而不只是“哪个算法更高级”。</p>
+<h2 id="section-12">调试数据</h2>
+<p>至少同步记录局部路径、前视点、曲率、各限速因子、MPPI 候选总代价、最终速度、底盘实际速度和碰撞预测结果。</p></div></article></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+  
+</body>
+</html>

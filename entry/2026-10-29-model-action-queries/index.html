@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="从张量形状、Query 数量、位置编码和掩码解释动作占位向量为何存在、如何训练以及何时不需要。">
+  <meta property="og:title" content="Transformer 动作查询与并行序列预测 · PDFstudent 知识库">
+  <meta property="og:description" content="从张量形状、Query 数量、位置编码和掩码解释动作占位向量为何存在、如何训练以及何时不需要。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>Transformer 动作查询与并行序列预测 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main"><a class="back" href="/">← 返回首页</a><article><header class="article-header"><p class="eyebrow">模型基础 · 2026-10-29</p><h1>Transformer 动作查询与并行序列预测</h1><p class="article-summary">从张量形状、Query 数量、位置编码和掩码解释动作占位向量为何存在、如何训练以及何时不需要。</p><div class="tags"><span class="tag">Transformer</span><span class="tag">Query Token</span><span class="tag">Action Token</span><span class="tag">注意力</span></div></header><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">序列长度为什么通常不变</a></li><li class="toc-level-2"><a href="#section-2">Attention 的输出数量</a></li><li class="toc-level-2"><a href="#section-3">动作槽位是什么</a></li><li class="toc-level-2"><a href="#section-4">训练后是否固定</a></li><li class="toc-level-2"><a href="#section-5">物理含义来自哪里</a></li><li class="toc-level-2"><a href="#section-6">独立查询与共享查询</a></li><li class="toc-level-2"><a href="#section-7">动作槽位之间的交互</a></li><li class="toc-level-2"><a href="#section-8">为什么不用一个向量输出全部动作</a></li><li class="toc-level-2"><a href="#section-9">自回归与并行预测</a></li><li class="toc-level-2"><a href="#section-10">输出头</a></li><li class="toc-level-2"><a href="#section-11">常见误区</a></li><li class="toc-level-2"><a href="#section-12">最小实验</a></li></ol></nav><div class="article-body"><h2 id="section-1">序列长度为什么通常不变</h2>
+<p>输入矩阵形状为 <code>N × d</code>，表示 N 个位置、每个位置 d 维。标准 Transformer 层输出仍是 <code>N × d</code>，它更新已有行，不自动创建新行。</p>
+<p>前馈网络逐位置计算，也不改变位置数量。</p>
+<h2 id="section-2">Attention 的输出数量</h2>
+<p>Attention 先计算 <code>Q = XWq</code>、<code>K = XWk</code>、<code>V = XWv</code>，再计算 <code>softmax(QKᵀ / sqrt(d))V</code>。</p>
+<p>输出有多少行由 Q 的行数决定。没有第四个 Query，就没有第四个独立输出向量。</p>
+<h2 id="section-3">动作槽位是什么</h2>
+<p>需要一次预测 K 个未来动作时，可在图像、语言和状态后加入 K 个动作查询。每个查询经过注意力读取前面的信息，形成对应时间位置的隐藏状态。</p>
+<p>它更像答题框或固定岗位，不包含答案本身。</p>
+<h2 id="section-4">训练后是否固定</h2>
+<p>可学习动作向量在训练中通过任务损失反向传播更新。训练完成并冻结模型后，其初始向量通常固定。</p>
+<p>固定的是查询身份；经过 Transformer 后的隐藏向量随输入变化，输出头给出的速度或轨迹也随输入变化。</p>
+<h2 id="section-5">物理含义来自哪里</h2>
+<p>初始动作查询通常没有米或米每秒等直接单位。第几个槽位、位置编码、输出头和监督目标共同赋予其角色。</p>
+<p>若第一个槽位总被监督为最近未来动作，它会学习“近期动作查询”；更远位置则学习较长时间尺度。</p>
+<h2 id="section-6">独立查询与共享查询</h2>
+<p>一种设计为每个动作位置使用独立向量；另一种使用同一基础向量叠加不同时间位置编码。</p>
+<p>独立向量提供更强位置特化，共享向量参数更少。二者都需要让模型区分时间顺序。</p>
+<h2 id="section-7">动作槽位之间的交互</h2>
+<p>允许动作槽位互相注意时，它们可以协调速度和方向，生成连续轨迹。使用因果掩码时，后续动作可以参考前面动作位置，但不能反向看到未来。</p>
+<p>掩码决定每个查询能看什么，槽位决定在哪里产生结果，两者不能混为一谈。</p>
+<h2 id="section-8">为什么不用一个向量输出全部动作</h2>
+<p>可以读取一个汇总向量，再用线性层输出 <code>K × action_dim</code>。这种结构更简单。</p>
+<p>多个动作查询的优势是每个时间点拥有独立隐藏状态，可以关注不同区域，并通过注意力协调。缺点是序列更长、计算量更大。</p>
+<h2 id="section-9">自回归与并行预测</h2>
+<p>语言模型的单次前向仍只更新已有位置。程序根据最后位置预测下一个离散符号，把符号追加后再次调用模型，这才形成新序列。</p>
+<p>机器人动作更常一次预测一段 action chunk，减少推理频率；但执行若干步后仍应根据新观测滚动重算，避免长时开环误差。</p>
+<h2 id="section-10">输出头</h2>
+<p>隐藏状态可通过多层感知机回归速度、相对位姿或路径点。输出动作的归一化、坐标系、时间间隔和损失函数决定最终物理含义。</p>
+<p>若输出未来八个相对位姿，结果应明确是相对当前机器人、上一预测点还是固定局部坐标系。</p>
+<h2 id="section-11">常见误区</h2>
+<ol>
+<li>占位查询不是把真实动作喂给模型。</li>
+<li>固定初始向量不意味着固定输出。</li>
+<li>Transformer 并非所有任务都必须使用动作查询。</li>
+<li>多个 Query 不自动保证轨迹平滑，仍需训练目标和时间建模。</li>
+<li>输出路径点与直接输出速度具有不同控制和安全含义。</li>
+</ol>
+<h2 id="section-12">最小实验</h2>
+<p>可以构造图像特征、指令特征和四个动作查询，让模型回归四个二维点。分别移除位置编码、禁止动作间注意力、改为单向量输出，比较轨迹一致性和每个时间位置的误差。</p></div></article></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+  
+</body>
+</html>

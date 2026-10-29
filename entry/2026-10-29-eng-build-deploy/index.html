@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="区分源码构建、SDK、merged install 和完整集成包，覆盖交叉编译、空间峰值、原子切换与文件校验。">
+  <meta property="og:title" content="构建产物、完整部署与回滚 · PDFstudent 知识库">
+  <meta property="og:description" content="区分源码构建、SDK、merged install 和完整集成包，覆盖交叉编译、空间峰值、原子切换与文件校验。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>构建产物、完整部署与回滚 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main"><a class="back" href="/">← 返回首页</a><article><header class="article-header"><p class="eyebrow">工程实践 · 2026-10-29</p><h1>构建产物、完整部署与回滚</h1><p class="article-summary">区分源码构建、SDK、merged install 和完整集成包，覆盖交叉编译、空间峰值、原子切换与文件校验。</p><div class="tags"><span class="tag">构建</span><span class="tag">Conan</span><span class="tag">交叉编译</span><span class="tag">部署</span></div></header><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">项目依赖边界</a></li><li class="toc-level-2"><a href="#section-2">构建成功不等于可部署</a></li><li class="toc-level-2"><a href="#section-3">Merged install</a></li><li class="toc-level-2"><a href="#section-4">交叉编译</a></li><li class="toc-level-2"><a href="#section-5">原生设备编译</a></li><li class="toc-level-2"><a href="#section-6">Conan 工具链</a></li><li class="toc-level-2"><a href="#section-7">空间峰值</a></li><li class="toc-level-2"><a href="#section-8">原子部署</a></li><li class="toc-level-2"><a href="#section-9">文件完整性</a></li><li class="toc-level-2"><a href="#section-10">动态库验证</a></li><li class="toc-level-2"><a href="#section-11">回滚包</a></li><li class="toc-level-2"><a href="#section-12">部署验证顺序</a></li><li class="toc-level-2"><a href="#section-13">失败处理</a></li></ol></nav><div class="article-body"><h2 id="section-1">项目依赖边界</h2>
+<p>接口定义、应用代码、系统集成包和设备运行时可能分别构建，却在部署根目录中交叉安装文件。</p>
+<p>单应用热替换只适合目录边界清晰的组件。接口包的动态库、共享资源和包索引分散在多个位置，必须作为完整依赖图部署。</p>
+<h2 id="section-2">构建成功不等于可部署</h2>
+<p>编译只生成目标文件。部署还需要目录布局、环境脚本、动态库、资源文件、包索引和版本清单。</p>
+<p>SDK 压缩包、源码 install 目录和完整运行包用途不同，不能因为目录结构相似就直接覆盖正式根目录。</p>
+<h2 id="section-3">Merged install</h2>
+<p>Merged 模式把多个包安装到共同前缀，便于运行，但文件所有权分散。升级单个基础接口时，难以安全删除旧文件。</p>
+<p>因此接口 ABI 变化应重新组装完整集成包，而不是把某个 share 子目录覆盖进去。</p>
+<h2 id="section-4">交叉编译</h2>
+<p>检查目标架构、系统库版本、动态加载器和工具链。部署前使用二进制检查和动态库检查确认产物与设备匹配。</p>
+<h2 id="section-5">原生设备编译</h2>
+<p>在设备上直接编译可以避免交叉工具链差异，但会消耗存储和时间。必须明确依赖来自系统还是 Conan，避免与正式运行库混合。</p>
+<h2 id="section-6">Conan 工具链</h2>
+<p>工具链文件定义编译器、sysroot、搜索前缀、构建类型和依赖路径。更换工具链可能改变 ABI、标准库和查找顺序，即使源码不变也会产生运行差异。</p>
+<h2 id="section-7">空间峰值</h2>
+<p>部署时可能同时存在压缩包、临时解压目录、当前正式目录和备份。需要计算峰值，而不是只看最终目录大小。</p>
+<p>同时检查 inode，特别是 ROS 安装树包含大量小文件。</p>
+<h2 id="section-8">原子部署</h2>
+<p>先写入独立版本目录，完成校验后再切换当前版本指针。不要边运行边覆盖正式文件。</p>
+<h2 id="section-9">文件完整性</h2>
+<p>传输后比较缺失文件、大小或校验值。少数不可读缓存目录导致传输返回失败，不代表业务文件全部缺失，也不能直接忽略错误。</p>
+<h2 id="section-10">动态库验证</h2>
+<p>加载目标环境后检查所有可执行文件的动态依赖，并验证运行时能够发现关键包和资源。</p>
+<h2 id="section-11">回滚包</h2>
+<p>备份应记录来源提交、构建时间、依赖版本和校验值。只保留一个名字含 backup 的目录不构成可靠回滚。</p>
+<h2 id="section-12">部署验证顺序</h2>
+<ol>
+<li>校验架构与文件完整性。</li>
+<li>加载环境并检查包发现。</li>
+<li>检查动态库。</li>
+<li>启动只读或无运动节点。</li>
+<li>验证传感器和接口。</li>
+<li>低风险任务测试。</li>
+<li>确认后再删除旧版本。</li>
+</ol>
+<h2 id="section-13">失败处理</h2>
+<p>部署失败时保留原正式目录，不做半覆盖。空间不足先报告可清理对象，由维护者确认后再删除旧备份。</p></div></article></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+  
+</body>
+</html>
