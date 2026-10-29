@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="保存离散动作与轨迹分支、固定种子五场景结果、测地距离和同状态反事实回放的证据边界。">
+  <meta property="og:title" content="从离线推理到闭环：定位 InternVLA 提前停止 · PDFstudent 知识库">
+  <meta property="og:description" content="保存离散动作与轨迹分支、固定种子五场景结果、测地距离和同状态反事实回放的证据边界。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>从离线推理到闭环：定位 InternVLA 提前停止 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">离线回放究竟验证了什么</a><ol><li class="toc-level-3"><a href="#section-2">离散分支没有轨迹不等于模型失败</a></li><li class="toc-level-3"><a href="#section-3">固定输入不能证明闭环成功</a></li></ol></li><li class="toc-level-2"><a href="#section-4">为什么五个样本的结果会变化</a><ol><li class="toc-level-3"><a href="#section-5">先固定随机性，再比较指标</a></li><li class="toc-level-3"><a href="#section-6">开启观察记录不能改变待测策略</a></li></ol></li><li class="toc-level-2"><a href="#section-7">把意图、实际运动和结束原因对齐</a><ol><li class="toc-level-3"><a href="#section-8">欧氏距离与测地距离回答不同问题</a></li><li class="toc-level-3"><a href="#section-9">提前 STOP 的证据链</a></li></ol></li><li class="toc-level-2"><a href="#section-10">反事实回放能证明什么</a><ol><li class="toc-level-3"><a href="#section-11">从相同状态强制前进，检验可通行性</a></li><li class="toc-level-3"><a href="#section-12">下一层证据仍然缺失</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a><ol><li><a href="/entry/2026-10-29-vlnce-foundations/">VLN-CE 的任务、模型与地图边界</a></li><li><a href="/entry/2026-10-29-model-action-queries/">Transformer 为什么需要动作查询，以及固定查询如何输出不同动作</a></li><li><a href="/entry/2026-10-29-vln-omtrackvla/">OmTrackVLA 完整网络结构</a></li><li><a href="/entry/2026-10-29-vln-internvla/">InternVLA-N1 双系统架构</a></li><li><a href="/entry/2026-10-29-vln-dagger/">DAgger 如何让导航模型学会从自己的偏差中恢复</a></li><li><a href="/entry/2026-10-29-vln-deployment/">VLN 推理资源与部署架构</a></li><li><a aria-current="page" href="/entry/2026-10-29-internvla-evaluation/">从离线推理到闭环：定位 InternVLA 提前停止</a></li><li><a href="/entry/2026-10-29-vlnce-offline-training/">VLN-CE 离线训练：LMDB、DAgger 与 RNN 的时间关系</a></li><li><a href="/entry/2026-10-29-gr00t-action-contract/">GR00T：从视觉语言到具身动作的接口约定</a></li><li><a href="/entry/2026-10-29-vlnce-experiment-evidence/">VLN-CE：损失下降、STOP 失败与闭环证据</a></li><li><a href="/entry/2026-10-29-omtrack-data-training/">OmTrackVLA：从视频滑窗到训练梯度</a></li><li><a href="/entry/2026-10-29-omtrack-closed-loop/">OmTrackVLA：过门失败、目标丢失与五场景评测</a></li><li><a href="/entry/2026-10-29-navigation-metrics-data/">导航数据与指标：场景、episode、轨迹和成功率</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">离线回放究竟验证了什么</a><ol><li class="toc-level-3"><a href="#section-2">离散分支没有轨迹不等于模型失败</a></li><li class="toc-level-3"><a href="#section-3">固定输入不能证明闭环成功</a></li></ol></li><li class="toc-level-2"><a href="#section-4">为什么五个样本的结果会变化</a><ol><li class="toc-level-3"><a href="#section-5">先固定随机性，再比较指标</a></li><li class="toc-level-3"><a href="#section-6">开启观察记录不能改变待测策略</a></li></ol></li><li class="toc-level-2"><a href="#section-7">把意图、实际运动和结束原因对齐</a><ol><li class="toc-level-3"><a href="#section-8">欧氏距离与测地距离回答不同问题</a></li><li class="toc-level-3"><a href="#section-9">提前 STOP 的证据链</a></li></ol></li><li class="toc-level-2"><a href="#section-10">反事实回放能证明什么</a><ol><li class="toc-level-3"><a href="#section-11">从相同状态强制前进，检验可通行性</a></li><li class="toc-level-3"><a href="#section-12">下一层证据仍然缺失</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a><ol><li><a href="/entry/2026-10-29-vlnce-foundations/">VLN-CE 的任务、模型与地图边界</a></li><li><a href="/entry/2026-10-29-model-action-queries/">Transformer 为什么需要动作查询，以及固定查询如何输出不同动作</a></li><li><a href="/entry/2026-10-29-vln-omtrackvla/">OmTrackVLA 完整网络结构</a></li><li><a href="/entry/2026-10-29-vln-internvla/">InternVLA-N1 双系统架构</a></li><li><a href="/entry/2026-10-29-vln-dagger/">DAgger 如何让导航模型学会从自己的偏差中恢复</a></li><li><a href="/entry/2026-10-29-vln-deployment/">VLN 推理资源与部署架构</a></li><li><a aria-current="page" href="/entry/2026-10-29-internvla-evaluation/">从离线推理到闭环：定位 InternVLA 提前停止</a></li><li><a href="/entry/2026-10-29-vlnce-offline-training/">VLN-CE 离线训练：LMDB、DAgger 与 RNN 的时间关系</a></li><li><a href="/entry/2026-10-29-gr00t-action-contract/">GR00T：从视觉语言到具身动作的接口约定</a></li><li><a href="/entry/2026-10-29-vlnce-experiment-evidence/">VLN-CE：损失下降、STOP 失败与闭环证据</a></li><li><a href="/entry/2026-10-29-omtrack-data-training/">OmTrackVLA：从视频滑窗到训练梯度</a></li><li><a href="/entry/2026-10-29-omtrack-closed-loop/">OmTrackVLA：过门失败、目标丢失与五场景评测</a></li><li><a href="/entry/2026-10-29-navigation-metrics-data/">导航数据与指标：场景、episode、轨迹和成功率</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">具身智能 · 2026-10-29</p><h1>从离线推理到闭环：定位 InternVLA 提前停止</h1><p class="article-summary">保存离散动作与轨迹分支、固定种子五场景结果、测地距离和同状态反事实回放的证据边界。</p><div class="tags"><span class="tag">InternVLA-N1</span><span class="tag">DualVLN</span><span class="tag">STOP</span><span class="tag">评测</span></div></header><div class="article-body"><p>模型成功加载、输出局部轨迹，是否已经证明能导航？2026 年 10 月 26 日至 28 日的实验讨论按离线输入检查、闭环小样本、固定种子复现和失败回放逐步排除了不同解释。本文保存当时回答中报告的实验结果；本次归档未重新运行模型，因此下述数字是历史测试报告，而非本轮复测成绩。</p>
+<h2 id="section-1">离线回放究竟验证了什么</h2>
+<h3 id="section-2">离散分支没有轨迹不等于模型失败</h3>
+<p>原单帧日志输出 <code>→→→→</code>，被解析为四次右转，<code>pixel=None</code>、轨迹点数为零。这是走离散决策分支，不足以判定局部轨迹模块损坏。确定性生成 <code>do_sample=False</code> 时，<code>top_p/top_k</code> 警告表示这些采样参数不生效，也不等于推理失败。</p>
+<p>30 帧回放随后出现低头动作、目标像素和 33 个局部轨迹点。原文字 <code>463 215</code> 被对应实现解析为 <code>[x,y]=[215,463]</code>；后续若 <code>pixel=None</code> 但仍有轨迹，表示没有新像素目标、继续使用已保存的规划条件。这个坐标顺序是该解析器约定，不能推广到任意模型。</p>
+<h3 id="section-3">固定输入不能证明闭环成功</h3>
+<p>原离线脚本使用预录 RGB，并带固定假深度和位姿；模型动作没有改变下一帧。因此它只证明输入输出链可用。闭环时，动作改变机器人位置，下一帧由环境重新生成，错误会改变未来的观测分布。</p>
+<p>当时源码检查还区分：评测适配器生成并传入深度张量，但 <code>nextdit_async</code> 的实际分支读取 RGB 特征与规划特征，没有消费 <code>depths_dp</code>。不能因“传了深度”就说模型使用 RGB-D，也不能因为某分支不用深度，就直接删掉适配器仍依赖的字段。</p>
+<h2 id="section-4">为什么五个样本的结果会变化</h2>
+<h3 id="section-5">先固定随机性，再比较指标</h3>
+<p>原记录中，一次单 episode 成功，终点误差 0.269 m、SPL 0.995；随后五场景出现 1/5 成功，而较早预跑为 3/5。检查发现 System 1 生成轨迹使用随机初始噪声，之前未固定 PyTorch 种子。不能从这几次直接推断模型退化或提高。</p>
+<p>固定 <code>seed=0</code> 后，两次测试的文字、像素目标和动作序列被报告为逐项一致：成功 2/5，平均 SPL 0.382，平均终点误差 4.017 m。三个失败均由 STOP 结束，OS 为零，未碰到步数上限。这只是选定的 R2R val_unseen 小样本，不是官方完整基准，也没有足够样本支撑稳定成功率。</p>
+<h3 id="section-6">开启观察记录不能改变待测策略</h3>
+<p>后来加入位姿记录和视频，保持同一种子，结果仍为 2/5。轨迹记录读取执行后的仿真位置，不把真值目标、参考路径或 navmesh 喂给模型。诊断工具如果改变输入，原来的对照就不再成立。</p>
+<h2 id="section-7">把意图、实际运动和结束原因对齐</h2>
+<h3 id="section-8">欧氏距离与测地距离回答不同问题</h3>
+<p>俯视图用 Habitat 世界坐标 x、z 作水平轴，y 是高度。目标距离图的横轴是 <code>env.step</code> 次数，包含抬头低头等调用，并非秒数，也未必等于导航决策次数。</p>
+<p>一个失败案例的终点与目标直线相距约 2.27 m，测地距离却约 8.59 m，说明中间有障碍或绕行要求。用直线距离替代评测器的可通行距离会误判成功。参考路径用于找到分岔和复核局部片段，并不是唯一正确路线。</p>
+<h3 id="section-9">提前 STOP 的证据链</h3>
+<p>另一个吧台案例记录的距离依次下降：4.562、4.312、4.062、3.823 m；没有碰撞，随后第 36 个导航步骤输出 STOP。成功阈值为 3 m，因此还差 0.823 m。可确认直接失败原因是提前停止，而不是步数耗尽或机器人被撞停。</p>
+<p>第 27 步的像素目标 <code>[181,251]</code> 位于近处吧台边缘。把数据集终点投影到同一图像后，局部选点与终点方向不同；两处深度被报告为约 2.90 m 和 5.48 m。但局部子目标本来就不必等于最终目标，单凭这种差异不能证明选点错误。</p>
+<h2 id="section-10">反事实回放能证明什么</h2>
+<h3 id="section-11">从相同状态强制前进，检验可通行性</h3>
+<p>原讨论报告按原始动作回放，位置与记录最大误差为 0 m；从停止前的同一状态强制前进四步，距离降至 2.877 m且无碰撞。这支持“当时并非前方不可通行”，但强制动作来自诊断脚本，不能给原模型追加一次成功。</p>
+<p>它也不能完全区分模型误认了吧台拐角，还是正确识别后过早判定完成。可观察行为支持 STOP 提前，内部语义解释仍是待验证假设。把这两个层次写在同一句确定性结论里，会夸大证据。</p>
+<h3 id="section-12">下一层证据仍然缺失</h3>
+<p>原讨论最后准备了 11 个未见场景、每场景五条轨迹的 55 条诊断集，并报告环境加载成功；当前已读回合没有它的完整评测结果。不能把“准备好诊断集”写成“55 条验证通过”。应继续按提前停止、经过目标后离开、路线偏离和碰撞分层统计，再考虑修改模型或数据。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>

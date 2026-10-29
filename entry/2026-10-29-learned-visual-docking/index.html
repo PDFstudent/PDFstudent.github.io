@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="从相对位姿与视觉伺服出发，解释无标记精停的尺度、标定、延迟和验收边界。">
+  <meta property="og:title" content="无标记视觉精停：学习表示与几何闭环如何协作 · PDFstudent 知识库">
+  <meta property="og:description" content="从相对位姿与视觉伺服出发，解释无标记精停的尺度、标定、延迟和验收边界。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>无标记视觉精停：学习表示与几何闭环如何协作 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">两条学习路线究竟差在哪里</a><ol><li class="toc-level-3"><a href="#section-2">直接回归控制误差</a></li><li class="toc-level-3"><a href="#section-3">学习对应关系，再用几何求解</a></li></ol></li><li class="toc-level-2"><a href="#section-4">不求完整三维位姿，也能视觉伺服吗</a><ol><li class="toc-level-3"><a href="#section-5">图像误差与动作响应</a></li></ol></li><li class="toc-level-2"><a href="#section-6">厘米级误差预算为什么比平均匹配精度更重要</a><ol><li class="toc-level-3"><a href="#section-7">角度、延迟和停稳会叠加</a></li><li class="toc-level-3"><a href="#section-8">目标是操作允许区域，还是单一参考姿态</a></li></ol></li><li class="toc-level-2"><a href="#section-9">怎样采集和验收，才能避免虚假的高精度</a><ol><li class="toc-level-3"><a href="#section-10">标签工具与部署输入必须分开</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li><li><a aria-current="page" href="/entry/2026-10-29-learned-visual-docking/">无标记视觉精停：学习表示与几何闭环如何协作</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">两条学习路线究竟差在哪里</a><ol><li class="toc-level-3"><a href="#section-2">直接回归控制误差</a></li><li class="toc-level-3"><a href="#section-3">学习对应关系，再用几何求解</a></li></ol></li><li class="toc-level-2"><a href="#section-4">不求完整三维位姿，也能视觉伺服吗</a><ol><li class="toc-level-3"><a href="#section-5">图像误差与动作响应</a></li></ol></li><li class="toc-level-2"><a href="#section-6">厘米级误差预算为什么比平均匹配精度更重要</a><ol><li class="toc-level-3"><a href="#section-7">角度、延迟和停稳会叠加</a></li><li class="toc-level-3"><a href="#section-8">目标是操作允许区域，还是单一参考姿态</a></li></ol></li><li class="toc-level-2"><a href="#section-9">怎样采集和验收，才能避免虚假的高精度</a><ol><li class="toc-level-3"><a href="#section-10">标签工具与部署输入必须分开</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li><li><a aria-current="page" href="/entry/2026-10-29-learned-visual-docking/">无标记视觉精停：学习表示与几何闭环如何协作</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">运动控制 · 2026-10-29</p><h1>无标记视觉精停：学习表示与几何闭环如何协作</h1><p class="article-summary">从相对位姿与视觉伺服出发，解释无标记精停的尺度、标定、延迟和验收边界。</p><div class="tags"><span class="tag">视觉伺服</span><span class="tag">精停</span><span class="tag">相对位姿</span><span class="tag">数据驱动</span></div></header><div class="article-body"><p>机器人到达目标附近后，仍可能有厘米级横向误差和角度偏差。2026 年 10 月 26 日至 28 日的讨论关注一个可复用问题：取消人工视觉标记以后，怎样利用自然外观完成可靠的末端精停？讨论分析的是方案与验证条件，没有完成新的实机精度验收。</p>
+<p>传统标记同时解决目标身份、对应关系和尺度等问题。去掉标记并不意味着这些问题消失；它们需要由参考图像、三维模型、深度、运动反馈或训练先验承担。</p>
+<h2 id="section-1">两条学习路线究竟差在哪里</h2>
+<h3 id="section-2">直接回归控制误差</h3>
+<p>一种路线把当前图像、参考图像和状态输入网络，直接预测相对位姿或控制增量，例如平面误差 <code>(dx,dy,dtheta)</code>。它能把外观和动作关联学在一起，但训练数据必须覆盖视角、光照、遮挡、初始误差和动作响应。</p>
+<p>如果标签是绝对位姿，网络还要解决坐标定义和尺度；如果标签是动作，数据必须包含一致的时间间隔与执行约束。测试集要按地点、时间或外观变化切分，避免仅记住某张背景。</p>
+<h3 id="section-3">学习对应关系，再用几何求解</h3>
+<p>另一种路线用学习方法找关键点、稠密匹配或目标特征，再通过几何估计相对位姿，最后闭环控制。它把外观识别与位姿求解分开，便于观察匹配数、内点率、重投影误差等诊断量。</p>
+<p>这两条路线的分界是“直接预测动作或位姿”与“学习感知再做几何”，不是 RGB 与 RGB-D。两者都可能使用单目或深度。单目存在尺度歧义，但有已知尺寸三维目标时可通过 PnP 获取尺度；有可靠深度时可以建立三维对应关系。深度提供额外约束，也引入近距离失效、反光、缺测和外参问题。</p>
+<h2 id="section-4">不求完整三维位姿，也能视觉伺服吗</h2>
+<h3 id="section-5">图像误差与动作响应</h3>
+<p>图像伺服可用当前特征 s 与目标特征 s* 的误差 <code>e=s-s*</code> 驱动运动。简化关系为：</p>
+<pre><code class="language-text">e_dot ≈ J_image * u
+u = -lambda * pinv(J_image) * e</code></pre>
+<p>u 是机器人允许的速度分量，J_image 描述动作怎样改变图像特征，lambda 为收敛增益，pinv 为伪逆。实际系统还需要速度和加速度限幅、可观测性判断、外点剔除和安全约束。</p>
+<p>即使不重建完整地图，也必须知道图像变化与底盘动作之间的关系。可以通过标定、局部辨识或学习估计该关系，但不能因为用了神经网络就忽略相机安装、坐标变换和控制延迟。若相机装在会运动的头部，必须纳入头部关节状态与完整变换链。</p>
+<h2 id="section-6">厘米级误差预算为什么比平均匹配精度更重要</h2>
+<h3 id="section-7">角度、延迟和停稳会叠加</h3>
+<p>目标距离约 0.8 米、方向误差 1° 时，横向误差约为：</p>
+<pre><code class="language-text">0.8 * sin(1 degree) ≈ 0.014 m</code></pre>
+<p>这已接近 14 毫米。若机器人以 0.1 m/s 运动，感知到执行的总延迟为 0.1 秒，仅延迟就对应约 10 毫米位移。这些是说明误差量级的计算例子，不是本次实测数据。</p>
+<p>因此应记录曝光时间、位姿估计时间、控制输出时间和停稳时间，区分静态定位误差与动态闭环误差。仅在停住后计算视觉误差，可能掩盖最后一个动作带来的超调。</p>
+<h3 id="section-8">目标是操作允许区域，还是单一参考姿态</h3>
+<p>下游操作可能允许一个位置与角度容差区域，而不是必须复现单张参考图像。应从任务允许误差反推控制目标：横向、纵向和角度分别允许多少，是否存在不可越过的边界，接近方向是否受限。</p>
+<p>自然纹理重复时，还要先确认“这是哪个目标”，再求它的局部误差。局部匹配置信度高不保证目标身份正确；粗定位、目标编码和几何一致性可以成为相互独立的约束。</p>
+<h2 id="section-9">怎样采集和验收，才能避免虚假的高精度</h2>
+<h3 id="section-10">标签工具与部署输入必须分开</h3>
+<p>人工标记可以作为离线真值工具，用来生成位姿标签和量化误差，但部署不依赖标记时，训练输入应遮蔽或移除它，防止网络偷看答案。还应隔离日期、场地和参考图像，检查模型是否只记住了背景。</p>
+<p>验收应报告重复性、成功率、横向与角度误差分布、较高分位误差、错误目标匹配率和安全停止次数，并覆盖遮挡、光照、低纹理与相机扰动。均值很小但偶尔对错目标，仍不满足可靠精停的要求。</p>
+<p>讨论最终支持的是一条可验证的工程路线：先保留粗定位与安全执行，再验证自然特征或学习模型是否能提供稳定局部反馈，最后用闭环误差分布决定适用范围。它没有证明单目方法一定达到某个工业精度，也没有把方案建议当成已完成部署。执行状态机可结合<a href="https://pdfstudent.github.io/entry/2026-10-29-nav-precision-docking/" rel="noreferrer">视觉精导航与横向微移</a>阅读。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>

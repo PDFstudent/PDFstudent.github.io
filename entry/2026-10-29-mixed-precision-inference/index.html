@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="从 autocast 与 TensorRT 的不同作用解释 BF16 的速度、显存和精度边界，并给出可复验的计时与输出比较方法。">
+  <meta property="og:title" content="混合精度与推理引擎：参数存储、算子计算和控制误差 · PDFstudent 知识库">
+  <meta property="og:description" content="从 autocast 与 TensorRT 的不同作用解释 BF16 的速度、显存和精度边界，并给出可复验的计时与输出比较方法。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>混合精度与推理引擎：参数存储、算子计算和控制误差 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">先区分四个层次</a><ol><li class="toc-level-3"><a href="#section-2">指数范围和有效精度的交换</a></li></ol></li><li class="toc-level-2"><a href="#section-3">autocast 的“混合”发生在哪里</a></li><li class="toc-level-2"><a href="#section-4">比较结果要在限幅之前</a></li><li class="toc-level-2"><a href="#section-5">正确计时后再决定是否构建引擎</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li><li><a href="/entry/2026-10-29-ros-tf-frequency/">ROS 2 的 TF 频率与仿真时钟回跳</a></li><li><a aria-current="page" href="/entry/2026-10-29-mixed-precision-inference/">混合精度与推理引擎：参数存储、算子计算和控制误差</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">先区分四个层次</a><ol><li class="toc-level-3"><a href="#section-2">指数范围和有效精度的交换</a></li></ol></li><li class="toc-level-2"><a href="#section-3">autocast 的“混合”发生在哪里</a></li><li class="toc-level-2"><a href="#section-4">比较结果要在限幅之前</a></li><li class="toc-level-2"><a href="#section-5">正确计时后再决定是否构建引擎</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li><li><a href="/entry/2026-10-29-ros-tf-frequency/">ROS 2 的 TF 频率与仿真时钟回跳</a></li><li><a aria-current="page" href="/entry/2026-10-29-mixed-precision-inference/">混合精度与推理引擎：参数存储、算子计算和控制误差</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">工程实践 · 2026-10-29</p><h1>混合精度与推理引擎：参数存储、算子计算和控制误差</h1><p class="article-summary">从 autocast 与 TensorRT 的不同作用解释 BF16 的速度、显存和精度边界，并给出可复验的计时与输出比较方法。</p><div class="tags"><span class="tag">VLN</span><span class="tag">实验证据</span><span class="tag">模型机制</span></div></header><div class="article-body"><p>“使用 BF16”为什么能提速，却不一定让显存减半？“换成 TensorRT”是否等于重新训练？原讨论先解释这些概念，再检查实际前向代码。这里保留可独立复用的技术机制，省略现场部署参数、设备标识和内部链路；没有把部署建议写成已完成的 TensorRT 实验。</p>
+<h2 id="section-1">先区分四个层次</h2>
+<p>模型定义数学运算，PyTorch调度这些算子，CUDA kernel执行具体计算；ONNX是计算图交换形式，TensorRT则根据图、输入形状和目标硬件构建并执行推理引擎。BF16/FP16是数值格式，和使用哪个执行后端不是同一选择。PyTorch可以混合精度，TensorRT也可以保留某些高精度运算。</p>
+<h3 id="section-2">指数范围和有效精度的交换</h3>
+<div class="table-scroll" role="region" aria-label="对照表" tabindex="0"><table><thead><tr><th scope="col">格式</th><th scope="col">符号位</th><th scope="col">指数位</th><th scope="col">显式尾数位</th></tr></thead><tbody><tr><td>FP32</td><td>1</td><td>8</td><td>23</td></tr><tr><td>BF16</td><td>1</td><td>8</td><td>7</td></tr><tr><td>FP16</td><td>1</td><td>5</td><td>10</td></tr></tbody></table></div>
+<p>BF16与FP32拥有相近的指数范围，但有效数字更少；FP16比BF16有更细的尾数，却只有较小的范围，最大有限值约65504。BF16不是在任何任务都“更准确”，它主要减少大动态范围激活的溢出风险。还须检查硬件及算子对所选格式的支持。</p>
+<h2 id="section-3">autocast 的“混合”发生在哪里</h2>
+<p>原始权重可以长期保留FP32，适合的矩阵乘法临时使用低精度权重与输入，累加精度由实现决定，部分敏感算子继续使用FP32。退出上下文不会将检查点永久转换。不要把“通常高精度累加”表述成所有算子的硬性保证。</p>
+<pre><code class="language-python">model.eval()
+with torch.inference_mode():
+    with torch.autocast(&quot;cuda&quot;, dtype=torch.bfloat16):
+        features = vision_encoder(images)
+    features = features.float()
+    trajectory = planner(features)</code></pre>
+<p>此例只在视觉编码区域启用 autocast，后续输出转回FP32；它不代表整个网络全部以BF16运行。原讨论中的Qwen主干本来已按BF16加载，视觉编码与投影层却可能保留FP32，因而“FP32基线”也应写清是哪个模块的基线。</p>
+<p>model.bfloat16()则改变参数和缓冲区自身的存储类型，与autocast不同。只优化运算时，FP32主权重、副本、激活和其他模块仍会占显存，所以峰值显存不必减半。磁盘缓存保存fp16同样不能证明实时前向采用fp16。</p>
+<h2 id="section-4">比较结果要在限幅之前</h2>
+<p>同一组输入分别记录原始路点、映射后速度和最后输出。若两种精度的速度都被截成同一上限，最后命令相等也不能说明模型数值相等。x/y是长度、yaw是角度，应分别报告 ADE、FDE 和角度误差，不把混合单位的 MSE 直接称为厘米误差。</p>
+<p>检查 NaN/Inf、误差分布、近零处符号变化和边界样本；单图输出接近只能说明这一输入上的数值一致性。完整闭环还要比较成功率、碰撞、目标丢失与动作平滑度。阈值应来自控制需求与基线误差，而非把一次讨论里的示例阈值当成通用标准。</p>
+<h2 id="section-5">正确计时后再决定是否构建引擎</h2>
+<p>CUDA通常异步执行。用主机计时应先预热，并在计时边界同步，或使用CUDA events；同时独立记录端到端图像年龄，避免只测GPU而漏掉排队延迟。</p>
+<pre><code class="language-python">for _ in range(10):
+    predict(inputs)
+torch.cuda.synchronize()
+start = time.perf_counter()
+output = predict(inputs)
+torch.cuda.synchronize()
+elapsed = time.perf_counter() - start</code></pre>
+<p>这个单次例子只展示计时边界，正式评测应采样多次并报告P50/P95/P99、冷启动、持续运行温度和峰值显存。平均帧率满足要求不意味着长尾延迟满足控制周期。</p>
+<p>TensorRT可以做图优化、融合与kernel选择，但动态文本、Python控制流和自定义token处理可能需要分段保留PyTorch。先以固定图像形状的视觉编码器为候选是一种工程选择，不是已证明的必然最优解。引擎可移植性依赖版本、构建选项和硬件兼容模式；不能默认把一台GPU生成的engine直接复制到另一平台就能运行。ARM64迁移也要重新准备兼容二进制，不能复制x86的虚拟环境。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>
