@@ -3,85 +3,63 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="从张量形状、Query 数量、位置编码和掩码解释动作占位向量为何存在、如何训练以及何时不需要。">
-  <meta property="og:title" content="Transformer 动作查询与并行序列预测 · PDFstudent 知识库">
-  <meta property="og:description" content="从张量形状、Query 数量、位置编码和掩码解释动作占位向量为何存在、如何训练以及何时不需要。">
+  <meta name="description" content="从“图像和指令已经输入，为什么还要加占位向量”出发，推导输出位置、固定查询、动作含义与并行预测之间的关系。">
+  <meta property="og:title" content="Transformer 为什么需要动作查询，以及固定查询如何输出不同动作 · PDFstudent 知识库">
+  <meta property="og:description" content="从“图像和指令已经输入，为什么还要加占位向量”出发，推导输出位置、固定查询、动作含义与并行预测之间的关系。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pdfstudent.github.io">
-  <title>Transformer 动作查询与并行序列预测 · PDFstudent 知识库</title>
-  <link rel="stylesheet" href="/assets/site.css?v=a14d4b983aa5">
+  <title>Transformer 为什么需要动作查询，以及固定查询如何输出不同动作 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=158eac112de5">
 </head>
 <body>
   <div class="shell"><header class="site-header">
     <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
     <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
-  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a><ol><li><a aria-current="page" href="/entry/2026-10-29-model-action-queries/">Transformer 动作查询与并行序列预测</a></li><li><a href="/entry/2026-10-29-vln-omtrackvla/">OmTrackVLA 完整网络结构</a></li><li><a href="/entry/2026-10-29-vln-internvla/">InternVLA-N1 双系统架构</a></li><li><a href="/entry/2026-10-29-vln-dagger/">DAgger 连续导航数据闭环</a></li><li><a href="/entry/2026-10-29-vln-deployment/">VLN 推理资源与部署架构</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、从张量形状理解输出位置</a></li><li class="toc-level-3"><a href="#section-2">序列长度为什么通常不变</a></li><li class="toc-level-3"><a href="#section-3">Attention 的输出数量</a></li><li class="toc-level-3"><a href="#section-4">主干位置与任务输出维度</a></li><li class="toc-level-2"><a href="#section-5">二、动作 Query 如何获得时间和物理含义</a></li><li class="toc-level-3"><a href="#section-6">动作槽位是什么</a></li><li class="toc-level-3"><a href="#section-7">训练后是否固定</a></li><li class="toc-level-3"><a href="#section-8">物理含义来自哪里</a></li><li class="toc-level-3"><a href="#section-9">独立查询与共享查询</a></li><li class="toc-level-3"><a href="#section-10">动作槽位之间的交互</a></li><li class="toc-level-3"><a href="#section-11">监督目标如何赋予角色</a></li><li class="toc-level-2"><a href="#section-12">三、输出结构与闭环执行</a></li><li class="toc-level-3"><a href="#section-13">为什么不用一个向量输出全部动作</a></li><li class="toc-level-3"><a href="#section-14">自回归与并行预测</a></li><li class="toc-level-3"><a href="#section-15">输出头与坐标定义</a></li><li class="toc-level-3"><a href="#section-16">Action Chunk 的滚动执行</a></li><li class="toc-level-2"><a href="#section-17">四、验证与复盘</a></li><li class="toc-level-3"><a href="#section-18">常见误区</a></li><li class="toc-level-3"><a href="#section-19">最小实验</a></li><li class="toc-level-3"><a href="#section-20">阅读源码时必须确认</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a><ol><li><a aria-current="page" href="/entry/2026-10-29-model-action-queries/">Transformer 动作查询与并行序列预测</a></li><li><a href="/entry/2026-10-29-vln-omtrackvla/">OmTrackVLA 完整网络结构</a></li><li><a href="/entry/2026-10-29-vln-internvla/">InternVLA-N1 双系统架构</a></li><li><a href="/entry/2026-10-29-vln-dagger/">DAgger 连续导航数据闭环</a></li><li><a href="/entry/2026-10-29-vln-deployment/">VLN 推理资源与部署架构</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、从张量形状理解输出位置</a></li><li class="toc-level-3"><a href="#section-2">序列长度为什么通常不变</a></li><li class="toc-level-3"><a href="#section-3">Attention 的输出数量</a></li><li class="toc-level-3"><a href="#section-4">主干位置与任务输出维度</a></li><li class="toc-level-2"><a href="#section-5">二、动作 Query 如何获得时间和物理含义</a></li><li class="toc-level-3"><a href="#section-6">动作槽位是什么</a></li><li class="toc-level-3"><a href="#section-7">训练后是否固定</a></li><li class="toc-level-3"><a href="#section-8">物理含义来自哪里</a></li><li class="toc-level-3"><a href="#section-9">独立查询与共享查询</a></li><li class="toc-level-3"><a href="#section-10">动作槽位之间的交互</a></li><li class="toc-level-3"><a href="#section-11">监督目标如何赋予角色</a></li><li class="toc-level-2"><a href="#section-12">三、输出结构与闭环执行</a></li><li class="toc-level-3"><a href="#section-13">为什么不用一个向量输出全部动作</a></li><li class="toc-level-3"><a href="#section-14">自回归与并行预测</a></li><li class="toc-level-3"><a href="#section-15">输出头与坐标定义</a></li><li class="toc-level-3"><a href="#section-16">Action Chunk 的滚动执行</a></li><li class="toc-level-2"><a href="#section-17">四、验证与复盘</a></li><li class="toc-level-3"><a href="#section-18">常见误区</a></li><li class="toc-level-3"><a href="#section-19">最小实验</a></li><li class="toc-level-3"><a href="#section-20">阅读源码时必须确认</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">具身智能 · 2026-10-29</p><h1>Transformer 动作查询与并行序列预测</h1><p class="article-summary">从张量形状、Query 数量、位置编码和掩码解释动作占位向量为何存在、如何训练以及何时不需要。</p><div class="tags"><span class="tag">Transformer</span><span class="tag">Query Token</span><span class="tag">Action Token</span><span class="tag">注意力</span></div></header><div class="article-body"><h2 id="section-1">一、从张量形状理解输出位置</h2>
-<h3 id="section-2">序列长度为什么通常不变</h3>
-<p>输入矩阵形状为 <code>N × d</code>，表示 N 个位置、每个位置 d 维。标准 Transformer 层输出仍是 <code>N × d</code>，它更新已有行，不自动创建新行。</p>
-<p>前馈网络逐位置计算，也不改变位置数量。</p>
-<h3 id="section-3">Attention 的输出数量</h3>
-<p>Attention 先计算 <code>Q = XWq</code>、<code>K = XWk</code>、<code>V = XWv</code>，再计算 <code>softmax(QKᵀ / sqrt(d))V</code>。</p>
-<p>输出有多少行由 Q 的行数决定。没有第四个 Query，就没有第四个独立输出向量。</p>
-<p>若 <code>X ∈ R^(N×d_model)</code>，则 <code>Q、K、V</code> 的第一维仍是 <code>N</code>，注意力矩阵为 <code>N×N</code>，输出仍有 <code>N</code> 行。多头注意力只把特征维拆成多个头，不会自动生成第 <code>N+1</code> 个位置。</p>
-<h3 id="section-4">主干位置与任务输出维度</h3>
-<p>主干保持 N 个位置，不代表任务只能输出 N 个数。一个隐藏向量也可经线性层输出整段 <code>K×action_dim</code> 动作；区别是单向量方案让全部未来动作共享表示，多查询方案让每个未来时刻拥有独立隐藏状态。</p>
-<h2 id="section-5">二、动作 Query 如何获得时间和物理含义</h2>
-<h3 id="section-6">动作槽位是什么</h3>
-<p>需要一次预测 K 个未来动作时，可在图像、语言和状态后加入 K 个动作查询。每个查询经过注意力读取前面的信息，形成对应时间位置的隐藏状态。</p>
-<p>它更像答题框或固定岗位，不包含答案本身。</p>
-<h3 id="section-7">训练后是否固定</h3>
-<p>可学习动作向量在训练中通过任务损失反向传播更新。训练完成并冻结模型后，其初始向量通常固定。</p>
-<p>固定的是查询身份；经过 Transformer 后的隐藏向量随输入变化，输出头给出的速度或轨迹也随输入变化。</p>
-<h3 id="section-8">物理含义来自哪里</h3>
-<p>初始动作查询通常没有米或米每秒等直接单位。第几个槽位、位置编码、输出头和监督目标共同赋予其角色。</p>
-<p>若第一个槽位总被监督为最近未来动作，它会学习“近期动作查询”；更远位置则学习较长时间尺度。</p>
-<h3 id="section-9">独立查询与共享查询</h3>
-<p>一种设计为每个动作位置使用独立向量；另一种使用同一基础向量叠加不同时间位置编码。</p>
-<p>独立向量提供更强位置特化，共享向量参数更少。二者都需要让模型区分时间顺序。</p>
-<h3 id="section-10">动作槽位之间的交互</h3>
-<p>允许动作槽位互相注意时，它们可以协调速度和方向，生成连续轨迹。使用因果掩码时，后续动作可以参考前面动作位置，但不能反向看到未来。</p>
-<p>掩码决定每个查询能看什么，槽位决定在哪里产生结果，两者不能混为一谈。</p>
-<p>| 掩码 | Query 可读取内容 | 主要特点 |</p>
-<p>|---|---|---|</p>
-<p>| 全可见 | 输入与全部动作 Query | 并行协调强 |</p>
-<p>| 动作因果 | 输入与更早动作 Query | 保留时间方向 |</p>
-<p>| 仅交叉读取 | 输入，不读取其他动作 Query | 简单但连续性依赖损失 |</p>
-<h3 id="section-11">监督目标如何赋予角色</h3>
-<p>若 <code>q_i</code> 固定对应未来 <code>i×Δt</code> 时刻，基础回归损失可写成 <code>Σ_i w_i·L(â_i,a_i)</code>。位置编码只告诉模型“第几个槽位”，真正的秒数、坐标系和物理单位来自采样间隔、标签构造、动作归一化与输出头。</p>
-<p>轨迹任务还可增加相邻差分、速度、加速度或曲率损失。多个 Query 本身不会自动保证轨迹平滑。</p>
-<h2 id="section-12">三、输出结构与闭环执行</h2>
-<h3 id="section-13">为什么不用一个向量输出全部动作</h3>
-<p>可以读取一个汇总向量，再用线性层输出 <code>K × action_dim</code>。这种结构更简单。</p>
-<p>多个动作查询的优势是每个时间点拥有独立隐藏状态，可以关注不同区域，并通过注意力协调。缺点是序列更长、计算量更大。</p>
-<h3 id="section-14">自回归与并行预测</h3>
-<p>语言模型的单次前向仍只更新已有位置。程序根据最后位置预测下一个离散符号，把符号追加后再次调用模型，这才形成新序列。</p>
-<p>机器人动作更常一次预测一段 action chunk，减少推理频率；但执行若干步后仍应根据新观测滚动重算，避免长时开环误差。</p>
-<h3 id="section-15">输出头与坐标定义</h3>
-<p>隐藏状态可通过多层感知机回归速度、相对位姿或路径点。输出动作的归一化、坐标系、时间间隔和损失函数决定最终物理含义。</p>
-<p>若输出未来八个相对位姿，结果应明确是相对当前机器人、上一预测点还是固定局部坐标系。</p>
-<p>三种定义不能混用：所有点相对当前机器人时便于整段碰撞检查；逐点增量需要累积积分；冻结局部坐标系则必须随轨迹一起保存原点和时间戳。</p>
-<h3 id="section-16">Action Chunk 的滚动执行</h3>
-<p>预测八步不等于开环执行八步。通常只执行前若干步，获得新观测后重新推理，再对新旧轨迹做时间对齐。执行比例越小，闭环性越强但推理频率更高；比例越大，算力压力更小但长期预测误差风险更高。</p>
-<h2 id="section-17">四、验证与复盘</h2>
-<h3 id="section-18">常见误区</h3>
-<ol>
-<li>占位查询不是把真实动作喂给模型。</li>
-<li>固定初始向量不意味着固定输出。</li>
-<li>Transformer 并非所有任务都必须使用动作查询。</li>
-<li>多个 Query 不自动保证轨迹平滑，仍需训练目标和时间建模。</li>
-<li>输出路径点与直接输出速度具有不同控制和安全含义。</li>
-</ol>
-<h3 id="section-19">最小实验</h3>
-<p>可以构造图像特征、指令特征和四个动作查询，让模型回归四个二维点。分别移除位置编码、禁止动作间注意力、改为单向量输出，比较轨迹一致性和每个时间位置的误差。</p>
-<h3 id="section-20">阅读源码时必须确认</h3>
-<ol>
-<li>Query 是独立向量还是共享向量加时间编码。</li>
-<li>动作位置采用哪种注意力掩码。</li>
-<li>每个位置对应的时间戳和坐标系。</li>
-<li>输出头预测速度、位姿还是路径点。</li>
-<li>训练是否约束相邻动作连续性。</li>
-<li>推理预测多少步、实际执行多少步、何时滚动重算。</li>
-</ol></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a><ol><li><a aria-current="page" href="/entry/2026-10-29-model-action-queries/">Transformer 为什么需要动作查询，以及固定查询如何输出不同动作</a></li><li><a href="/entry/2026-10-29-vln-omtrackvla/">OmTrackVLA 完整网络结构</a></li><li><a href="/entry/2026-10-29-vln-internvla/">InternVLA-N1 双系统架构</a></li><li><a href="/entry/2026-10-29-vln-dagger/">DAgger 如何让导航模型学会从自己的偏差中恢复</a></li><li><a href="/entry/2026-10-29-vln-deployment/">VLN 推理资源与部署架构</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">图像和指令已经输入，为什么不能直接多输出四个位置</a><ol><li class="toc-level-3"><a href="#section-2">一次注意力计算究竟产生多少行</a></li><li class="toc-level-3"><a href="#section-3">加入动作查询后，新增位置负责什么</a></li></ol></li><li class="toc-level-2"><a href="#section-4">查询训练后固定，为什么输出还会随画面改变</a><ol><li class="toc-level-3"><a href="#section-5">固定的是初始查询，变化的是读完场景后的表示</a></li><li class="toc-level-3"><a href="#section-6">向量中的哪一维代表米、秒或速度</a></li></ol></li><li class="toc-level-2"><a href="#section-7">四个未来点为什么能一次算出，而语言模型常常逐字生成</a><ol><li class="toc-level-3"><a href="#section-8">动作位置已知时，因果掩码不等于逐步调用</a></li><li class="toc-level-3"><a href="#section-9">语言生成的新位置来自外部生成循环</a></li></ol></li><li class="toc-level-2"><a href="#section-10">一个向量也能输出整段动作，查询序列还是必须的吗</a><ol><li class="toc-level-3"><a href="#section-11">输出维度可以在动作头中扩展</a></li><li class="toc-level-3"><a href="#section-12">预测四步不等于开环执行四步</a></li></ol></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a><ol><li><a aria-current="page" href="/entry/2026-10-29-model-action-queries/">Transformer 为什么需要动作查询，以及固定查询如何输出不同动作</a></li><li><a href="/entry/2026-10-29-vln-omtrackvla/">OmTrackVLA 完整网络结构</a></li><li><a href="/entry/2026-10-29-vln-internvla/">InternVLA-N1 双系统架构</a></li><li><a href="/entry/2026-10-29-vln-dagger/">DAgger 如何让导航模型学会从自己的偏差中恢复</a></li><li><a href="/entry/2026-10-29-vln-deployment/">VLN 推理资源与部署架构</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">图像和指令已经输入，为什么不能直接多输出四个位置</a><ol><li class="toc-level-3"><a href="#section-2">一次注意力计算究竟产生多少行</a></li><li class="toc-level-3"><a href="#section-3">加入动作查询后，新增位置负责什么</a></li></ol></li><li class="toc-level-2"><a href="#section-4">查询训练后固定，为什么输出还会随画面改变</a><ol><li class="toc-level-3"><a href="#section-5">固定的是初始查询，变化的是读完场景后的表示</a></li><li class="toc-level-3"><a href="#section-6">向量中的哪一维代表米、秒或速度</a></li></ol></li><li class="toc-level-2"><a href="#section-7">四个未来点为什么能一次算出，而语言模型常常逐字生成</a><ol><li class="toc-level-3"><a href="#section-8">动作位置已知时，因果掩码不等于逐步调用</a></li><li class="toc-level-3"><a href="#section-9">语言生成的新位置来自外部生成循环</a></li></ol></li><li class="toc-level-2"><a href="#section-10">一个向量也能输出整段动作，查询序列还是必须的吗</a><ol><li class="toc-level-3"><a href="#section-11">输出维度可以在动作头中扩展</a></li><li class="toc-level-3"><a href="#section-12">预测四步不等于开环执行四步</a></li></ol></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">具身智能 · 2026-10-29</p><h1>Transformer 为什么需要动作查询，以及固定查询如何输出不同动作</h1><p class="article-summary">从“图像和指令已经输入，为什么还要加占位向量”出发，推导输出位置、固定查询、动作含义与并行预测之间的关系。</p><div class="tags"><span class="tag">Transformer</span><span class="tag">Query Token</span><span class="tag">Action Token</span><span class="tag">注意力</span></div></header><div class="article-body"><p>一个导航模型已经接收图像和指令，为什么还要在输入末尾加入几个看起来没有信息的动作 token？如果这些向量训练后就固定了，为什么机器人还能针对不同画面输出不同动作？这两个疑问分别涉及<strong>输出在哪里计算</strong>和<strong>输出根据什么变化</strong>。</p>
+<p>动作查询提供的是读取信息的计算位置，本身不是预先填好的动作。下面用一个贯穿的假设例子说明：模型读取场景特征，希望预测未来四个二维路径点。数字只是便于推导，不代表某个开源项目的配置。</p>
+<h2 id="section-1">图像和指令已经输入，为什么不能直接多输出四个位置</h2>
+<h3 id="section-2">一次注意力计算究竟产生多少行</h3>
+<p>假设图像和语言已经被编码为三个特征位置，输入 X 的形状是 <code>3×d_model</code>。这里把真实图像中的许多 patch 简化成少量位置。对 X 做线性投影得到 Q、K、V，并不会增加行数；每一行 Q 表示这个位置怎样从其他位置读取信息。</p>
+<pre><code class="language-text">Q: 3×d_k       K: 3×d_k       V: 3×d_v
+QKᵀ: 3×3       每个查询对三个输入位置分别打分
+softmax(QKᵀ / sqrt(d_k)): 3×3
+注意力权重 × V: 3×d_v</code></pre>
+<p>所以这次计算得到三个更新后的表示，而不是“三个输入表示，再额外长出四个路径点表示”。逐位置前馈网络继续处理每一行，多头注意力在特征维度分头计算，也不自行增加位置。计算定义可对照 <a href="https://arxiv.org/html/1706.03762v7#S3" rel="noreferrer">Transformer 原论文第 3 节</a>。</p>
+<p>真正决定输出行数的是<strong>查询的行数</strong>。交叉注意力可以让四个查询读取三个输入：Q 有四行，K 和 V 各有三行，最终得到四行输出。因此不能把“标准自注意力层保持位置数”误记成“所有 Transformer 模型的最终输出长度必须等于输入长度”。</p>
+<h3 id="section-3">加入动作查询后，新增位置负责什么</h3>
+<p>在自注意力方案中，可以把四个查询接到场景特征后面：</p>
+<pre><code class="language-text">输入：场景1  场景2  指令  q1  q2  q3  q4
+             ↓ Transformer 更新每个位置
+输出：表示1  表示2  表示  h1  h2  h3  h4
+                          ↓ 逐位置动作头
+                         p1  p2  p3  p4</code></pre>
+<p>q1 让模型有一个位置专门汇集“预测第一个路径点需要的信息”。它读取目标方向、当前障碍和历史运动，形成 h1；动作头再把 h1 转换成二维坐标。后续位置同理。</p>
+<p>“占位”只是便于理解的说法。在计算中它是参与注意力的向量，不是空白字符，也不是把未来正确动作提前输入模型。</p>
+<h2 id="section-4">查询训练后固定，为什么输出还会随画面改变</h2>
+<h3 id="section-5">固定的是初始查询，变化的是读完场景后的表示</h3>
+<p>一次推理可以写成 <code>h_i = Fθ(context, q_i)</code>，再通过 <code>p_i = headθ(h_i)</code> 得到路径点。冻结后，参数 θ 和可学习初始查询 q_i 不再更新，但 context 随图像、语言和历史变化，h_i 因而可以变化，p_i 也随之变化。</p>
+<p>同一个 q1 先读取“前方有障碍”，再读取“前方畅通”的场景，匹配的键、读取的值以及逐层隐藏状态都可能不同。固定查询没有要求注意力权重固定，更没有要求动作固定。</p>
+<div class="table-scroll" role="region" aria-label="对照表" tabindex="0"><table><thead><tr><th scope="col">对象</th><th scope="col">冻结后是否变化</th><th scope="col">在例子中的作用</th></tr></thead><tbody><tr><td>初始查询 q1</td><td>通常不变</td><td>指定用于预测的计算位置</td></tr><tr><td>场景 context</td><td>随当前输入改变</td><td>提供目标、障碍和运动信息</td></tr><tr><td>隐藏状态 h1</td><td>随输入改变</td><td>汇集第一个路径点所需信息</td></tr><tr><td>输出 p1</td><td>随输入改变</td><td>动作头解码后的二维点</td></tr></tbody></table></div>
+<p>训练时，路径点误差反向传播到动作头、主干和允许更新的查询。冻结只是停止参数学习，没有停止根据输入计算。</p>
+<h3 id="section-6">向量中的哪一维代表米、秒或速度</h3>
+<p>初始查询通常没有这种直接物理解释。假设第 i 个位置总被监督为 <code>t+i×Δt</code> 时刻、相对当前机器人坐标系的二维位置，它的时间角色由标签配对确定，空间含义由标签坐标系和输出头确定。位置编码帮助区分“第几个”，不能单独告诉模型一个单位是一米还是一厘米。</p>
+<p>若标签先除以长度尺度 L 做归一化，模型输出必须乘回 L 才能交给控制器。若把相对当前机器人的四个位置误当成四次逐步位移，累计求和会改变整条轨迹。这属于输出解释错误，与注意力有没有学好是两个问题。</p>
+<p>查询可以使用四个独立向量，也可以使用共享向量加不同位置编码。无论哪种方式，都要能区分四个时刻。查询、位置信息和可见上下文如果完全相同，就不能期待模型凭空形成四种不同职责。</p>
+<h2 id="section-7">四个未来点为什么能一次算出，而语言模型常常逐字生成</h2>
+<h3 id="section-8">动作位置已知时，因果掩码不等于逐步调用</h3>
+<p>例子中的四个查询都是已知输入，可以一次送入模型。全可见掩码允许它们相互读取；因果掩码只允许后面位置读取前面位置的表示。每一层使用上一层的表示进行矩阵运算，两种掩码都可在一次前向中处理所有已知位置。</p>
+<p>关键条件是 q2 不需要等第一个预测数值解码后才能构造。如果实现要求先得到 p1，再把它编码为第二步输入，就出现真正的顺序依赖。不能仅凭“用了 causal mask”判断一定要执行四次前向。</p>
+<h3 id="section-9">语言生成的新位置来自外部生成循环</h3>
+<p>常见语言推理在已有前缀末尾预测下一个词元，再把预测词元追加到前缀，进入下一步计算。新位置由生成程序追加，标准 Transformer 层没有在一次前向中自动增长位置。训练时使用右移的真实词元，是另一种输入构造方式，不能与不携带真实动作的 learned query 混为一谈。</p>
+<p>机器人模型也可以做自回归动作预测；一次输出 action chunk 是另一种设计。它减少多次调用开销，但多个查询和并行计算都不自动保证轨迹平滑，连续性仍需训练数据、损失和下游约束处理。</p>
+<h2 id="section-10">一个向量也能输出整段动作，查询序列还是必须的吗</h2>
+<h3 id="section-11">输出维度可以在动作头中扩展</h3>
+<p>不必须。取一个汇总表示 h，通过线性层或 MLP 输出八个数，再 reshape 成 <code>4×2</code>，同样得到四个二维点。主干里的位置数与动作头最终输出多少个数，是两件事。</p>
+<p>单查询让整段预测共享一个主干表示；多查询让每个时刻拥有独立表示，可以关注不同输入信息。后者增加序列长度和计算量，不能仅据此断言效果更好。比较时需要保持数据、预测时域和动作定义一致。</p>
+<p>读 OmTrackVLA 时尤其要看动作头：一个 ACT 位置后接整段回归头，不意味着只预测一步。对应链路见 <a href="https://pdfstudent.github.io/entry/2026-10-29-vln-omtrackvla/" rel="noreferrer">OmTrackVLA 的视觉到轨迹结构</a>。</p>
+<h3 id="section-12">预测四步不等于开环执行四步</h3>
+<p>可以预测四步，只执行第一步，再根据新观察重算。执行更长片段能降低推理负担，但要处理轨迹有效期、时间对齐和环境变化。所有点相对当前机器人、逐点增量、冻结局部坐标系这三种表示也不能混用。</p>
+<p>读代码时沿“查询如何创建 → 掩码允许读取什么 → 取哪个隐藏状态 → 动作头形状 → 标签定义 → 实际执行几步”查一遍，才能完整回答为什么加查询、固定查询如何变化，以及哪些输出真的会被执行。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
   
 </body>
 </html>

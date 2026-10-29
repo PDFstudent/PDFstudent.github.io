@@ -9,13 +9,13 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pdfstudent.github.io">
   <title>2026-10-28 Codex 每日复盘 · PDFstudent 知识库</title>
-  <link rel="stylesheet" href="/assets/site.css?v=a14d4b983aa5">
+  <link rel="stylesheet" href="/assets/site.css?v=158eac112de5">
 </head>
 <body>
   <div class="shell"><header class="site-header">
     <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
     <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
-  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">今日概览</a></li><li class="toc-level-2"><a href="#section-2">核心知识与依据</a></li><li class="toc-level-3"><a href="#section-3">Transformer 输出查询</a></li><li class="toc-level-3"><a href="#section-4">视觉语言动作模型</a></li><li class="toc-level-3"><a href="#section-5">DAgger 数据闭环</a></li><li class="toc-level-3"><a href="#section-6">人形机器人 MPC 与 WBC</a></li><li class="toc-level-2"><a href="#section-7">项目进展</a></li><li class="toc-level-2"><a href="#section-8">今日决策</a></li><li class="toc-level-2"><a href="#section-9">未解决问题</a></li><li class="toc-level-2"><a href="#section-10">下一步行动</a></li><li class="toc-level-2"><a href="#section-11">长期记忆</a></li><li class="toc-level-2"><a href="#section-12">覆盖与省略说明</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">今日概览</a></li><li class="toc-level-2"><a href="#section-2">核心知识与依据</a></li><li class="toc-level-3"><a href="#section-3">Transformer 输出查询</a></li><li class="toc-level-3"><a href="#section-4">视觉语言动作模型</a></li><li class="toc-level-3"><a href="#section-5">DAgger 数据闭环</a></li><li class="toc-level-3"><a href="#section-6">人形机器人 MPC 与 WBC</a></li><li class="toc-level-2"><a href="#section-7">项目进展</a></li><li class="toc-level-2"><a href="#section-8">今日决策</a></li><li class="toc-level-2"><a href="#section-9">未解决问题</a></li><li class="toc-level-2"><a href="#section-10">下一步行动</a></li><li class="toc-level-2"><a href="#section-11">长期记忆</a></li><li class="toc-level-2"><a href="#section-12">覆盖与省略说明</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">每日复盘 · 2026-10-28</p><h1>2026-10-28 Codex 每日复盘</h1><p class="article-summary">今日围绕个人知识库、Transformer 输出查询、视觉语言动作模型，以及人形机器人 MPC 与 WBC 展开系统学习与工程落地。</p><div class="tags"><span class="tag">每日复盘</span><span class="tag">Transformer</span><span class="tag">VLA</span><span class="tag">机器人控制</span></div></header><div class="article-body"><h2 id="section-1">今日概览</h2>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">今日概览</a></li><li class="toc-level-2"><a href="#section-2">核心知识与依据</a><ol><li class="toc-level-3"><a href="#section-3">Transformer 输出查询</a></li><li class="toc-level-3"><a href="#section-4">视觉语言动作模型</a></li><li class="toc-level-3"><a href="#section-5">DAgger 数据闭环</a></li><li class="toc-level-3"><a href="#section-6">人形机器人 MPC 与 WBC</a></li></ol></li><li class="toc-level-2"><a href="#section-7">项目进展</a></li><li class="toc-level-2"><a href="#section-8">今日决策</a></li><li class="toc-level-2"><a href="#section-9">未解决问题</a></li><li class="toc-level-2"><a href="#section-10">下一步行动</a></li><li class="toc-level-2"><a href="#section-11">长期记忆</a></li><li class="toc-level-2"><a href="#section-12">覆盖与省略说明</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">今日概览</a></li><li class="toc-level-2"><a href="#section-2">核心知识与依据</a><ol><li class="toc-level-3"><a href="#section-3">Transformer 输出查询</a></li><li class="toc-level-3"><a href="#section-4">视觉语言动作模型</a></li><li class="toc-level-3"><a href="#section-5">DAgger 数据闭环</a></li><li class="toc-level-3"><a href="#section-6">人形机器人 MPC 与 WBC</a></li></ol></li><li class="toc-level-2"><a href="#section-7">项目进展</a></li><li class="toc-level-2"><a href="#section-8">今日决策</a></li><li class="toc-level-2"><a href="#section-9">未解决问题</a></li><li class="toc-level-2"><a href="#section-10">下一步行动</a></li><li class="toc-level-2"><a href="#section-11">长期记忆</a></li><li class="toc-level-2"><a href="#section-12">覆盖与省略说明</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">每日复盘 · 2026-10-28</p><h1>2026-10-28 Codex 每日复盘</h1><p class="article-summary">今日围绕个人知识库、Transformer 输出查询、视觉语言动作模型，以及人形机器人 MPC 与 WBC 展开系统学习与工程落地。</p><div class="tags"><span class="tag">每日复盘</span><span class="tag">Transformer</span><span class="tag">VLA</span><span class="tag">机器人控制</span></div></header><div class="article-body"><h2 id="section-1">今日概览</h2>
 <p>今天共有 4 个实际更新且包含实质内容的任务，形成两条主线：一条是把多设备、多窗口对话沉淀为可持续维护的知识库；另一条是从 Transformer 基础机制出发，继续理解视觉语言动作模型和人形机器人运动控制。</p>
 <p>知识库已经完成首次历史全量导入，并切换到“私有源资料加公开脱敏页面”的双仓库结构。技术学习方面，输出查询、动作轨迹预测、DAgger 数据闭环、双系统视觉语言导航，以及 MPC 与 WBC 的上下层关系已经连成一套较完整的认知框架。</p>
 <h2 id="section-2">核心知识与依据</h2>
@@ -32,34 +32,26 @@
 <p>MPC 使用相对简化的模型预测未来质心、躯干和接触力，负责“看得远”；WBC 使用完整刚体动力学，以更高频率协调支撑脚、摆动脚和全身关节，负责“做得准”。二者之间还需要步态与接触计划，上游导航只提供目标速度或路径。</p>
 <p>这一架构的难点不只在优化器，而在浮动基座、接触切换、摩擦约束、状态估计、模型误差和执行器带宽的一致性。</p>
 <h2 id="section-7">项目进展</h2>
-<ul>
-<li>完成当前账号可访问的 47 个历史会话的首次全量整理。</li>
+<ul><li>完成当前账号可访问的 47 个历史会话的首次全量整理。</li>
 <li>建立历史总览、导航控制、感知定位、具身智能和工程实践专题文章。</li>
 <li>私有仓库继续保存 Markdown 源资料、生成脚本和安全检查规则。</li>
 <li>公开仓库只保存经过脱敏检查的静态网页。</li>
-<li>GitHub Pages 已作为唯一持续更新的网站，旧的实验性托管链路不再参与日常发布。</li>
-</ul>
+<li>GitHub Pages 已作为唯一持续更新的网站，旧的实验性托管链路不再参与日常发布。</li></ul>
 <h2 id="section-8">今日决策</h2>
-<ul>
-<li>知识库采用“首次全量导入，此后每日增量维护”。</li>
+<ul><li>知识库采用“首次全量导入，此后每日增量维护”。</li>
 <li>公开页面不设置登录，接受网页公开这一前提，但只发布最少必要的脱敏知识。</li>
 <li>私有源仓库保留，不能用生成后的公开网页仓库替代。</li>
-<li>VLA 学习与实验优先从可解释的模块边界入手，再决定是否进行完整模型部署。</li>
-</ul>
+<li>VLA 学习与实验优先从可解释的模块边界入手，再决定是否进行完整模型部署。</li></ul>
 <h2 id="section-9">未解决问题</h2>
-<ul>
-<li>大型视觉语言导航模型在目标硬件上的真实推理速度和峰值内存仍需实测。</li>
+<ul><li>大型视觉语言导航模型在目标硬件上的真实推理速度和峰值内存仍需实测。</li>
 <li>高层规划与本地高频控制的通信频率、延迟容忍和失联降级策略尚未形成完整方案。</li>
 <li>DAgger 专家来源、时间同步、干预窗口和安全门控仍需结合具体机器人制定采集规范。</li>
-<li>周度复盘尚未开始，需要在一周增量内容积累后验证是否能提炼出稳定的主题演化。</li>
-</ul>
+<li>周度复盘尚未开始，需要在一周增量内容积累后验证是否能提炼出稳定的主题演化。</li></ul>
 <h2 id="section-10">下一步行动</h2>
-<ol>
-<li>为候选 VLA 模型建立统一的硬件评估表，记录权重、精度、峰值内存、单步延迟和控制频率。</li>
+<ol><li>为候选 VLA 模型建立统一的硬件评估表，记录权重、精度、峰值内存、单步延迟和控制频率。</li>
 <li>用小型示例验证动作查询如何从多模态序列回归一组未来路径点。</li>
 <li>按“站立 WBC、接触切换、简化 MPC、上下层联调”的顺序学习人形控制。</li>
-<li>继续按主题增量更新现有文章，避免每天生成彼此割裂的重复笔记。</li>
-</ol>
+<li>继续按主题增量更新现有文章，避免每天生成彼此割裂的重复笔记。</li></ol>
 <h2 id="section-11">长期记忆</h2>
 <p>学习一个复杂机器人模型时，先区分感知编码、时序融合、规划表示、动作输出和底层执行；评估一项工程功能时，先区分配置文件中存在、运行时真正生效和硬件能够执行。知识库也遵循同一原则：保留可复用结构，而不是累积未经压缩的原始对话。</p>
 <h2 id="section-12">覆盖与省略说明</h2>

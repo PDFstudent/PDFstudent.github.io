@@ -3,60 +3,73 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="给出 RPP 曲率与限速公式、MPPI 采样评价机制、终点局部最优和全向 Rotation Shim 取舍。">
+  <meta name="description" content="围绕 RPP 为何不横移、不主动绕障，推导前视曲率、限速与碰撞拒绝，再分析 MPPI 终点停滞和全向控制选择。">
   <meta property="og:title" content="RPP、MPPI 与全向底盘控制 · PDFstudent 知识库">
-  <meta property="og:description" content="给出 RPP 曲率与限速公式、MPPI 采样评价机制、终点局部最优和全向 Rotation Shim 取舍。">
+  <meta property="og:description" content="围绕 RPP 为何不横移、不主动绕障，推导前视曲率、限速与碰撞拒绝，再分析 MPPI 终点停滞和全向控制选择。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pdfstudent.github.io">
   <title>RPP、MPPI 与全向底盘控制 · PDFstudent 知识库</title>
-  <link rel="stylesheet" href="/assets/site.css?v=a14d4b983aa5">
+  <link rel="stylesheet" href="/assets/site.css?v=158eac112de5">
 </head>
 <body>
   <div class="shell"><header class="site-header">
     <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
     <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
-  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a aria-current="page" href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、RPP：几何跟踪、限速与碰撞预测</a></li><li class="toc-level-3"><a href="#section-2">前视点与路径裁剪</a></li><li class="toc-level-3"><a href="#section-3">曲率与非完整约束</a></li><li class="toc-level-3"><a href="#section-4">曲率限速</a></li><li class="toc-level-3"><a href="#section-5">障碍限速与碰撞预测</a></li><li class="toc-level-2"><a href="#section-6">二、MPPI：采样、展开与评价项竞争</a></li><li class="toc-level-3"><a href="#section-7">优化变量与更新</a></li><li class="toc-level-3"><a href="#section-8">MPPI 不是全局规划器</a></li><li class="toc-level-3"><a href="#section-9">终点附近零速度局部最优</a></li><li class="toc-level-3"><a href="#section-10">加速度模型与真实底盘</a></li><li class="toc-level-2"><a href="#section-11">三、全向运动、Rotation Shim 与选择</a></li><li class="toc-level-3"><a href="#section-12">Rotation Shim</a></li><li class="toc-level-3"><a href="#section-13">原地旋转碰撞</a></li><li class="toc-level-3"><a href="#section-14">控制器选择</a></li><li class="toc-level-2"><a href="#section-15">四、可观测性与复盘</a></li><li class="toc-level-3"><a href="#section-16">调试数据</a></li><li class="toc-level-3"><a href="#section-17">最小对比实验</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a aria-current="page" href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、RPP：几何跟踪、限速与碰撞预测</a></li><li class="toc-level-3"><a href="#section-2">前视点与路径裁剪</a></li><li class="toc-level-3"><a href="#section-3">曲率与非完整约束</a></li><li class="toc-level-3"><a href="#section-4">曲率限速</a></li><li class="toc-level-3"><a href="#section-5">障碍限速与碰撞预测</a></li><li class="toc-level-2"><a href="#section-6">二、MPPI：采样、展开与评价项竞争</a></li><li class="toc-level-3"><a href="#section-7">优化变量与更新</a></li><li class="toc-level-3"><a href="#section-8">MPPI 不是全局规划器</a></li><li class="toc-level-3"><a href="#section-9">终点附近零速度局部最优</a></li><li class="toc-level-3"><a href="#section-10">加速度模型与真实底盘</a></li><li class="toc-level-2"><a href="#section-11">三、全向运动、Rotation Shim 与选择</a></li><li class="toc-level-3"><a href="#section-12">Rotation Shim</a></li><li class="toc-level-3"><a href="#section-13">原地旋转碰撞</a></li><li class="toc-level-3"><a href="#section-14">控制器选择</a></li><li class="toc-level-2"><a href="#section-15">四、可观测性与复盘</a></li><li class="toc-level-3"><a href="#section-16">调试数据</a></li><li class="toc-level-3"><a href="#section-17">最小对比实验</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">运动控制 · 2026-10-29</p><h1>RPP、MPPI 与全向底盘控制</h1><p class="article-summary">给出 RPP 曲率与限速公式、MPPI 采样评价机制、终点局部最优和全向 Rotation Shim 取舍。</p><div class="tags"><span class="tag">RPP</span><span class="tag">MPPI</span><span class="tag">Rotation Shim</span><span class="tag">全向底盘</span></div></header><div class="article-body"><h2 id="section-1">一、RPP：几何跟踪、限速与碰撞预测</h2>
-<h3 id="section-2">前视点与路径裁剪</h3>
-<p>RPP 将全局路径裁剪并变换到机器人坐标系，在路径上寻找前视距离对应的点。前视距离可以写成 <code>Ld = clamp(|v| × T, Lmin, Lmax)</code>。</p>
-<p>速度越高，前视越远，控制更平滑；低速时前视缩短，更容易精确跟踪。</p>
-<p>实际链路还包括路径裁剪、坐标变换和沿弧长搜索。若最近点跳到空间上很近的折返段，曲率公式即使正确也会跟错路径，因此前向索引单调性和路线方向是首要检查项。</p>
-<h3 id="section-3">曲率与非完整约束</h3>
-<p>前视点为 <code>(xL, yL)</code> 时，纯跟踪曲率为 <code>k = 2 × yL / (xL² + yL²)</code>。正常跟踪角速度为 <code>w = v × k</code>。</p>
-<p>RPP 的所谓横向控制是通过角速度改变轨迹，不直接输出横向平移速度。</p>
-<h3 id="section-4">曲率限速</h3>
-<p>转弯半径 <code>R = |1 / k|</code>。当半径小于设定尺度时，纵向速度按半径比例降低。弯越急速度越低，可以减少过冲和横向加速度。</p>
-<p>还可用横向加速度约束 <code>v≤sqrt(a_lat,max/|k|)</code>。路径噪声造成曲率尖峰时，应先检查路径平滑与前视点稳定性，而不是只降低最大速度。</p>
-<h3 id="section-5">障碍限速与碰撞预测</h3>
-<p>控制器可从代价地图膨胀值反推近似障碍距离，再按距离缩放速度。反推依赖膨胀层参数一致，否则控制器估计的障碍距离不准确。</p>
-<p>这种限速不会自动生成绕障轨迹。最终安全仍依赖前向碰撞预测；预测到碰撞时应拒绝当前命令。</p>
-<p>预测通常按候选 <code>v,w</code> 积分未来位姿，并在每个位姿检查完整 footprint。障碍限速、预测碰撞停车和真正生成绕障轨迹是三种不同能力。</p>
-<h2 id="section-6">二、MPPI：采样、展开与评价项竞争</h2>
-<h3 id="section-7">优化变量与更新</h3>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a aria-current="page" href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">RPP 怎样从一个前视点得到纵向速度和转向速度</a><ol><li class="toc-level-3"><a href="#section-2">横向误差通过转向修正，不等于输出横移速度</a></li><li class="toc-level-3"><a href="#section-3">速度不是只受最大速度一个参数控制</a></li><li class="toc-level-3"><a href="#section-4">原地转向与普通跟踪属于不同分支</a></li></ol></li><li class="toc-level-2"><a href="#section-5">RPP 能检测碰撞，为什么仍不能自己绕过障碍</a><ol><li class="toc-level-3"><a href="#section-6">检查的是当前命令形成的圆弧</a></li><li class="toc-level-3"><a href="#section-7">绕行需要新的路径或局部候选选择</a></li></ol></li><li class="toc-level-2"><a href="#section-8">MPPI 怎样选择局部轨迹，为什么有时在终点停住</a><ol><li class="toc-level-3"><a href="#section-9">优化变量与更新</a></li><li class="toc-level-3"><a href="#section-10">终点附近零速度局部最优</a></li><li class="toc-level-3"><a href="#section-11">加速度模型与真实底盘</a></li></ol></li><li class="toc-level-2"><a href="#section-12">全向底盘还需不需要先原地转向</a><ol><li class="toc-level-3"><a href="#section-13">Rotation Shim</a></li></ol></li><li class="toc-level-2"><a href="#section-14">看到跟踪差或停车时，怎样决定查哪个环节</a><ol><li class="toc-level-3"><a href="#section-15">最小对比实验</a></li></ol></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a aria-current="page" href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">RPP 怎样从一个前视点得到纵向速度和转向速度</a><ol><li class="toc-level-3"><a href="#section-2">横向误差通过转向修正，不等于输出横移速度</a></li><li class="toc-level-3"><a href="#section-3">速度不是只受最大速度一个参数控制</a></li><li class="toc-level-3"><a href="#section-4">原地转向与普通跟踪属于不同分支</a></li></ol></li><li class="toc-level-2"><a href="#section-5">RPP 能检测碰撞，为什么仍不能自己绕过障碍</a><ol><li class="toc-level-3"><a href="#section-6">检查的是当前命令形成的圆弧</a></li><li class="toc-level-3"><a href="#section-7">绕行需要新的路径或局部候选选择</a></li></ol></li><li class="toc-level-2"><a href="#section-8">MPPI 怎样选择局部轨迹，为什么有时在终点停住</a><ol><li class="toc-level-3"><a href="#section-9">优化变量与更新</a></li><li class="toc-level-3"><a href="#section-10">终点附近零速度局部最优</a></li><li class="toc-level-3"><a href="#section-11">加速度模型与真实底盘</a></li></ol></li><li class="toc-level-2"><a href="#section-12">全向底盘还需不需要先原地转向</a><ol><li class="toc-level-3"><a href="#section-13">Rotation Shim</a></li></ol></li><li class="toc-level-2"><a href="#section-14">看到跟踪差或停车时，怎样决定查哪个环节</a><ol><li class="toc-level-3"><a href="#section-15">最小对比实验</a></li></ol></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">运动控制 · 2026-10-29</p><h1>RPP、MPPI 与全向底盘控制</h1><p class="article-summary">围绕 RPP 为何不横移、不主动绕障，推导前视曲率、限速与碰撞拒绝，再分析 MPPI 终点停滞和全向控制选择。</p><div class="tags"><span class="tag">RPP</span><span class="tag">MPPI</span><span class="tag">Rotation Shim</span><span class="tag">全向底盘</span></div></header><div class="article-body"><p>一条路径交给 RPP 后，机器人能拐弯、在障碍附近减速，却不会自动横移绕过障碍。这与“它负责横向控制、也会避障”的说法并不矛盾：横向误差可以靠转向纠正，碰撞预测也可以只负责拒绝危险指令。</p>
+<p>下面先沿 RPP 的一次控制循环解释速度怎样产生，再与 MPPI 的候选轨迹优化比较。RPP 分支细节对应此前讨论过的源码行为，不把某个分支的默认值当成所有 Nav2 版本的保证。通用职责可对照 <a href="https://github.com/ros-navigation/navigation2/blob/main/nav2_regulated_pure_pursuit_controller/README.md" rel="noreferrer">Nav2 官方 RPP 说明</a>。</p>
+<h2 id="section-1">RPP 怎样从一个前视点得到纵向速度和转向速度</h2>
+<h3 id="section-2">横向误差通过转向修正，不等于输出横移速度</h3>
+<p>RPP 先裁剪路径并变换到机器人坐标系，再选取前视点 carrot。采用速度相关前视时，距离可写为 <code>Ld=clamp(|v_current|×T_L,L_min,L_max)</code>；固定前视则直接使用配置距离。高速度看得更远通常更平滑，但前视过大也可能切弯，因此它不是越大越好。</p>
+<p>设前视点相对机器人为 <code>(x_L,y_L)</code>，正常几何跟踪使用曲率 <code>κ=2y_L/(x_L²+y_L²)</code>，再计算 <code>ω=vκ</code>。在所讨论的实现里，正常输出是 <code>linear.x</code> 与 <code>angular.z</code>，没有规划独立的 <code>linear.y</code>。所谓横向控制是在改变行驶方向后逐渐消除侧向误差。</p>
+<p>举一个计算例子：前视点位于前方 1 m、左侧 0.5 m，则 κ 为 0.8 m⁻¹；若调节后的前进速度为 0.4 m/s，角速度就是 0.32 rad/s。这个输出描述的是向左弯的圆弧，不是向左平移 0.32 m/s。坐标轴和单位不同，不能混用。</p>
+<h3 id="section-3">速度不是只受最大速度一个参数控制</h3>
+<p>正常跟踪先取期望线速度，再结合弯曲程度、障碍附近代价与接近终点的程度调节。几种调节解决的现象不同，应分别记录它们给出的候选速度。</p>
+<div class="table-scroll" role="region" aria-label="对照表" tabindex="0"><table><thead><tr><th scope="col">调节</th><th scope="col">使用的信息</th><th scope="col">要解决的问题</th></tr></thead><tbody><tr><td>曲率限速</td><td>当前跟踪曲率或独立限速曲率</td><td>急弯时不继续以高速度冲过</td></tr><tr><td>代价限速</td><td>当前位置的膨胀代价与配置参数</td><td>接近墙或障碍时保守行驶</td></tr><tr><td>终点减速</td><td>路径剩余长度与目标距离</td><td>接近终点时减小过冲</td></tr></tbody></table></div>
+<p>在讨论的曲率调节分支中，转弯半径 <code>R=|1/κ|</code> 小于门限 R_min 时，候选速度按 <code>v_desired×R/R_min</code> 缩小。它是按半径调速的规则，不等同于显式求解横向加速度硬约束。若另外设计 <code>v≤sqrt(a_lat,max/|κ|)</code>，那是新增约束，需要单独实现和验证。</p>
+<p>障碍距离可由有效膨胀代价近似反推，形式为 <code>d≈r_inscribed+ln(253/cost)/k_inflation</code>。这里依赖特定膨胀代价模型和有效 cost 范围，不能对自由空间零代价直接取对数。参数必须与膨胀层一致；不一致时，控制器会误解相同 cost 对应的距离。</p>
+<p>曲率与代价调节取较保守的候选，再按实现处理最小调节速度、终点减速与倒车方向。最小调节速度可能使“靠近障碍减速”本身不会降到零，所以它不能替代碰撞拒绝。实际顺序与参数名要核对正在运行的版本。</p>
+<h3 id="section-4">原地转向与普通跟踪属于不同分支</h3>
+<p>进入目标位置容差后对齐航向，或路径方向差过大时，可以进入零线速度的旋转分支。旋转速度还应受角加速度和剩余角度可停车条件限制；其规则不能直接套到普通跟踪分支。</p>
+<p>此前检查的实现中，普通跟踪的纵向调节没有使用当前速度形成逐周期加速度约束。这解释了为什么候选速度可能突变，但不能据此声称所有 RPP 版本都没有加速度控制。部署时继续追踪外部速度平滑器与底盘固件是否真正生效，并比较命令速度和实际速度。</p>
+<p>另一个需要核对的分支是固定曲率前视：当前实现究竟只用它限速，还是也用它计算 ω？两个选择改变转弯结果，不能只看参数名称推断。</p>
+<h2 id="section-5">RPP 能检测碰撞，为什么仍不能自己绕过障碍</h2>
+<h3 id="section-6">检查的是当前命令形成的圆弧</h3>
+<p>算出 v、ω 后，碰撞检查将它们在短时间内视作常量，向前积分位姿，并在预测姿态上检查车体 footprint。简化的离散关系是：</p>
+<pre><code class="language-text">x_next = x + Δt × v × cos(θ)
+y_next = y + Δt × v × sin(θ)
+θ_next = θ + Δt × ω</code></pre>
+<p>正常平移的采样步长可按地图分辨率与速度选择，原地旋转还要考虑车体最远角点的扫掠。预测通常受最大时间和前视范围限制。动态障碍只有进入当前代价地图后，才可能被这一检查看到；缺失感知不会因为做了 footprint 检查而自动补齐。</p>
+<p>此前讨论的分支在预测碰撞后抛出 <code>NoValidControl</code>，拒绝本周期控制。上层如何停车、等待、恢复或重新规划，要继续看 Controller Server 与行为树。不能把“拒绝危险圆弧”解释成“已经找到另一条安全圆弧”。</p>
+<h3 id="section-7">绕行需要新的路径或局部候选选择</h3>
+<p>假设原路径直穿一个新障碍，RPP 计算出的跟踪圆弧也会碰撞。降低速度可以延迟接近障碍，拒绝命令可以阻止继续运动，但这两步都没有回答应该从左边还是右边绕过去。需要上游重规划生成新路径，或采用有局部候选优化能力的控制器。</p>
+<p>因此排查“遇障不绕行”时，先确定业务要求到底是等待、沿新路径绕行，还是允许偏离指定路线。前视距离和最低速度调得再多，也不能替代缺失的任务策略。</p>
+<p>边界处理同样影响安全语义。此前源码分析发现预测位姿超出局部地图时存在警告后按无碰撞返回的分支；部署到不同版本前必须重新核对，不能假定“没检测到”就等于“已证明安全”。</p>
+<h2 id="section-8">MPPI 怎样选择局部轨迹，为什么有时在终点停住</h2>
+<p>RPP 是沿给定几何路径生成命令，MPPI 则比较有限时域里的候选运动。先理解优化变量，再分析代价竞争，才能判断零速度是计算异常还是当前目标下的低代价选择。</p>
+<h3 id="section-9">优化变量与更新</h3>
 <p>MPPI 维护一段未来控制序列，对其加入随机扰动，使用运动模型展开大量候选轨迹，再按总代价对扰动加权更新控制序列。</p>
 <p>总代价可包含路径跟随、目标距离、目标航向、障碍代价、速度偏好、轨迹平滑和运动学约束。</p>
 <p>候选代价可写成 <code>S_n=Σ_k c(x_k,u_k)+c_terminal(x_H)</code>，再按 <code>w_n∝exp(-S_n/λ)</code> 加权扰动并更新控制序列。温度、噪声标准差、样本数和预测时域共同决定探索范围、稳定性与计算量。</p>
-<h3 id="section-8">MPPI 不是全局规划器</h3>
 <p>它只在有限时域和采样范围内选择局部轨迹。若全局路径穿过不可通行区域、代价地图封死通道或采样范围不足，MPPI 也无法创造可行路径。</p>
-<h3 id="section-9">终点附近零速度局部最优</h3>
+<h3 id="section-10">终点附近零速度局部最优</h3>
 <p>差速机器人到达目标附近时，可能需要先偏离最终航向才能继续减少位置误差。如果目标航向评价项在较远距离就强烈惩罚转向，所有有效运动都可能比停住代价更高。</p>
-<p>解决思路是明确位置与航向的阶段分工：先完成平移，再在位置容差内执行最终旋转，而不是单纯放宽进度检查时间。</p>
+<p>这是一种需要通过评价项数据验证的解释，不能从“终点停住”现象直接确定根因。还要排除目标容差、不可行运动学、障碍代价和输出链问题。</p>
+<p>若确认是位置与航向目标相互牵制，解决思路是明确位置与航向的阶段分工：先完成平移，再在位置容差内执行最终旋转，而不是单纯放宽进度检查时间。</p>
 <p>排查时应分别输出路径、目标距离、目标航向和障碍评价项的加权贡献。只看总代价无法发现某个航向项在过早阶段压倒位置进展。</p>
-<h3 id="section-10">加速度模型与真实底盘</h3>
+<h3 id="section-11">加速度模型与真实底盘</h3>
 <p>MPPI 展开轨迹时使用内部加速度限制。外部速度平滑器若未启动，其参数不会作用于实际命令。底盘固件还可能有独立斜坡限制。</p>
 <p>应同时记录控制器输出速度和里程计实际速度，估计真实加减速度，再使预测模型与底盘能力接近。</p>
-<h2 id="section-11">三、全向运动、Rotation Shim 与选择</h2>
-<h3 id="section-12">Rotation Shim</h3>
+<h2 id="section-12">全向底盘还需不需要先原地转向</h2>
+<p>全向能力属于整条执行链，不是只在规划器里选了一个运动模型就会自动出现。要确认主控制器、消息转发和底盘都保留横向速度。</p>
+<h3 id="section-13">Rotation Shim</h3>
 <p>Rotation Shim 在路径跟踪前先把机器人旋转到接近路径方向，适合不能横移的差速底盘。</p>
 <p>全向底盘可以同时输出纵向、横向和角速度，强制原地旋转可能降低效率。若主控制器和下游速度链真正支持横向分量，可让其直接跟踪路径。</p>
-<h3 id="section-13">原地旋转碰撞</h3>
 <p>原地旋转并非天然安全。非圆形车体旋转时会扫过更大区域，Rotation Shim 需要使用完整 footprint 做前向模拟碰撞检查。</p>
-<h3 id="section-14">控制器选择</h3>
 <p>固定业务路线、行为要求清晰且遇障停车时，RPP 简单可解释。需要动态局部绕障、全向运动或多目标权衡时，MPPI 更灵活。</p>
 <p>选择标准应包含任务语义、运动学、障碍策略、算力和可验证性，而不只是“哪个算法更高级”。</p>
-<h2 id="section-15">四、可观测性与复盘</h2>
-<h3 id="section-16">调试数据</h3>
+<h2 id="section-14">看到跟踪差或停车时，怎样决定查哪个环节</h2>
 <p>至少同步记录局部路径、前视点、曲率、各限速因子、MPPI 候选总代价、最终速度、底盘实际速度和碰撞预测结果。</p>
-<h3 id="section-17">最小对比实验</h3>
+<h3 id="section-15">最小对比实验</h3>
 <p>在同一条直线、急弯、S 弯、狭窄通道和带最终航向的任务上分别运行 RPP 与 MPPI；固定路径、代价地图、footprint 和速度上限，比较路径误差、速度平滑、计算耗时、终点成功率和安全层触发，才能把差异归因到控制器。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
   
 </body>

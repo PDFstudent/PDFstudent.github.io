@@ -9,17 +9,17 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pdfstudent.github.io">
   <title>历史 Chat 技术知识树与系统索引 · PDFstudent 知识库</title>
-  <link rel="stylesheet" href="/assets/site.css?v=a14d4b983aa5">
+  <link rel="stylesheet" href="/assets/site.css?v=158eac112de5">
 </head>
 <body>
   <div class="shell"><header class="site-header">
     <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
     <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
-  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="技术栈导航"><strong>技术栈</strong><ol><li><a href="/entry/2026-10-29-slam-index/">SLAM 技术</a></li><li><a href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a></li><li><a href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a></li><li><a href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a></li><li><a href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a></li><li><a href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">重构目标</a></li><li class="toc-level-2"><a href="#section-2">覆盖范围</a></li><li class="toc-level-2"><a href="#section-3">分类原则</a></li><li class="toc-level-2"><a href="#section-4">六条技术主线</a></li><li class="toc-level-3"><a href="#section-5">1. SLAM 与多传感器定位</a></li><li class="toc-level-3"><a href="#section-6">2. 路线规划与导航系统</a></li><li class="toc-level-3"><a href="#section-7">3. 运动控制、精导航与安全</a></li><li class="toc-level-3"><a href="#section-8">4. 具身模型、VLN 与数据闭环</a></li><li class="toc-level-3"><a href="#section-9">5. 人形机器人动力学与全身控制</a></li><li class="toc-level-3"><a href="#section-10">6. 机器人工程交付与诊断</a></li><li class="toc-level-2"><a href="#section-11">技术栈之间的依赖关系</a></li><li class="toc-level-2"><a href="#section-12">历史会话覆盖映射</a></li><li class="toc-level-3"><a href="#section-13">SLAM 技术来源</a></li><li class="toc-level-3"><a href="#section-14">导航算法来源</a></li><li class="toc-level-3"><a href="#section-15">模型基础与 VLN 来源</a></li><li class="toc-level-3"><a href="#section-16">工程实践来源</a></li><li class="toc-level-2"><a href="#section-17">后续维护规则</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="技术栈导航"><strong>技术栈</strong><ol><li><a href="/entry/2026-10-29-slam-index/">SLAM 技术</a></li><li><a href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a></li><li><a href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a></li><li><a href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a></li><li><a href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a></li><li><a href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">重构目标</a></li><li class="toc-level-2"><a href="#section-2">覆盖范围</a></li><li class="toc-level-2"><a href="#section-3">分类原则</a></li><li class="toc-level-2"><a href="#section-4">六条技术主线</a></li><li class="toc-level-3"><a href="#section-5">1. SLAM 与多传感器定位</a></li><li class="toc-level-3"><a href="#section-6">2. 路线规划与导航系统</a></li><li class="toc-level-3"><a href="#section-7">3. 运动控制、精导航与安全</a></li><li class="toc-level-3"><a href="#section-8">4. 具身模型、VLN 与数据闭环</a></li><li class="toc-level-3"><a href="#section-9">5. 人形机器人动力学与全身控制</a></li><li class="toc-level-3"><a href="#section-10">6. 机器人工程交付与诊断</a></li><li class="toc-level-2"><a href="#section-11">技术栈之间的依赖关系</a></li><li class="toc-level-2"><a href="#section-12">历史会话覆盖映射</a></li><li class="toc-level-3"><a href="#section-13">SLAM 技术来源</a></li><li class="toc-level-3"><a href="#section-14">导航算法来源</a></li><li class="toc-level-3"><a href="#section-15">模型基础与 VLN 来源</a></li><li class="toc-level-3"><a href="#section-16">工程实践来源</a></li><li class="toc-level-2"><a href="#section-17">后续维护规则</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">技术总览 · 2026-10-29</p><h1>历史 Chat 技术知识树与系统索引</h1><p class="article-summary">基于全部历史讨论的实际问题域，重组为 SLAM、路线规划、运动控制、具身智能、人形控制和工程实践六条技术主线。</p><div class="tags"><span class="tag">技术知识树</span><span class="tag">历史归档</span><span class="tag">学习路径</span><span class="tag">系统索引</span></div></header><div class="article-body"><h2 id="section-1">重构目标</h2>
-<p>第一版归档主要按照讨论场景分组，能够覆盖内容，但不利于形成稳定的学习体系。例如 Transformer、VLA 开源项目、DAgger 与人形控制被放在同一个“具身智能”分类中，SLAM 定位问题与导航控制问题也存在交叉。</p>
-<p>新的知识树按技术栈组织。每个专题都尽量回答六类问题：基础概念是什么、系统结构怎样、算法如何工作、源码或现场证据是什么、工程上如何判断、还有哪些问题待验证。</p>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="技术栈导航"><strong>技术栈</strong><ol><li><a href="/entry/2026-10-29-slam-index/">SLAM 技术</a></li><li><a href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a></li><li><a href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a></li><li><a href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a></li><li><a href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a></li><li><a href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">按正在解决的问题找文章</a></li><li class="toc-level-2"><a href="#section-2">覆盖范围</a></li><li class="toc-level-2"><a href="#section-3">分类原则</a></li><li class="toc-level-2"><a href="#section-4">六条技术主线</a><ol><li class="toc-level-3"><a href="#section-5">1. SLAM 与多传感器定位</a></li><li class="toc-level-3"><a href="#section-6">2. 路线规划与导航系统</a></li><li class="toc-level-3"><a href="#section-7">3. 运动控制、精导航与安全</a></li><li class="toc-level-3"><a href="#section-8">4. 具身模型、VLN 与数据闭环</a></li><li class="toc-level-3"><a href="#section-9">5. 人形机器人动力学与全身控制</a></li><li class="toc-level-3"><a href="#section-10">6. 机器人工程交付与诊断</a></li></ol></li><li class="toc-level-2"><a href="#section-11">技术栈之间的依赖关系</a></li><li class="toc-level-2"><a href="#section-12">历史会话覆盖映射</a><ol><li class="toc-level-3"><a href="#section-13">SLAM 技术来源</a></li><li class="toc-level-3"><a href="#section-14">导航算法来源</a></li><li class="toc-level-3"><a href="#section-15">模型基础与 VLN 来源</a></li><li class="toc-level-3"><a href="#section-16">工程实践来源</a></li></ol></li><li class="toc-level-2"><a href="#section-17">后续维护规则</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="技术栈导航"><strong>技术栈</strong><ol><li><a href="/entry/2026-10-29-slam-index/">SLAM 技术</a></li><li><a href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a></li><li><a href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a></li><li><a href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a></li><li><a href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a></li><li><a href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">按正在解决的问题找文章</a></li><li class="toc-level-2"><a href="#section-2">覆盖范围</a></li><li class="toc-level-2"><a href="#section-3">分类原则</a></li><li class="toc-level-2"><a href="#section-4">六条技术主线</a><ol><li class="toc-level-3"><a href="#section-5">1. SLAM 与多传感器定位</a></li><li class="toc-level-3"><a href="#section-6">2. 路线规划与导航系统</a></li><li class="toc-level-3"><a href="#section-7">3. 运动控制、精导航与安全</a></li><li class="toc-level-3"><a href="#section-8">4. 具身模型、VLN 与数据闭环</a></li><li class="toc-level-3"><a href="#section-9">5. 人形机器人动力学与全身控制</a></li><li class="toc-level-3"><a href="#section-10">6. 机器人工程交付与诊断</a></li></ol></li><li class="toc-level-2"><a href="#section-11">技术栈之间的依赖关系</a></li><li class="toc-level-2"><a href="#section-12">历史会话覆盖映射</a><ol><li class="toc-level-3"><a href="#section-13">SLAM 技术来源</a></li><li class="toc-level-3"><a href="#section-14">导航算法来源</a></li><li class="toc-level-3"><a href="#section-15">模型基础与 VLN 来源</a></li><li class="toc-level-3"><a href="#section-16">工程实践来源</a></li></ol></li><li class="toc-level-2"><a href="#section-17">后续维护规则</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">技术总览 · 2026-10-29</p><h1>历史 Chat 技术知识树与系统索引</h1><p class="article-summary">基于全部历史讨论的实际问题域，重组为 SLAM、路线规划、运动控制、具身智能、人形控制和工程实践六条技术主线。</p><div class="tags"><span class="tag">技术知识树</span><span class="tag">历史归档</span><span class="tag">学习路径</span><span class="tag">系统索引</span></div></header><div class="article-body"><p>这个索引用于从具体疑问找到解释，不必先知道算法属于哪个技术栈。若想系统学习，可以按后面的六条主线进入专题；若正在排障，先在下面按现象找文章。</p>
+<h2 id="section-1">按正在解决的问题找文章</h2>
+<div class="table-scroll" role="region" aria-label="对照表" tabindex="0"><table><thead><tr><th scope="col">问题或现象</th><th scope="col">对应文章</th></tr></thead><tbody><tr><td>反光物附近出现鬼点，机器人误停车</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-pointcloud-diagnostics/" rel="noreferrer">点云处理链与证据回溯</a></td></tr><tr><td>重新经过旧区域，车辆残影为什么还在地图里</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-mapping-keyframes/" rel="noreferrer">关键帧追加与地图更新</a></td></tr><tr><td>配准分数很好，位置却在错误走廊</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-relocalization-fusion/" rel="noreferrer">候选定位与独立地标校验</a></td></tr><tr><td>标志 ID 没错，航向为什么左右跳</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-visual-pose/" rel="noreferrer">平面姿态双解与控制门控</a></td></tr><tr><td>指定路线被改道，中途接入又走回头路</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-nav-global-planning/" rel="noreferrer">路线语义与前向接入</a></td></tr><tr><td>参数没生效，定位恢复后任务仍被判失败</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-nav-lifecycle-config/" rel="noreferrer">运行配置与恢复竞态</a></td></tr><tr><td>RPP 为什么不横移绕障，MPPI 为什么终点停住</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-nav-local-controllers/" rel="noreferrer">局部控制器的计算与边界</a></td></tr><tr><td>视觉接管、搜索、微移的边界与停稳怎么判断</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-nav-precision-docking/" rel="noreferrer">精导航执行过程</a></td></tr><tr><td>路径通过规划，为什么执行时仍会碰撞</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-nav-collision-safety/" rel="noreferrer">车体扫掠与障碍等待</a></td></tr><tr><td>固定动作查询为什么能产生不同动作</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-model-action-queries/" rel="noreferrer">Transformer 输出位置与动作含义</a></td></tr><tr><td>多路图像特征如何变成八个路径点</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-vln-omtrackvla/" rel="noreferrer">OmTrackVLA 推理链</a></td></tr><tr><td>高层模型算得慢，低层怎样持续控制</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-vln-internvla/" rel="noreferrer">双系统分工与计划接口</a></td></tr><tr><td>BC 已有专家数据，为何还需要 DAgger</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-vln-dagger/" rel="noreferrer">偏差状态、标签与连续采集</a></td></tr><tr><td>权重装得下，是否就能在机器人上闭环运行</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-vln-deployment/" rel="noreferrer">内存、延迟与有效轨迹预算</a></td></tr><tr><td>期望速度怎样通过脚底接触变成关节动作</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-model-mpc-wbc/" rel="noreferrer">MPC、WBC 与动力学约束</a></td></tr><tr><td>最后一行报错是否根因，旧 CI 是否包含修复</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-eng-debug-ci/" rel="noreferrer">版本身份与日志时间线</a></td></tr><tr><td>编译成功，为什么部署后仍找不到库和资源</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-eng-build-deploy/" rel="noreferrer">完整产物、激活与回滚</a></td></tr><tr><td>日志、SSH、包锁或桌面工具出现异常</td><td><a href="https://pdfstudent.github.io/entry/2026-10-29-eng-linux-ops/" rel="noreferrer">按症状检查 Linux 环境</a></td></tr></tbody></table></div>
 <h2 id="section-2">覆盖范围</h2>
-<p>本次重构已分页读取 47 个历史会话，共获得 792 个可用对话回合和 786 条用户提问；另有 2 个 ChatGPT 来源只返回摘要预览。现有任务列表没有报告不可访问的数据源。</p>
+<p>历史采集台账记录了 47 个会话、792 个可用回合和 786 条用户提问；另有 2 个 ChatGPT 来源只有摘要预览。这些数字表示采集范围，不代表每条技术结论都已逐项验证，也不能证明账号上未连接设备的全部历史均已获取。仅有摘要的来源无法按完整对话复核。</p>
 <p>分类单位是对话回合，不是 Chat 窗口。同一 Chat 中关于模型、训练、部署或安全控制的不同回合会分别进入对应专题；同一回合如果同时涉及定位、导航与工程部署，也允许挂接多个专题。</p>
 <p>公开页面只保留长期可复用的知识。设备信息、访问凭据、内部链接、本地路径、私人仓库配置、完整日志和原始聊天均不公开。</p>
 <h2 id="section-3">分类原则</h2>
@@ -55,8 +55,7 @@
 <p>知识库系统不再作为技术专业与算法并列，而是所有专业共同使用的沉淀机制：每日增量记录变化，长期专题吸收稳定知识，覆盖台账追踪原始讨论是否被遗漏。</p>
 <h2 id="section-12">历史会话覆盖映射</h2>
 <h3 id="section-13">SLAM 技术来源</h3>
-<ul>
-<li>高反光材料导致异常点云及其同步诊断数据。</li>
+<ul><li>高反光材料导致异常点云及其同步诊断数据。</li>
 <li>平面视觉标志航向漂移和姿态双解。</li>
 <li>定位失败、地图位姿、里程计与坐标变换接口。</li>
 <li>远程 RViz 与导航调试桥。</li>
@@ -65,11 +64,9 @@
 <li>增量建图、关键帧累加和动态残影。</li>
 <li>反光地标辅助定位与几何配准。</li>
 <li>激光强度字段可视化。</li>
-<li>视觉停靠状态日志与重对齐行为。</li>
-</ul>
+<li>视觉停靠状态日志与重对齐行为。</li></ul>
 <h3 id="section-14">导航算法来源</h3>
-<ul>
-<li>指定路线编辑、下发和一次规划。</li>
+<ul><li>指定路线编辑、下发和一次规划。</li>
 <li>全向底盘、Rotation Shim、MPPI 与 RPP。</li>
 <li>障碍停车等待、静态地图校验和运动扫掠。</li>
 <li>后半平面点云过滤及其安全边界。</li>
@@ -77,34 +74,27 @@
 <li>横向微移服务、停车锚点与离站。</li>
 <li>仿真与实车配置、任务类型配置和速度链路。</li>
 <li>生命周期暂停、定位抖动和任务恢复竞态。</li>
-<li>真机启动、路线标注、系统接口和状态报告。</li>
-</ul>
+<li>真机启动、路线标注、系统接口和状态报告。</li></ul>
 <h3 id="section-15">模型基础与 VLN 来源</h3>
-<ul>
-<li>Transformer 为什么需要输出查询位置，以及查询向量训练后的含义。</li>
+<ul><li>Transformer 为什么需要输出查询位置，以及查询向量训练后的含义。</li>
 <li>人形机器人 MPC 与 WBC 的职责、频率和接口。</li>
 <li>OmTrackVLA 网络结构、动作输出和本机推理可行性。</li>
 <li>InternVLA-N1 双系统、NavDP、DualVLN 与 RGB、RGB-D 取舍。</li>
-<li>DAgger 训练阶段、连续轨迹标注、专家接管和危险样本处理。</li>
-</ul>
+<li>DAgger 训练阶段、连续轨迹标注、专家接管和危险样本处理。</li></ul>
 <h3 id="section-16">工程实践来源</h3>
-<ul>
-<li>地图与构建产物传输、文件完整性校验。</li>
+<ul><li>地图与构建产物传输、文件完整性校验。</li>
 <li>多项目依赖、接口包升级和完整集成部署。</li>
 <li>CI 失败对应的分支与提交关系。</li>
 <li>部署空间峰值、旧备份和回滚策略。</li>
 <li>日志目录权限与最小只读授权。</li>
 <li>远程桌面、输入法和软件包管理锁。</li>
-<li>实体视觉标签尺寸、静区、安装结构和批量识别验证。</li>
-</ul>
+<li>实体视觉标签尺寸、静区、安装结构和批量识别验证。</li></ul>
 <h2 id="section-17">后续维护规则</h2>
-<ol>
-<li>每日复盘只记录当天新增知识、决策和问题，不承担完整教材功能。</li>
+<ol><li>每日复盘只记录当天新增知识、决策和问题，不承担完整教材功能。</li>
 <li>技术专题吸收跨天、跨窗口的长期知识，并随新证据更新。</li>
 <li>同一主题优先更新既有专题，避免创建大量重复短文。</li>
 <li>每条结论区分已验证事实、基于证据的推断和待验证假设。</li>
-<li>每周检查技术栈之间是否出现新的依赖、冲突或知识空白。</li>
-</ol></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+<li>每周检查技术栈之间是否出现新的依赖、冲突或知识空白。</li></ol></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
   
 </body>
 </html>

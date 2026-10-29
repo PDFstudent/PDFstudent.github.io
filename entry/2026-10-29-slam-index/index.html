@@ -9,7 +9,7 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pdfstudent.github.io">
   <title>SLAM 技术 · PDFstudent 知识库</title>
-  <link rel="stylesheet" href="/assets/site.css?v=a14d4b983aa5">
+  <link rel="stylesheet" href="/assets/site.css?v=158eac112de5">
 </head>
 <body>
   <div class="shell"><header class="site-header">
@@ -18,12 +18,10 @@
   </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent current" href="/entry/2026-10-29-slam-index/">SLAM 技术</a><ol><li><a href="/entry/2026-10-29-slam-pointcloud-diagnostics/">点云链路与高反光异常诊断</a></li><li><a href="/entry/2026-10-29-slam-mapping-keyframes/">Fast-LIO、关键帧与增量建图</a></li><li><a href="/entry/2026-10-29-slam-relocalization-fusion/">全局重定位与反光地标校验</a></li><li><a href="/entry/2026-10-29-slam-visual-pose/">平面视觉标志姿态与双解消歧</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">学习路径</a></li><li class="toc-level-2"><a href="#section-2">子专题</a></li><li class="toc-level-2"><a href="#section-3">关键依赖</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent current" href="/entry/2026-10-29-slam-index/">SLAM 技术</a><ol><li><a href="/entry/2026-10-29-slam-pointcloud-diagnostics/">点云链路与高反光异常诊断</a></li><li><a href="/entry/2026-10-29-slam-mapping-keyframes/">Fast-LIO、关键帧与增量建图</a></li><li><a href="/entry/2026-10-29-slam-relocalization-fusion/">全局重定位与反光地标校验</a></li><li><a href="/entry/2026-10-29-slam-visual-pose/">平面视觉标志姿态与双解消歧</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">学习路径</a></li><li class="toc-level-2"><a href="#section-2">子专题</a></li><li class="toc-level-2"><a href="#section-3">关键依赖</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">SLAM技术 · 2026-10-29</p><h1>SLAM 技术</h1><p class="article-summary">从点云进入系统开始，依次理解前端里程计、地图构建、全局重定位和视觉姿态校验。</p><div class="tags"><span class="tag">SLAM</span><span class="tag">点云</span><span class="tag">建图</span><span class="tag">重定位</span></div></header><div class="article-body"><h2 id="section-1">学习路径</h2>
 <p>SLAM 专题按照“传感器数据是否可信—局部运动是否连续—地图如何保存—全局位置如何恢复”的顺序组织。建议先读点云链路，再读关键帧建图，最后读多源定位与视觉姿态。</p>
 <h2 id="section-2">子专题</h2>
-<ol>
-<li><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-pointcloud-diagnostics/" rel="noreferrer">点云链路与高反光异常诊断</a>：点云分层、强度、多径、时间同步与证据链。</li>
+<ol><li><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-pointcloud-diagnostics/" rel="noreferrer">点云链路与高反光异常诊断</a>：点云分层、强度、多径、时间同步与证据链。</li>
 <li><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-mapping-keyframes/" rel="noreferrer">Fast-LIO、关键帧与增量建图</a>：激光惯性前端、关键帧触发、动态残影与地图清理。</li>
 <li><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-relocalization-fusion/" rel="noreferrer">全局重定位与反光地标校验</a>：候选生成、GICP、地点描述子和地标恢复。</li>
-<li><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-visual-pose/" rel="noreferrer">平面视觉标志姿态与双解消歧</a>：PnP、IPPE、重投影误差、先验与跨帧连续性。</li>
-</ol>
+<li><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-visual-pose/" rel="noreferrer">平面视觉标志姿态与双解消歧</a>：PnP、IPPE、重投影误差、先验与跨帧连续性。</li></ol>
 <h2 id="section-3">关键依赖</h2>
 <p>点云时间与坐标不可信时，后续建图和定位结论都不可信；局部里程计连续不代表全局位姿正确；单一匹配分数好也不代表候选位置一定正确。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
   

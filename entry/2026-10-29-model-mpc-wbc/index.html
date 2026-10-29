@@ -3,87 +3,85 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="从浮动基座动力学、接触力和摩擦约束出发，解释 MPC 规划与 WBC 全身执行的变量、频率和接口。">
+  <meta name="description" content="解释期望速度为何不能直接变成关节力矩，沿接触力规划、全身动力学和触地反馈理解 MPC 与 WBC。">
   <meta property="og:title" content="人形机器人 MPC 与 WBC · PDFstudent 知识库">
-  <meta property="og:description" content="从浮动基座动力学、接触力和摩擦约束出发，解释 MPC 规划与 WBC 全身执行的变量、频率和接口。">
+  <meta property="og:description" content="解释期望速度为何不能直接变成关节力矩，沿接触力规划、全身动力学和触地反馈理解 MPC 与 WBC。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pdfstudent.github.io">
   <title>人形机器人 MPC 与 WBC · PDFstudent 知识库</title>
-  <link rel="stylesheet" href="/assets/site.css?v=a14d4b983aa5">
+  <link rel="stylesheet" href="/assets/site.css?v=158eac112de5">
 </head>
 <body>
   <div class="shell"><header class="site-header">
     <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
     <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
-  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a><ol><li><a aria-current="page" href="/entry/2026-10-29-model-mpc-wbc/">人形机器人 MPC 与 WBC</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、控制问题与系统分层</a></li><li class="toc-level-3"><a href="#section-2">控制层级</a></li><li class="toc-level-3"><a href="#section-3">浮动基座</a></li><li class="toc-level-2"><a href="#section-4">二、MPC：用简化模型规划未来</a></li><li class="toc-level-3"><a href="#section-5">质心动力学</a></li><li class="toc-level-3"><a href="#section-6">MPC 决策变量</a></li><li class="toc-level-3"><a href="#section-7">MPC 约束</a></li><li class="toc-level-3"><a href="#section-8">滚动优化与失效语义</a></li><li class="toc-level-2"><a href="#section-9">三、WBC：把计划变成全身动作</a></li><li class="toc-level-3"><a href="#section-10">WBC 动力学</a></li><li class="toc-level-3"><a href="#section-11">WBC 任务</a></li><li class="toc-level-3"><a href="#section-12">QP 与 HQP</a></li><li class="toc-level-2"><a href="#section-13">四、层间接口与接触切换</a></li><li class="toc-level-3"><a href="#section-14">为什么分成 MPC 和 WBC</a></li><li class="toc-level-3"><a href="#section-15">典型频率</a></li><li class="toc-level-3"><a href="#section-16">接触切换</a></li><li class="toc-level-3"><a href="#section-17">MPC 与 WBC 接口</a></li><li class="toc-level-2"><a href="#section-18">五、诊断与 VLA 衔接</a></li><li class="toc-level-3"><a href="#section-19">常见失败原因</a></li><li class="toc-level-3"><a href="#section-20">与 VLA 的连接</a></li><li class="toc-level-3"><a href="#section-21">学习顺序</a></li><li class="toc-level-3"><a href="#section-22">复盘检查表</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a><ol><li><a aria-current="page" href="/entry/2026-10-29-model-mpc-wbc/">人形机器人 MPC 与 WBC</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、控制问题与系统分层</a></li><li class="toc-level-3"><a href="#section-2">控制层级</a></li><li class="toc-level-3"><a href="#section-3">浮动基座</a></li><li class="toc-level-2"><a href="#section-4">二、MPC：用简化模型规划未来</a></li><li class="toc-level-3"><a href="#section-5">质心动力学</a></li><li class="toc-level-3"><a href="#section-6">MPC 决策变量</a></li><li class="toc-level-3"><a href="#section-7">MPC 约束</a></li><li class="toc-level-3"><a href="#section-8">滚动优化与失效语义</a></li><li class="toc-level-2"><a href="#section-9">三、WBC：把计划变成全身动作</a></li><li class="toc-level-3"><a href="#section-10">WBC 动力学</a></li><li class="toc-level-3"><a href="#section-11">WBC 任务</a></li><li class="toc-level-3"><a href="#section-12">QP 与 HQP</a></li><li class="toc-level-2"><a href="#section-13">四、层间接口与接触切换</a></li><li class="toc-level-3"><a href="#section-14">为什么分成 MPC 和 WBC</a></li><li class="toc-level-3"><a href="#section-15">典型频率</a></li><li class="toc-level-3"><a href="#section-16">接触切换</a></li><li class="toc-level-3"><a href="#section-17">MPC 与 WBC 接口</a></li><li class="toc-level-2"><a href="#section-18">五、诊断与 VLA 衔接</a></li><li class="toc-level-3"><a href="#section-19">常见失败原因</a></li><li class="toc-level-3"><a href="#section-20">与 VLA 的连接</a></li><li class="toc-level-3"><a href="#section-21">学习顺序</a></li><li class="toc-level-3"><a href="#section-22">复盘检查表</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">机器人控制 · 2026-10-29</p><h1>人形机器人 MPC 与 WBC</h1><p class="article-summary">从浮动基座动力学、接触力和摩擦约束出发，解释 MPC 规划与 WBC 全身执行的变量、频率和接口。</p><div class="tags"><span class="tag">MPC</span><span class="tag">WBC</span><span class="tag">接触动力学</span><span class="tag">人形机器人</span></div></header><div class="article-body"><h2 id="section-1">一、控制问题与系统分层</h2>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a><ol><li><a aria-current="page" href="/entry/2026-10-29-model-mpc-wbc/">人形机器人 MPC 与 WBC</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">给定躯干速度后，为什么仍不能直接得到关节力矩</a><ol><li class="toc-level-3"><a href="#section-2">控制层级</a></li></ol></li><li class="toc-level-2"><a href="#section-3">MPC 怎样判断未来运动是否有可实现的接触力</a><ol><li class="toc-level-3"><a href="#section-4">质心动力学</a></li><li class="toc-level-3"><a href="#section-5">MPC 约束</a></li><li class="toc-level-3"><a href="#section-6">用摩擦力算例理解为什么平滑轨迹也不可行</a></li></ol></li><li class="toc-level-2"><a href="#section-7">WBC 怎样把质心和接触计划变成当前全身动作</a><ol><li class="toc-level-3"><a href="#section-8">WBC 动力学</a></li><li class="toc-level-3"><a href="#section-9">QP 与 HQP</a></li></ol></li><li class="toc-level-2"><a href="#section-10">MPC 计划与真实触地不同步时，谁应该服从谁</a><ol><li class="toc-level-3"><a href="#section-11">为什么分成 MPC 和 WBC</a></li><li class="toc-level-3"><a href="#section-12">接触切换</a></li></ol></li><li class="toc-level-2"><a href="#section-13">机器人不稳定时怎样按层定位，而不是只调权重</a><ol><li class="toc-level-3"><a href="#section-14">常见失败原因</a></li><li class="toc-level-3"><a href="#section-15">学习顺序</a></li></ol></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a><ol><li><a aria-current="page" href="/entry/2026-10-29-model-mpc-wbc/">人形机器人 MPC 与 WBC</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">给定躯干速度后，为什么仍不能直接得到关节力矩</a><ol><li class="toc-level-3"><a href="#section-2">控制层级</a></li></ol></li><li class="toc-level-2"><a href="#section-3">MPC 怎样判断未来运动是否有可实现的接触力</a><ol><li class="toc-level-3"><a href="#section-4">质心动力学</a></li><li class="toc-level-3"><a href="#section-5">MPC 约束</a></li><li class="toc-level-3"><a href="#section-6">用摩擦力算例理解为什么平滑轨迹也不可行</a></li></ol></li><li class="toc-level-2"><a href="#section-7">WBC 怎样把质心和接触计划变成当前全身动作</a><ol><li class="toc-level-3"><a href="#section-8">WBC 动力学</a></li><li class="toc-level-3"><a href="#section-9">QP 与 HQP</a></li></ol></li><li class="toc-level-2"><a href="#section-10">MPC 计划与真实触地不同步时，谁应该服从谁</a><ol><li class="toc-level-3"><a href="#section-11">为什么分成 MPC 和 WBC</a></li><li class="toc-level-3"><a href="#section-12">接触切换</a></li></ol></li><li class="toc-level-2"><a href="#section-13">机器人不稳定时怎样按层定位，而不是只调权重</a><ol><li class="toc-level-3"><a href="#section-14">常见失败原因</a></li><li class="toc-level-3"><a href="#section-15">学习顺序</a></li></ol></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">机器人控制 · 2026-10-29</p><h1>人形机器人 MPC 与 WBC</h1><p class="article-summary">解释期望速度为何不能直接变成关节力矩，沿接触力规划、全身动力学和触地反馈理解 MPC 与 WBC。</p><div class="tags"><span class="tag">MPC</span><span class="tag">WBC</span><span class="tag">接触动力学</span><span class="tag">人形机器人</span></div></header><div class="article-body"><p>导航模型已经给出“向前走”的期望速度，人形机器人为什么还需要 MPC 和 WBC，不能直接把速度分给关节？因为躯干没有直接驱动它的六个电机，运动要通过脚与地面的接触力实现，而关节力矩、摩擦与接触切换都有约束。</p>
+<p>下面沿“期望运动 → 未来质心和接触计划 → 当前关节动作”解释两层职责。MPC 负责在简化模型中看未来，WBC 负责用完整身体满足当前动力学；两者的计划必须与真实接触和执行器能力一致。</p>
+<h2 id="section-1">给定躯干速度后，为什么仍不能直接得到关节力矩</h2>
+<p>先从欠驱动性理解控制困难，再看分层。否则 MPC 和 WBC 很容易只剩两个缩写。</p>
 <h3 id="section-2">控制层级</h3>
 <p>导航层输出目标位置、路径或期望速度；步态层决定支撑腿、摆动腿、落脚点和接触时序；MPC 规划未来质心与接触力；WBC 把计划变成全身关节动作；电机伺服执行电流、力矩或位置控制。</p>
-<h3 id="section-3">浮动基座</h3>
 <p>人形躯干的六个自由度没有直接执行器，只能通过脚与环境的接触力间接控制。系统因此是欠驱动的。</p>
 <p>轮式底盘持续接地且运动学关系相对固定，人形机器人不断切换双脚支撑和单脚支撑，动力学约束随时间改变。</p>
 <p>广义坐标可写成 <code>q=[p_b,R_b,q_j]</code>：基座位置、基座姿态和关节角。基座六自由度没有对应电机，选择矩阵 <code>S</code> 只把关节力矩注入可驱动关节；基座运动必须由重力与足底接触力共同形成。</p>
-<h2 id="section-4">二、MPC：用简化模型规划未来</h2>
-<h3 id="section-5">质心动力学</h3>
+<h2 id="section-3">MPC 怎样判断未来运动是否有可实现的接触力</h2>
+<p>未来位置看起来平滑，不代表地面能够提供所需的力。约束决定计划的物理可行性。</p>
+<h3 id="section-4">质心动力学</h3>
 <p>质心平动满足 <code>m × p_ddot = Σfi + m × g</code>。角动量变化由各接触点相对质心的位置与接触力矩共同决定。</p>
 <p>MPC 常使用质心动力学或线性倒立摆等简化模型，减少优化变量并扩大预测时域。</p>
-<h3 id="section-6">MPC 决策变量</h3>
 <p>常见变量包括未来质心位置速度、躯干姿态、每只支撑脚的接触力，有时还包含落脚位置和接触时序。</p>
 <p>目标函数同时惩罚速度跟踪误差、姿态误差、角动量、接触力变化和控制能量。</p>
 <p>典型离散目标为 <code>J=Σ||x_k-x_ref,k||²_Q+||u_k-u_ref,k||²_R+||u_k-u_(k-1)||²_S</code>。第三项抑制接触力突变，防止计划数学可行但执行器无法平滑跟随。</p>
-<h3 id="section-7">MPC 约束</h3>
+<h3 id="section-5">MPC 约束</h3>
 <p>摆动脚不能产生接触力；支撑脚法向力必须非负；切向力不能超出摩擦锥；压力中心要位于足底支撑区域；状态和接触力还要满足硬件能力。</p>
 <p>这些约束决定计划是否物理可行，而不只是轨迹看起来平滑。</p>
-<p>摩擦锥常线性化为 <code>|f_x|≤μf_z</code>、<code>|f_y|≤μf_z</code>、<code>f_z≥0</code>。摆动脚接触力必须为零；支撑脚还要满足压力中心位于足底支撑多边形。若 MPC 同时优化落脚点，还必须加入运动学可达区域。</p>
-<h3 id="section-8">滚动优化与失效语义</h3>
+<p>点接触摩擦约束应限制切向合力，并满足 <code>f_z≥0</code>；线性近似是否保守要检查它与圆锥的包含关系。摆动脚接触力必须为零；支撑脚还要满足压力中心位于足底支撑多边形。若 MPC 同时优化落脚点，还必须加入运动学可达区域。</p>
 <p>MPC 每周期只执行优化序列的第一段，再用新状态重新求解。求解超时不能无条件沿用旧结果；需要检查旧计划剩余有效期，并在失效时切换到保守站立、减速或安全停机。</p>
-<h2 id="section-9">三、WBC：把计划变成全身动作</h2>
-<h3 id="section-10">WBC 动力学</h3>
+<h3 id="section-6">用摩擦力算例理解为什么平滑轨迹也不可行</h3>
+<p>理想点接触下需要满足切向合力不超过 μf_z，即 sqrt(f_x²+f_y²)≤μf_z。若分别允许两个方向都取 μf_z，则合力会达到 sqrt(2)μf_z，已经超出原摩擦圆锥。因此两个轴各自限幅形成的是外包近似，并不自动保守。</p>
+<p>若需要保守的四面体近似，可采用 |f_x|+|f_y|≤μf_z，或把两个轴上限都缩为 μf_z/sqrt(2)。这只是说明约束几何的算例；实际足底还要考虑压力中心、接触力矩与摩擦估计误差。</p>
+<h2 id="section-7">WBC 怎样把质心和接触计划变成当前全身动作</h2>
+<p>相同质心运动可能对应很多关节动作，WBC 还要兼顾支撑、摆动腿、姿态和执行器限制。</p>
+<h3 id="section-8">WBC 动力学</h3>
 <p>全身动力学可写为 <code>M(q)q_ddot + h(q,q_dot) = Sᵀτ + Jcᵀλ</code>。</p>
 <p>决策变量常包含广义加速度、关节力矩和接触力。约束包括完整动力学、支撑脚零加速度、摩擦锥和关节限制。</p>
-<h3 id="section-11">WBC 任务</h3>
 <p>WBC 同时跟踪质心、躯干姿态、摆动脚轨迹和 MPC 接触力，并保持支撑脚稳定。手臂可用于调节角动量，低优先级任务还包括节能和远离关节限位。</p>
-<h3 id="section-12">QP 与 HQP</h3>
+<h3 id="section-9">QP 与 HQP</h3>
 <p>加权 QP 把任务误差乘不同权重后联合优化，任务之间可以妥协。分层 QP 保证高优先级任务不被低优先级目标破坏。</p>
 <p>物理可行性和接触通常最高，平衡与支撑脚稳定其次，姿态美观和节能更低。</p>
 <p>任务常写为 <code>J_i q_ddot + Jdot_i q_dot ≈ x_ddot_i*</code>。QP 同时寻找 <code>q_ddot、τ、λ</code>，最小化任务误差并满足动力学、支撑脚零加速度、摩擦和关节限制。HQP 则把高优先级的最优解集合变成下一层约束。</p>
-<h2 id="section-13">四、层间接口与接触切换</h2>
-<h3 id="section-14">为什么分成 MPC 和 WBC</h3>
+<h2 id="section-10">MPC 计划与真实触地不同步时，谁应该服从谁</h2>
+<p>简化模型、全身模型和实际机器人之间存在差异，接触切换时尤为明显。接口需让下层能够拒绝失效参考。</p>
+<h3 id="section-11">为什么分成 MPC 和 WBC</h3>
 <p>若直接对完整几十自由度机器人做长时域优化，变量包括所有关节状态、力矩、接触力和切换，问题过大且非光滑。</p>
 <p>MPC 使用简化模型低频看远，WBC 使用完整模型高频做准，是计算量与模型精度的折中。</p>
-<h3 id="section-15">典型频率</h3>
 <p>MPC 可能运行在几十赫兹量级，WBC 数百赫兹，电机伺服更高。具体值由机器人动力学、求解器和硬件决定。</p>
 <p>接口必须处理不同频率之间的插值、参考连续性和延迟。</p>
-<h3 id="section-16">接触切换</h3>
+<h3 id="section-12">接触切换</h3>
 <p>摆动脚提前或延迟触地时，继续使用原接触模型会产生错误力矩。状态估计和接触检测需要快速更新 WBC 约束，并通知上层重新规划。</p>
-<h3 id="section-17">MPC 与 WBC 接口</h3>
 <p>两层需要统一机器人质量惯量、坐标系、接触点定义和时间基准。MPC 输出的接触力必须在 WBC 与真实执行器能力内。</p>
 <p>落脚点还必须运动学可达，不能只满足质心模型。</p>
 <p>接口至少携带时间戳、参考时域、接触集合、各接触点坐标系、期望力与计划版本。若实际接触检测与旧计划不一致，WBC 应优先满足真实接触约束并通知上层重规划，而不是为追踪旧参考强行施力。</p>
-<h2 id="section-18">五、诊断与 VLA 衔接</h2>
-<h3 id="section-19">常见失败原因</h3>
+<h2 id="section-13">机器人不稳定时怎样按层定位，而不是只调权重</h2>
+<p>先看状态估计、接触和饱和，再看优化目标。权重调整不能修复错误的物理假设。</p>
+<h3 id="section-14">常见失败原因</h3>
 <p>质量惯量误差、地面摩擦估计错误、状态估计漂移、落脚不可达、接触时序激进、任务权重不当、执行器饱和和通信延迟都可能导致不稳定。</p>
 <p>MPC 加 WBC 是架构，不是自动稳定保证。</p>
-<h3 id="section-20">与 VLA 的连接</h3>
 <p>VLA 更适合输出目标速度、局部路径或落脚意图。MPC 与 WBC 在明确动力学和接触约束下执行。让视觉语言模型直接输出所有关节力矩，会把安全与可行性完全交给数据覆盖。</p>
 <p>更完整的链路是：VLA 给出带时间戳和有效期的运动意图；MPC 转成动力学可行的未来质心/接触计划；WBC 生成当前全身动作；硬件层继续执行力矩、电流和碰撞保护。任何学习模型输出都不应绕过接触与执行器硬约束。</p>
-<h3 id="section-21">学习顺序</h3>
-<ol>
-<li>刚体运动学和雅可比。</li>
+<h3 id="section-15">学习顺序</h3>
+<ol><li>刚体运动学和雅可比。</li>
 <li>浮动基座动力学。</li>
 <li>接触、摩擦锥和支撑多边形。</li>
 <li>双脚站立 QP WBC。</li>
 <li>摆动脚与接触切换。</li>
 <li>线性倒立摆 MPC。</li>
 <li>质心动力学 MPC 与 WBC 联调。</li>
-</ol>
-<h3 id="section-22">复盘检查表</h3>
-<ol>
 <li>MPC 的状态、控制变量、预测时域和接触时序是什么？</li>
 <li>摩擦、压力中心和执行器约束在哪一层生效？</li>
 <li>WBC 最终输出加速度、位置、速度还是力矩？</li>
 <li>提前或延迟触地时谁更新约束、谁触发重规划？</li>
-<li>求解超时、状态异常和执行器饱和时如何降级？</li>
-</ol></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+<li>求解超时、状态异常和执行器饱和时如何降级？</li></ol></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
   
 </body>
 </html>
