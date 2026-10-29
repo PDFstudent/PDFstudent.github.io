@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="将全部历史讨论重新组织为 SLAM、导航算法、模型基础、VLN 开源项目、工程实践和知识库系统六条长期技术主线。">
+  <meta property="og:title" content="历史 Chat 技术知识树与系统索引 · PDFstudent 知识库">
+  <meta property="og:description" content="将全部历史讨论重新组织为 SLAM、导航算法、模型基础、VLN 开源项目、工程实践和知识库系统六条长期技术主线。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>历史 Chat 技术知识树与系统索引 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main"><a class="back" href="/">← 返回首页</a><article><header class="article-header"><p class="eyebrow">技术总览 · 2026-10-29</p><h1>历史 Chat 技术知识树与系统索引</h1><p class="article-summary">将全部历史讨论重新组织为 SLAM、导航算法、模型基础、VLN 开源项目、工程实践和知识库系统六条长期技术主线。</p><div class="tags"><span class="tag">技术知识树</span><span class="tag">历史归档</span><span class="tag">学习路径</span><span class="tag">系统索引</span></div></header><div class="article-body"><h2>重构目标</h2>
+<p>第一版归档主要按照讨论场景分组，能够覆盖内容，但不利于形成稳定的学习体系。例如 Transformer、VLA 开源项目、DAgger 与人形控制被放在同一个“具身智能”分类中，SLAM 定位问题与导航控制问题也存在交叉。</p>
+<p>新的知识树按技术栈组织。每个专题都尽量回答六类问题：基础概念是什么、系统结构怎样、算法如何工作、源码或现场证据是什么、工程上如何判断、还有哪些问题待验证。</p>
+<h2>覆盖范围</h2>
+<p>本次重构覆盖已经归档的 47 个历史会话，包括 45 个 Codex 会话和 2 个 ChatGPT 会话。现有任务列表没有报告不可访问的数据源。</p>
+<p>公开页面只保留长期可复用的知识。设备信息、访问凭据、内部链接、本地路径、私人仓库配置、完整日志和原始聊天均不公开。</p>
+<h2>六条一级主线</h2>
+<h3>1. 知识库系统</h3>
+<p>讨论多设备、多窗口 Chat 的首次全量导入、每日增量归档、私有 Markdown 源仓库、公开脱敏 Pages 和自动发布验证。</p>
+<p>适合回答的问题是：知识如何从一次性对话变成可检索、可更新、可追踪且不会泄露隐私的长期资料。</p>
+<h3>2. SLAM 技术</h3>
+<p>覆盖激光与点云处理、Fast-LIO、关键帧地图、增量建图、动态残影、全局重定位、反光地标、视觉标志姿态、坐标变换和远程诊断。</p>
+<p>适合回答的问题是：机器人如何建立地图、估计自身状态、发现定位失效，并用不同传感器互相校验。</p>
+<p>详细文章：<a href="https://pdfstudent.github.io/entry/2026-10-29-slam-technology/" rel="noreferrer">SLAM 技术：点云、建图、定位与多源校验</a>。</p>
+<h3>3. 导航算法分析</h3>
+<p>覆盖全局规划、指定路线、MPPI、RPP、Rotation Shim、全向运动、代价地图、碰撞检查、障碍停车等待、视觉精导航、横向微移、任务生命周期和配置分层。</p>
+<p>适合回答的问题是：有了地图与位姿后，机器人如何规划路径、生成速度、保证安全，并在故障后恢复任务。</p>
+<p>详细文章：<a href="https://pdfstudent.github.io/entry/2026-10-29-navigation-algorithms/" rel="noreferrer">导航算法分析：规划、控制、避障与状态机</a>。</p>
+<h3>4. 模型相关基础知识</h3>
+<p>覆盖 Transformer 的查询、序列位置、占位向量、并行输出、注意力掩码，以及人形机器人的 MPC、WBC、浮动基座动力学、接触约束和控制层级。</p>
+<p>适合回答的问题是：模型为什么使用动作查询输出轨迹，以及预测层计划如何变成物理机器人可执行的全身动作。</p>
+<p>详细文章：<a href="https://pdfstudent.github.io/entry/2026-10-29-model-foundations/" rel="noreferrer">模型基础：Transformer 动作查询与 MPC、WBC</a>。</p>
+<h3>5. VLN 开源项目学习</h3>
+<p>覆盖 OmTrackVLA、InternVLA-N1、NavDP、DualVLN、双视觉编码器、粗细粒度时序视觉表示、异步双系统、推理资源评估和 DAgger 数据闭环。</p>
+<p>适合回答的问题是：具体开源模型如何把图像、语言和历史状态转换为导航轨迹，能否在目标硬件运行，以及如何继续训练和安全部署。</p>
+<p>详细文章：<a href="https://pdfstudent.github.io/entry/2026-10-29-vln-open-source-projects/" rel="noreferrer">VLN 开源项目：OmTrackVLA、InternVLA-N1 与 DAgger</a>。</p>
+<h3>6. 工程实践问题解决</h3>
+<p>覆盖代码工作区关系、交叉编译、完整集成部署、CI 分支判断、磁盘空间、日志权限、文件传输、版本回滚、Linux 软件包锁、桌面环境和实体标签制作。</p>
+<p>适合回答的问题是：如何把算法变成可重复构建、可安全部署、可诊断、可验证和可回滚的工程系统。</p>
+<p>详细文章：<a href="https://pdfstudent.github.io/entry/2026-10-29-engineering-practice/" rel="noreferrer">工程实践：诊断、构建、部署与环境维护</a>。</p>
+<h2>技术栈之间的依赖关系</h2>
+<p>模型基础提供表示学习、时序融合和控制优化的通用概念。VLN 项目把这些概念实现为具体网络。SLAM 提供地图、位姿和环境几何。导航算法把感知与定位结果转成安全运动。工程实践保证整套系统可以稳定构建、部署和复现。知识库系统则负责把所有结论持续沉淀。</p>
+<p>可以把关系理解为：模型负责理解和预测，SLAM 负责建立世界状态，导航负责做出并执行局部运动决策，工程体系负责让所有模块真正运行，知识库负责保存可复用经验。</p>
+<h2>历史会话覆盖映射</h2>
+<h3>SLAM 技术来源</h3>
+<ul>
+<li>高反光材料导致异常点云及其同步诊断数据。</li>
+<li>平面视觉标志航向漂移和姿态双解。</li>
+<li>定位失败、地图位姿、里程计与坐标变换接口。</li>
+<li>远程 RViz 与导航调试桥。</li>
+<li>Fast-LIO 运行负载与进程树分析。</li>
+<li>PC 端视觉标志检测与质量可视化。</li>
+<li>增量建图、关键帧累加和动态残影。</li>
+<li>反光地标辅助定位与几何配准。</li>
+<li>激光强度字段可视化。</li>
+<li>视觉停靠状态日志与重对齐行为。</li>
+</ul>
+<h3>导航算法来源</h3>
+<ul>
+<li>指定路线编辑、下发和一次规划。</li>
+<li>全向底盘、Rotation Shim、MPPI 与 RPP。</li>
+<li>障碍停车等待、静态地图校验和运动扫掠。</li>
+<li>后半平面点云过滤及其安全边界。</li>
+<li>视觉精导航、六自由度观测和速度控制。</li>
+<li>横向微移服务、停车锚点与离站。</li>
+<li>仿真与实车配置、任务类型配置和速度链路。</li>
+<li>生命周期暂停、定位抖动和任务恢复竞态。</li>
+<li>真机启动、路线标注、系统接口和状态报告。</li>
+</ul>
+<h3>模型基础与 VLN 来源</h3>
+<ul>
+<li>Transformer 为什么需要输出查询位置，以及查询向量训练后的含义。</li>
+<li>人形机器人 MPC 与 WBC 的职责、频率和接口。</li>
+<li>OmTrackVLA 网络结构、动作输出和本机推理可行性。</li>
+<li>InternVLA-N1 双系统、NavDP、DualVLN 与 RGB、RGB-D 取舍。</li>
+<li>DAgger 训练阶段、连续轨迹标注、专家接管和危险样本处理。</li>
+</ul>
+<h3>工程实践来源</h3>
+<ul>
+<li>地图与构建产物传输、文件完整性校验。</li>
+<li>多项目依赖、接口包升级和完整集成部署。</li>
+<li>CI 失败对应的分支与提交关系。</li>
+<li>部署空间峰值、旧备份和回滚策略。</li>
+<li>日志目录权限与最小只读授权。</li>
+<li>远程桌面、输入法和软件包管理锁。</li>
+<li>实体视觉标签尺寸、静区、安装结构和批量识别验证。</li>
+</ul>
+<h2>后续维护规则</h2>
+<ol>
+<li>每日复盘只记录当天新增知识、决策和问题，不承担完整教材功能。</li>
+<li>技术专题吸收跨天、跨窗口的长期知识，并随新证据更新。</li>
+<li>同一主题优先更新既有专题，避免创建大量重复短文。</li>
+<li>每条结论区分已验证事实、基于证据的推断和待验证假设。</li>
+<li>每周检查技术栈之间是否出现新的依赖、冲突或知识空白。</li>
+</ol></div></article></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+  
+</body>
+</html>
