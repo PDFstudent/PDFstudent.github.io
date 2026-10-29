@@ -15,41 +15,52 @@
   <div class="shell"><header class="site-header">
     <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
     <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
-  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-navigation-index/">导航算法</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li><li><a aria-current="page" href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">两阶段结构</a></li><li class="toc-level-2"><a href="#section-2">三类边界</a></li><li class="toc-level-2"><a href="#section-3">捕获状态</a></li><li class="toc-level-2"><a href="#section-4">绝对搜索序列</a></li><li class="toc-level-2"><a href="#section-5">越界后的处理</a></li><li class="toc-level-2"><a href="#section-6">ALIGN 阶段</a></li><li class="toc-level-2"><a href="#section-7">APPROACH 阶段</a></li><li class="toc-level-2"><a href="#section-8">观测丢失</a></li><li class="toc-level-2"><a href="#section-9">定位跳变</a></li><li class="toc-level-2"><a href="#section-10">横向微移服务</a></li><li class="toc-level-2"><a href="#section-11">漂移保护</a></li><li class="toc-level-2"><a href="#section-12">停稳语义</a></li><li class="toc-level-2"><a href="#section-13">离站锚点</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-navigation-index/">导航算法</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li><li><a aria-current="page" href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">两阶段结构</a></li><li class="toc-level-2"><a href="#section-2">三类边界</a></li><li class="toc-level-2"><a href="#section-3">捕获状态</a></li><li class="toc-level-2"><a href="#section-4">绝对搜索序列</a></li><li class="toc-level-2"><a href="#section-5">越界后的处理</a></li><li class="toc-level-2"><a href="#section-6">ALIGN 阶段</a></li><li class="toc-level-2"><a href="#section-7">APPROACH 阶段</a></li><li class="toc-level-2"><a href="#section-8">观测丢失</a></li><li class="toc-level-2"><a href="#section-9">定位跳变</a></li><li class="toc-level-2"><a href="#section-10">横向微移服务</a></li><li class="toc-level-2"><a href="#section-11">漂移保护</a></li><li class="toc-level-2"><a href="#section-12">停稳语义</a></li><li class="toc-level-2"><a href="#section-13">离站锚点</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">导航算法 · 2026-10-29</p><h1>视觉精导航与横向微移</h1><p class="article-summary">拆解粗导航交接、视觉捕获、对齐、接近、搜索、硬安全包络、横向微移和离站锚点。</p><div class="tags"><span class="tag">精导航</span><span class="tag">视觉伺服</span><span class="tag">横向微移</span><span class="tag">状态机</span></div></header><div class="article-body"><h2 id="section-1">两阶段结构</h2>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a aria-current="page" href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、任务分层与状态机边界</a></li><li class="toc-level-3"><a href="#section-2">粗导航与视觉接管</a></li><li class="toc-level-3"><a href="#section-3">三类边界</a></li><li class="toc-level-2"><a href="#section-4">二、捕获与绝对搜索</a></li><li class="toc-level-3"><a href="#section-5">捕获状态</a></li><li class="toc-level-3"><a href="#section-6">绝对搜索序列</a></li><li class="toc-level-3"><a href="#section-7">越界后的处理</a></li><li class="toc-level-2"><a href="#section-8">三、视觉伺服：ALIGN、APPROACH 与重对齐</a></li><li class="toc-level-3"><a href="#section-9">ALIGN 阶段</a></li><li class="toc-level-3"><a href="#section-10">APPROACH 阶段</a></li><li class="toc-level-3"><a href="#section-11">观测丢失</a></li><li class="toc-level-3"><a href="#section-12">定位跳变与双坐标锚点</a></li><li class="toc-level-2"><a href="#section-13">四、横向微移闭环</a></li><li class="toc-level-3"><a href="#section-14">服务语义与幂等</a></li><li class="toc-level-3"><a href="#section-15">反馈、漂移与换向</a></li><li class="toc-level-3"><a href="#section-16">停稳语义</a></li><li class="toc-level-2"><a href="#section-17">五、停靠锚点与离站一致性</a></li><li class="toc-level-3"><a href="#section-18">离站锚点</a></li><li class="toc-level-3"><a href="#section-19">复盘证据</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a aria-current="page" href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、任务分层与状态机边界</a></li><li class="toc-level-3"><a href="#section-2">粗导航与视觉接管</a></li><li class="toc-level-3"><a href="#section-3">三类边界</a></li><li class="toc-level-2"><a href="#section-4">二、捕获与绝对搜索</a></li><li class="toc-level-3"><a href="#section-5">捕获状态</a></li><li class="toc-level-3"><a href="#section-6">绝对搜索序列</a></li><li class="toc-level-3"><a href="#section-7">越界后的处理</a></li><li class="toc-level-2"><a href="#section-8">三、视觉伺服：ALIGN、APPROACH 与重对齐</a></li><li class="toc-level-3"><a href="#section-9">ALIGN 阶段</a></li><li class="toc-level-3"><a href="#section-10">APPROACH 阶段</a></li><li class="toc-level-3"><a href="#section-11">观测丢失</a></li><li class="toc-level-3"><a href="#section-12">定位跳变与双坐标锚点</a></li><li class="toc-level-2"><a href="#section-13">四、横向微移闭环</a></li><li class="toc-level-3"><a href="#section-14">服务语义与幂等</a></li><li class="toc-level-3"><a href="#section-15">反馈、漂移与换向</a></li><li class="toc-level-3"><a href="#section-16">停稳语义</a></li><li class="toc-level-2"><a href="#section-17">五、停靠锚点与离站一致性</a></li><li class="toc-level-3"><a href="#section-18">离站锚点</a></li><li class="toc-level-3"><a href="#section-19">复盘证据</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">运动控制 · 2026-10-29</p><h1>视觉精导航与横向微移</h1><p class="article-summary">拆解粗导航交接、视觉捕获、对齐、接近、搜索、硬安全包络、横向微移和离站锚点。</p><div class="tags"><span class="tag">精导航</span><span class="tag">视觉伺服</span><span class="tag">横向微移</span><span class="tag">状态机</span></div></header><div class="article-body"><h2 id="section-1">一、任务分层与状态机边界</h2>
+<h3 id="section-2">粗导航与视觉接管</h3>
 <p>第一阶段使用地图导航到预停靠区域，第二阶段使用视觉标志完成精确对齐和接近。粗导航正常结束后，应先确认底盘真实停稳，再判断视觉是否可以接管。</p>
-<h2 id="section-2">三类边界</h2>
+<h3 id="section-3">三类边界</h3>
 <p>到位容差用于判断粗导航成功；视觉交接门限用于判断是否适合直接进入视觉控制；硬安全包络用于限制搜索和补偿运动的最大范围。</p>
 <p>三者作用不同。到位容差不应自动成为视觉阶段失败门限，交接门限也不等于绝对安全边界。</p>
-<h2 id="section-3">捕获状态</h2>
+<p>建议在状态机中分别记录 <code>coarse_goal_tolerance、handover_gate、hard_envelope</code>，并为每次拒绝输出具体边界。用一个“最大偏差”参数承担三种职责，会造成搜索刚越过软门限就误判硬失败。</p>
+<h2 id="section-4">二、捕获与绝对搜索</h2>
+<h3 id="section-5">捕获状态</h3>
 <p>视觉接管前要求目标连续可见、姿态质量通过且观测未过期。单帧检测不应立即驱动机器人。</p>
 <p>目标不可见时，搜索运动应围绕固定局部锚点生成离散候选姿态，而不是在每一步以当前位置累积偏移。</p>
-<h2 id="section-4">绝对搜索序列</h2>
+<h3 id="section-6">绝对搜索序列</h3>
 <p>搜索候选可以由航向和横向偏移组合构成。每次运动前检查候选是否位于硬安全包络内；不安全候选直接跳过，不应因为单个候选无效就终止整个任务。</p>
 <p>运动中一旦稳定看到目标，可提前制动，停稳并复核后进入视觉伺服。</p>
-<h2 id="section-5">越界后的处理</h2>
+<h3 id="section-7">越界后的处理</h3>
 <p>候选目标在运动前安全，但制动后实际位置可能轻微越过软门限。此时重点是停止继续朝误差增大方向运动，并选择能减小误差的后续候选。</p>
 <p>只有无法确认停稳、定位不可信、越过硬安全边界或所有安全候选耗尽，才应失败。</p>
-<h2 id="section-6">ALIGN 阶段</h2>
+<p>搜索目标应相对视觉接管时冻结的局部锚点计算。若每次都相对当前位置增量偏移，制动误差会被下一步继续累加，最终搜索中心漂离预停靠区域。</p>
+<h2 id="section-8">三、视觉伺服：ALIGN、APPROACH 与重对齐</h2>
+<h3 id="section-9">ALIGN 阶段</h3>
 <p>远距阶段主要修正横向和航向，同时限制纵向前进。航向参考应在多帧一致后冻结，避免平面姿态候选跳变把错误方向传入控制器。</p>
-<h2 id="section-7">APPROACH 阶段</h2>
+<h3 id="section-10">APPROACH 阶段</h3>
 <p>对齐达到门限后进入最终接近。纵向速度随距离减小，横向和角速度继续小幅修正。</p>
 <p>如果横向误差重新增大，切换到原地重对齐：纵向速度为零，只执行横移和小角度旋转；恢复后再继续接近。</p>
-<h2 id="section-8">观测丢失</h2>
+<p>典型限幅比例控制可写为 <code>v_x=sat(k_x e_x)</code>、<code>v_y=sat(k_y e_y)</code>、<code>w=sat(k_yaw e_yaw)</code>，但每个状态应使用不同增益与速度上限。APPROACH 中纵向速度还需随距离减小，并受观测年龄与安全距离门控。</p>
+<h3 id="section-11">观测丢失</h3>
 <p>观测超时立即零速并回到捕获。若视觉内部检查点恢复不可用，可以以丢失时的局部里程计上下文建立新搜索锚点，而不是盲目返回旧地图目标。</p>
-<h2 id="section-9">定位跳变</h2>
+<h3 id="section-12">定位跳变与双坐标锚点</h3>
 <p>视觉阶段的短时运动安全更适合用固定 odom 锚点计算，因为局部里程计连续；map 位姿用于硬包络复核和检测明显全局跳变。</p>
 <p>发生明显跳变时，不应继续相信旧地图预停靠点，应优先保留视觉接管时的局部连续上下文。</p>
-<h2 id="section-10">横向微移服务</h2>
+<h2 id="section-13">四、横向微移闭环</h2>
+<h3 id="section-14">服务语义与幂等</h3>
 <p>微移服务接收方向、距离、超时和请求 ID。相同 ID、相同参数重复调用应幂等；相同 ID、不同参数应拒绝。</p>
 <p>闭环反馈优先使用低延迟底盘里程计，激光定位用于连续性监测和最终全局复核。控制过程中限制横向与角加速度，换向前先降到零。</p>
-<h2 id="section-11">漂移保护</h2>
+<h3 id="section-15">反馈、漂移与换向</h3>
 <p>横移时可小幅修正航向，但不应持续追逐高延迟全局定位噪声。纵向漂移超过安全阈值应停车失败。</p>
 <p>航向误差在小死区内不修正，可以减少左右摇摆；超过死区后再按限幅比例控制。</p>
-<h2 id="section-12">停稳语义</h2>
+<p>微移距离应投影到停车时冻结的车体横轴，而不是持续使用随机器人航向变化的当前轴。每周期同时检查目标横移、纵向漂移、航向误差、反馈新鲜度和超时；任何失败路径都先零速并确认停稳。</p>
+<h3 id="section-16">停稳语义</h3>
 <p>到位、失败和超时都必须先发送零速，并连续确认实际速度足够小再返回。客户端等待超时不等于机器人运动已经取消。</p>
-<h2 id="section-13">离站锚点</h2>
+<h2 id="section-17">五、停靠锚点与离站一致性</h2>
+<h3 id="section-18">离站锚点</h3>
 <p>精停完成时记录停靠锚点。横向微移成功后更新该锚点，下一任务离站时以最新位置判断是否仍在站内。</p>
-<p>人工移动若超过离站距离，可以判定机器人已经离开；服务内的合法微移不应被误判成离站。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+<p>人工移动若超过离站距离，可以判定机器人已经离开；服务内的合法微移不应被误判成离站。</p>
+<h3 id="section-19">复盘证据</h3>
+<p>一次完整精导航应能回放：状态转移、每帧观测年龄与质量、冻结航向、三个控制误差、限幅前后速度、局部/全局锚点、安全包络、停止原因和实际停稳时刻。只保存最终成功或失败码无法复现漂移来源。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
   
 </body>
 </html>

@@ -15,33 +15,40 @@
   <div class="shell"><header class="site-header">
     <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
     <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
-  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-navigation-index/">导航算法</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a aria-current="page" href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">两层安全检查</a></li><li class="toc-level-2"><a href="#section-2">Footprint 一致性</a></li><li class="toc-level-2"><a href="#section-3">路径离散检查</a></li><li class="toc-level-2"><a href="#section-4">运动扫掠</a></li><li class="toc-level-2"><a href="#section-5">障碍等待状态机</a></li><li class="toc-level-2"><a href="#section-6">静态地图毛刺</a></li><li class="toc-level-2"><a href="#section-7">后方点云过滤</a></li><li class="toc-level-2"><a href="#section-8">自过滤与任务过滤的区别</a></li><li class="toc-level-2"><a href="#section-9">障碍日志</a></li><li class="toc-level-2"><a href="#section-10">回归场景</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-navigation-index/">导航算法</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a aria-current="page" href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">两层安全检查</a></li><li class="toc-level-2"><a href="#section-2">Footprint 一致性</a></li><li class="toc-level-2"><a href="#section-3">路径离散检查</a></li><li class="toc-level-2"><a href="#section-4">运动扫掠</a></li><li class="toc-level-2"><a href="#section-5">障碍等待状态机</a></li><li class="toc-level-2"><a href="#section-6">静态地图毛刺</a></li><li class="toc-level-2"><a href="#section-7">后方点云过滤</a></li><li class="toc-level-2"><a href="#section-8">自过滤与任务过滤的区别</a></li><li class="toc-level-2"><a href="#section-9">障碍日志</a></li><li class="toc-level-2"><a href="#section-10">回归场景</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">导航算法 · 2026-10-29</p><h1>代价地图、碰撞检查与障碍等待</h1><p class="article-summary">分析静态地图校验、局部代价地图、footprint 扫掠、后方点云过滤和障碍消失后的恢复条件。</p><div class="tags"><span class="tag">Costmap</span><span class="tag">Footprint</span><span class="tag">碰撞检查</span><span class="tag">停车等待</span></div></header><div class="article-body"><h2 id="section-1">两层安全检查</h2>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a aria-current="page" href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、静态、实时与预测三层安全链</a></li><li class="toc-level-3"><a href="#section-2">静态与实时检查</a></li><li class="toc-level-3"><a href="#section-3">Footprint 一致性</a></li><li class="toc-level-3"><a href="#section-4">路径离散检查</a></li><li class="toc-level-3"><a href="#section-5">运动扫掠</a></li><li class="toc-level-2"><a href="#section-6">二、障碍等待与恢复状态机</a></li><li class="toc-level-3"><a href="#section-7">状态与转移</a></li><li class="toc-level-3"><a href="#section-8">静态地图毛刺</a></li><li class="toc-level-2"><a href="#section-9">三、点云过滤不能替代几何安全</a></li><li class="toc-level-3"><a href="#section-10">后方点云过滤</a></li><li class="toc-level-3"><a href="#section-11">自过滤与任务过滤的区别</a></li><li class="toc-level-2"><a href="#section-12">四、证据链与回归</a></li><li class="toc-level-3"><a href="#section-13">障碍日志</a></li><li class="toc-level-3"><a href="#section-14">回归场景</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a aria-current="page" href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、静态、实时与预测三层安全链</a></li><li class="toc-level-3"><a href="#section-2">静态与实时检查</a></li><li class="toc-level-3"><a href="#section-3">Footprint 一致性</a></li><li class="toc-level-3"><a href="#section-4">路径离散检查</a></li><li class="toc-level-3"><a href="#section-5">运动扫掠</a></li><li class="toc-level-2"><a href="#section-6">二、障碍等待与恢复状态机</a></li><li class="toc-level-3"><a href="#section-7">状态与转移</a></li><li class="toc-level-3"><a href="#section-8">静态地图毛刺</a></li><li class="toc-level-2"><a href="#section-9">三、点云过滤不能替代几何安全</a></li><li class="toc-level-3"><a href="#section-10">后方点云过滤</a></li><li class="toc-level-3"><a href="#section-11">自过滤与任务过滤的区别</a></li><li class="toc-level-2"><a href="#section-12">四、证据链与回归</a></li><li class="toc-level-3"><a href="#section-13">障碍日志</a></li><li class="toc-level-3"><a href="#section-14">回归场景</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">运动控制 · 2026-10-29</p><h1>代价地图、碰撞检查与障碍等待</h1><p class="article-summary">分析静态地图校验、局部代价地图、footprint 扫掠、后方点云过滤和障碍消失后的恢复条件。</p><div class="tags"><span class="tag">Costmap</span><span class="tag">Footprint</span><span class="tag">碰撞检查</span><span class="tag">停车等待</span></div></header><div class="article-body"><h2 id="section-1">一、静态、实时与预测三层安全链</h2>
+<h3 id="section-2">静态与实时检查</h3>
 <p>任务开始前可用静态地图检查整条路径，运行中再用局部代价地图检查前方走廊和未来运动轨迹。</p>
 <p>静态检查能发现传感器暂时看不到的固定结构；局部检查能处理新出现的动态障碍。二者互补。</p>
-<h2 id="section-2">Footprint 一致性</h2>
+<p>控制器还需要第三层：按候选速度向前积分未来位姿并做 footprint 扫掠。静态路径合法、当前局部区域无障碍，都不保证机器人在制动距离内仍然安全。</p>
+<h3 id="section-3">Footprint 一致性</h3>
 <p>规划器、路径平滑器和控制器若使用不同 footprint 或安全边界，同一条路径可能在规划阶段通过、平滑阶段失败，或运行时被控制器拒绝。</p>
 <p>应统一车体几何来源，并明确膨胀半径、额外安全边界和附属结构是否包含。</p>
-<h2 id="section-3">路径离散检查</h2>
+<h3 id="section-4">路径离散检查</h3>
 <p>只检查路径采样点上的 footprint，点间距过大时可能漏掉两点之间的碰撞。需要按位移和旋转插值，保证扫掠连续。</p>
-<h2 id="section-4">运动扫掠</h2>
+<p>插值步长应同时受平移和转角限制。非圆形车体即使中心几乎不动，原地旋转也会让角点扫过较大区域，不能只按中心位移采样。</p>
+<h3 id="section-5">运动扫掠</h3>
 <p>控制器可以根据当前速度和预测时域模拟未来位姿，在每个位姿检查 footprint。转弯时车尾和侧边扫掠尤其重要。</p>
 <p>带拖车或铰接结构时，单一固定 footprint 不能表达随关节角变化的占用区域，需要动态复合几何或专门扫掠模型。</p>
-<h2 id="section-5">障碍等待状态机</h2>
+<h2 id="section-6">二、障碍等待与恢复状态机</h2>
+<h3 id="section-7">状态与转移</h3>
 <p>发现障碍后立即零速，进入等待状态。障碍消失后不应立刻恢复，而应要求连续畅通时间，防止噪声导致启停振荡。</p>
 <p>等待期间仍要处理任务取消、定位丢失、超时和控制权切换。恢复前可重新验证路径前方走廊。</p>
-<h2 id="section-6">静态地图毛刺</h2>
+<p>建议显式状态为 <code>RUNNING→BLOCKED→CLEAR_CONFIRM→RUNNING</code>，任意状态都可转入 <code>CANCELED/FAILED</code>。进入 BLOCKED 时锁存障碍来源和首次碰撞索引；连续畅通超过门限才恢复，中途再次检测到障碍则返回 BLOCKED。</p>
+<h3 id="section-8">静态地图毛刺</h3>
 <p>地图边缘锯齿或孤立噪点可能造成静态 footprint 碰撞。直接关闭整条路径校验会失去固定障碍保护；把静态碰撞一律改成等待又可能永久卡住。</p>
 <p>更合理的是清理地图噪声、统一几何、设置有依据的边缘容差，并记录具体碰撞栅格和 footprint 交叠区域。</p>
-<h2 id="section-7">后方点云过滤</h2>
+<h2 id="section-9">三、点云过滤不能替代几何安全</h2>
+<h3 id="section-10">后方点云过滤</h3>
 <p>简单删除机器人坐标系中所有 <code>x &lt; 0</code> 点，会同时删除真实墙体、人员和货物，不只是车体自身回波。</p>
 <p>即使禁止倒车，转弯时后部仍会扫过环境。数据被删除后，后续 footprint 检查无法发现这些障碍。</p>
-<h2 id="section-8">自过滤与任务过滤的区别</h2>
+<h3 id="section-11">自过滤与任务过滤的区别</h3>
 <p>车体自过滤依据机器人几何删除自身回波，应长期启用；任务级后方过滤删除整个空间半平面，只适合非常受限的临时策略。</p>
 <p>验证过滤是否生效，应比较过滤前后同一坐标系中后方点数，并确认 frame_id，而不是只看 RViz 画面似乎变空。</p>
-<h2 id="section-9">障碍日志</h2>
+<h2 id="section-12">四、证据链与回归</h2>
+<h3 id="section-13">障碍日志</h3>
 <p>日志至少输出障碍来源、最近碰撞路径索引、预测碰撞时间、footprint 与栅格交叠、等待持续时间和恢复原因。</p>
 <p>只有“有障碍”无法区分静态地图毛刺、实时点云鬼点、机器人自身回波或真实动态障碍。</p>
-<h2 id="section-10">回归场景</h2>
+<h3 id="section-14">回归场景</h3>
 <ol>
 <li>路径正前方动态障碍。</li>
 <li>弯道外侧障碍。</li>
@@ -49,7 +56,8 @@
 <li>静态地图孤立毛刺。</li>
 <li>障碍短暂闪烁。</li>
 <li>等待期间定位丢失或任务取消。</li>
-</ol></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+</ol>
+<p>每个场景应同步保存原始与过滤点云、障碍层与膨胀层、footprint、候选轨迹、碰撞索引、控制命令和实际速度，才能判断根因是感知误报、几何配置还是控制器预测错误。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
   
 </body>
 </html>

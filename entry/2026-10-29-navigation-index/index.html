@@ -3,30 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="按全局路径、局部控制、安全碰撞、精导航和任务恢复五层拆解机器人导航系统。">
-  <meta property="og:title" content="导航算法 · PDFstudent 知识库">
-  <meta property="og:description" content="按全局路径、局部控制、安全碰撞、精导航和任务恢复五层拆解机器人导航系统。">
+  <meta name="description" content="聚焦业务路线如何成为可执行路径，以及配置、生命周期和故障恢复如何保证任务连续。">
+  <meta property="og:title" content="路线规划与导航系统 · PDFstudent 知识库">
+  <meta property="og:description" content="聚焦业务路线如何成为可执行路径，以及配置、生命周期和故障恢复如何保证任务连续。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pdfstudent.github.io">
-  <title>导航算法 · PDFstudent 知识库</title>
+  <title>路线规划与导航系统 · PDFstudent 知识库</title>
   <link rel="stylesheet" href="/assets/site.css?v=a14d4b983aa5">
 </head>
 <body>
   <div class="shell"><header class="site-header">
     <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
     <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
-  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent current" href="/entry/2026-10-29-navigation-index/">导航算法</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">学习路径</a></li><li class="toc-level-2"><a href="#section-2">子专题</a></li><li class="toc-level-2"><a href="#section-3">关键依赖</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent current" href="/entry/2026-10-29-navigation-index/">导航算法</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">学习路径</a></li><li class="toc-level-2"><a href="#section-2">子专题</a></li><li class="toc-level-2"><a href="#section-3">关键依赖</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">导航算法 · 2026-10-29</p><h1>导航算法</h1><p class="article-summary">按全局路径、局部控制、安全碰撞、精导航和任务恢复五层拆解机器人导航系统。</p><div class="tags"><span class="tag">Nav2</span><span class="tag">路径规划</span><span class="tag">局部控制</span><span class="tag">状态机</span></div></header><div class="article-body"><h2 id="section-1">学习路径</h2>
-<p>先理解路径从哪里来，再比较控制器如何跟踪；随后学习碰撞与安全链，最后进入视觉精导航和任务状态机。</p>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent current" href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">专题边界</a></li><li class="toc-level-2"><a href="#section-2">子专题</a></li><li class="toc-level-2"><a href="#section-3">关键依赖</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent current" href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">专题边界</a></li><li class="toc-level-2"><a href="#section-2">子专题</a></li><li class="toc-level-2"><a href="#section-3">关键依赖</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">导航算法 · 2026-10-29</p><h1>路线规划与导航系统</h1><p class="article-summary">聚焦业务路线如何成为可执行路径，以及配置、生命周期和故障恢复如何保证任务连续。</p><div class="tags"><span class="tag">Nav2</span><span class="tag">路线规划</span><span class="tag">任务编排</span><span class="tag">Lifecycle</span></div></header><div class="article-body"><h2 id="section-1">专题边界</h2>
+<p>这一专业回答“走哪条路、任务如何组织、系统何时重规划或恢复”。速度如何生成、视觉如何精停以及怎样做碰撞扫掠，移到独立的“运动控制、精导航与安全”专业，避免规划层和执行层混在一起。</p>
 <h2 id="section-2">子专题</h2>
 <ol>
 <li><a href="https://pdfstudent.github.io/entry/2026-10-29-nav-global-planning/" rel="noreferrer">全局规划、指定路线与重规划策略</a>：普通目标与业务路线的语义差异。</li>
-<li><a href="https://pdfstudent.github.io/entry/2026-10-29-nav-local-controllers/" rel="noreferrer">RPP、MPPI 与全向底盘控制</a>：曲率控制、采样优化、评价项冲突和 Rotation Shim。</li>
-<li><a href="https://pdfstudent.github.io/entry/2026-10-29-nav-collision-safety/" rel="noreferrer">代价地图、碰撞检查与障碍等待</a>：静态校验、局部扫掠、后方过滤和恢复条件。</li>
-<li><a href="https://pdfstudent.github.io/entry/2026-10-29-nav-precision-docking/" rel="noreferrer">视觉精导航与横向微移</a>：捕获、对齐、接近、重对齐、闭环微移和停稳。</li>
 <li><a href="https://pdfstudent.github.io/entry/2026-10-29-nav-lifecycle-config/" rel="noreferrer">配置分层、生命周期与故障恢复</a>：配置生效链、仿真实车差异和异步恢复竞态。</li>
 </ol>
 <h2 id="section-3">关键依赖</h2>
-<p>控制器选择必须与任务语义、运动学模型、感知范围和安全策略一致。配置文件中的参数只有在正确节点、插件和话题链实际运行时才有意义。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+<p>路线资产、地图注册、行为树和任务状态机必须使用同一任务语义。配置文件中的参数只有在正确节点、插件和话题链实际运行时才有意义。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
   
 </body>
 </html>

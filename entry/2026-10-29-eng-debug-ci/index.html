@@ -15,31 +15,37 @@
   <div class="shell"><header class="site-header">
     <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
     <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
-  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">工程实践问题解决</a><ol><li><a aria-current="page" href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">五个定位坐标</a></li><li class="toc-level-2"><a href="#section-2">事实与推断分离</a></li><li class="toc-level-2"><a href="#section-3">时间线</a></li><li class="toc-level-2"><a href="#section-4">运行期与退出期错误</a></li><li class="toc-level-2"><a href="#section-5">CI 流水线身份</a></li><li class="toc-level-2"><a href="#section-6">提交关系</a></li><li class="toc-level-2"><a href="#section-7">CI 阶段</a></li><li class="toc-level-2"><a href="#section-8">旧构建缓存</a></li><li class="toc-level-2"><a href="#section-9">最小修复</a></li><li class="toc-level-2"><a href="#section-10">工作区纪律</a></li><li class="toc-level-2"><a href="#section-11">日志输出设计</a></li><li class="toc-level-2"><a href="#section-12">问题报告模板</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">工程实践问题解决</a><ol><li><a aria-current="page" href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">五个定位坐标</a></li><li class="toc-level-2"><a href="#section-2">事实与推断分离</a></li><li class="toc-level-2"><a href="#section-3">时间线</a></li><li class="toc-level-2"><a href="#section-4">运行期与退出期错误</a></li><li class="toc-level-2"><a href="#section-5">CI 流水线身份</a></li><li class="toc-level-2"><a href="#section-6">提交关系</a></li><li class="toc-level-2"><a href="#section-7">CI 阶段</a></li><li class="toc-level-2"><a href="#section-8">旧构建缓存</a></li><li class="toc-level-2"><a href="#section-9">最小修复</a></li><li class="toc-level-2"><a href="#section-10">工作区纪律</a></li><li class="toc-level-2"><a href="#section-11">日志输出设计</a></li><li class="toc-level-2"><a href="#section-12">问题报告模板</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">工程实践 · 2026-10-29</p><h1>日志时间线、版本确认与 CI 诊断</h1><p class="article-summary">用提交、实例、时间窗口和完整事件链避免分析错流水线、错日志或级联错误。</p><div class="tags"><span class="tag">日志分析</span><span class="tag">CI</span><span class="tag">Git</span><span class="tag">故障定位</span></div></header><div class="article-body"><h2 id="section-1">五个定位坐标</h2>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a aria-current="page" href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、先确定分析的是哪一次运行</a></li><li class="toc-level-3"><a href="#section-2">五个定位坐标</a></li><li class="toc-level-3"><a href="#section-3">事实与推断分离</a></li><li class="toc-level-3"><a href="#section-4">时间线</a></li><li class="toc-level-3"><a href="#section-5">运行期与退出期错误</a></li><li class="toc-level-2"><a href="#section-6">二、CI 沿提交关系和阶段定位</a></li><li class="toc-level-3"><a href="#section-7">流水线身份</a></li><li class="toc-level-3"><a href="#section-8">提交关系</a></li><li class="toc-level-3"><a href="#section-9">阶段定位</a></li><li class="toc-level-3"><a href="#section-10">旧构建缓存</a></li><li class="toc-level-2"><a href="#section-11">三、修复边界与工作区纪律</a></li><li class="toc-level-3"><a href="#section-12">最小修复</a></li><li class="toc-level-3"><a href="#section-13">工作区纪律</a></li><li class="toc-level-2"><a href="#section-14">四、让下一次故障更容易诊断</a></li><li class="toc-level-3"><a href="#section-15">日志输出设计</a></li><li class="toc-level-3"><a href="#section-16">问题报告模板</a></li><li class="toc-level-3"><a href="#section-17">结论可信度</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a aria-current="page" href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li></ol></nav><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">一、先确定分析的是哪一次运行</a></li><li class="toc-level-3"><a href="#section-2">五个定位坐标</a></li><li class="toc-level-3"><a href="#section-3">事实与推断分离</a></li><li class="toc-level-3"><a href="#section-4">时间线</a></li><li class="toc-level-3"><a href="#section-5">运行期与退出期错误</a></li><li class="toc-level-2"><a href="#section-6">二、CI 沿提交关系和阶段定位</a></li><li class="toc-level-3"><a href="#section-7">流水线身份</a></li><li class="toc-level-3"><a href="#section-8">提交关系</a></li><li class="toc-level-3"><a href="#section-9">阶段定位</a></li><li class="toc-level-3"><a href="#section-10">旧构建缓存</a></li><li class="toc-level-2"><a href="#section-11">三、修复边界与工作区纪律</a></li><li class="toc-level-3"><a href="#section-12">最小修复</a></li><li class="toc-level-3"><a href="#section-13">工作区纪律</a></li><li class="toc-level-2"><a href="#section-14">四、让下一次故障更容易诊断</a></li><li class="toc-level-3"><a href="#section-15">日志输出设计</a></li><li class="toc-level-3"><a href="#section-16">问题报告模板</a></li><li class="toc-level-3"><a href="#section-17">结论可信度</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">工程实践 · 2026-10-29</p><h1>日志时间线、版本确认与 CI 诊断</h1><p class="article-summary">用提交、实例、时间窗口和完整事件链避免分析错流水线、错日志或级联错误。</p><div class="tags"><span class="tag">日志分析</span><span class="tag">CI</span><span class="tag">Git</span><span class="tag">故障定位</span></div></header><div class="article-body"><h2 id="section-1">一、先确定分析的是哪一次运行</h2>
+<h3 id="section-2">五个定位坐标</h3>
 <p>诊断前固定代码提交、构建产物、运行实例、设备环境和故障时间。任一项不一致，都可能把别的故障当成当前原因。</p>
-<h2 id="section-2">事实与推断分离</h2>
+<p>建议给每次运行生成统一身份：<code>commit + artifact_id + device_id + start_time + task_id</code>。截图、日志、bag 和测试结果都引用同一身份，避免多设备与多次部署之间串线。</p>
+<h3 id="section-3">事实与推断分离</h3>
 <p>事实包括明确日志、进程状态、话题频率和文件校验；推断是对因果的解释。报告中应分别标记。</p>
-<h2 id="section-3">时间线</h2>
+<h3 id="section-4">时间线</h3>
 <p>把任务状态、定位状态、坐标变换、规划控制结果、生命周期事件和进程退出按统一时间排列。</p>
 <p>较晚的 ERROR 可能只是较早 WARN 的级联结果，日志级别不等于因果优先级。</p>
-<h2 id="section-4">运行期与退出期错误</h2>
+<p>时间线至少对齐任务、定位、TF、规划、控制、Lifecycle 和进程事件。优先寻找系统首次偏离健康状态的事件，再沿依赖图解释后续错误。</p>
+<h3 id="section-5">运行期与退出期错误</h3>
 <p>只在主动停止时出现的消息转换或资源销毁错误，可能是关闭竞态；正常运行中节点退出、内存异常或消息类型错误则必须修复。</p>
 <p>判断条件包括是否只在停止后出现、是否影响下次启动、是否生成崩溃文件和业务是否已经中断。</p>
-<h2 id="section-5">CI 流水线身份</h2>
+<h2 id="section-6">二、CI 沿提交关系和阶段定位</h2>
+<h3 id="section-7">流水线身份</h3>
 <p>先确认日志末尾的提交、分支和实际检出版本。并行旧分支缺少主分支修复，不代表最新代码再次失效。</p>
-<h2 id="section-6">提交关系</h2>
+<h3 id="section-8">提交关系</h3>
 <p>用提交图确认修复是否是当前提交祖先。不要根据相似标题推断代码已经包含。</p>
-<h2 id="section-7">CI 阶段</h2>
+<h3 id="section-9">阶段定位</h3>
 <p>区分依赖获取、工具链生成、配置、编译、链接、测试、打包和部署。最后一行错误常由更早阶段配置不一致造成。</p>
-<h2 id="section-8">旧构建缓存</h2>
+<h3 id="section-10">旧构建缓存</h3>
 <p>工具链、依赖版本或生成目录变化后，旧缓存可能继续引用原路径。清理必须精确针对构建目录，不能破坏用户源码或整个工作区。</p>
-<h2 id="section-9">最小修复</h2>
+<h2 id="section-11">三、修复边界与工作区纪律</h2>
+<h3 id="section-12">最小修复</h3>
 <p>先只修复已证明的引入差异，其他重构暂时撤开。这样才能判断故障是否由特定提交引入。</p>
-<h2 id="section-10">工作区纪律</h2>
+<h3 id="section-13">工作区纪律</h3>
 <p>区分用户原有修改、当前任务修改和生成文件。只暂存本次范围，提交前运行差异检查和针对性测试。</p>
-<h2 id="section-11">日志输出设计</h2>
+<h2 id="section-14">四、让下一次故障更容易诊断</h2>
+<h3 id="section-15">日志输出设计</h3>
 <p>日志应突出状态进入退出、关键门限、候选选择和最终原因。高频循环不要持续打印大块性能详情，可按周期聚合统计。</p>
-<h2 id="section-12">问题报告模板</h2>
+<h3 id="section-16">问题报告模板</h3>
 <ol>
 <li>期望与实际行为。</li>
 <li>提交和构建产物。</li>
@@ -49,7 +55,9 @@
 <li>首个异常与后续级联。</li>
 <li>已排除假设。</li>
 <li>修改与回滚边界。</li>
-</ol></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+</ol>
+<h3 id="section-17">结论可信度</h3>
+<p>最终结论标为“已验证”“高概率推断”或“待验证”。已验证要有直接证据或可复现实验；推断写明支持与反证；待验证给出下一条最小实验，避免把一次性猜测固化成长期知识。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
   
 </body>
 </html>
