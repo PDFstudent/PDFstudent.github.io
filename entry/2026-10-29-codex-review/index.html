@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="将 FAST-LIVO 的连续追问整理为两篇相互衔接的技术文章，补齐共同状态、几何与光度残差、地图点来源和历史观测选择。">
+  <meta property="og:title" content="2026-10-29 技术增量：从融合状态到视觉地图 · PDFstudent 知识库">
+  <meta property="og:description" content="将 FAST-LIVO 的连续追问整理为两篇相互衔接的技术文章，补齐共同状态、几何与光度残差、地图点来源和历史观测选择。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>2026-10-29 技术增量：从融合状态到视觉地图 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">本次更新解决什么问题</a></li><li class="toc-level-2"><a href="#section-2">两条相互衔接的解释线</a><ol><li class="toc-level-3"><a href="#section-3">从 IMU 预测到共同状态更新</a></li><li class="toc-level-3"><a href="#section-4">从一个历史地图点到当前图像约束</a></li></ol></li><li class="toc-level-2"><a href="#section-5">已核对与仍需验证的边界</a></li><li class="toc-level-2"><a href="#section-6">阅读入口与覆盖说明</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">本次更新解决什么问题</a></li><li class="toc-level-2"><a href="#section-2">两条相互衔接的解释线</a><ol><li class="toc-level-3"><a href="#section-3">从 IMU 预测到共同状态更新</a></li><li class="toc-level-3"><a href="#section-4">从一个历史地图点到当前图像约束</a></li></ol></li><li class="toc-level-2"><a href="#section-5">已核对与仍需验证的边界</a></li><li class="toc-level-2"><a href="#section-6">阅读入口与覆盖说明</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">每日复盘 · 2026-10-29</p><h1>2026-10-29 技术增量：从融合状态到视觉地图</h1><p class="article-summary">将 FAST-LIVO 的连续追问整理为两篇相互衔接的技术文章，补齐共同状态、几何与光度残差、地图点来源和历史观测选择。</p><div class="tags"><span class="tag">每日复盘</span><span class="tag">SLAM</span><span class="tag">FAST-LIVO</span><span class="tag">视觉地图</span></div></header><div class="article-body"><h2 id="section-1">本次更新解决什么问题</h2>
+<p>这是当天手动触发的增量记录，不是完整自然日的最终统计。本次完整读取一个新增技术任务中的 9 个问题及其回答，按问题依赖拆成两篇文章，补充到 SLAM 专题。两篇都包含分层侧栏目录、公式符号解释、教学示例、代码核对位置及适用边界。</p>
+<h2 id="section-2">两条相互衔接的解释线</h2>
+<h3 id="section-3">从 IMU 预测到共同状态更新</h3>
+<p><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-fast-livo-fusion/" rel="noreferrer">FAST-LIVO 怎样用激光和图像共同修正 IMU 预测</a>先区分版本，再解释状态传播、协方差、去畸变、点到平面残差和光度残差，最后用局部加权求解说明“紧耦合”发生在哪里。</p>
+<p>其中容易混淆的关系已明确：雷达和图像共享状态，但各有自己的观测模型；多次迭代不是多次独立测量；不同频率的观测更新不代表可以忽略采集时间同步。</p>
+<h3 id="section-4">从一个历史地图点到当前图像约束</h3>
+<p><a href="https://pdfstudent.github.io/entry/2026-10-29-slam-fast-livo-visual-map/" rel="noreferrer">FAST-LIVO 的地图点和历史图像块怎样约束当前位姿</a>沿一个地图点的生命周期解释三维位置、历史观测、候选查询、参考选择、图像变形和残差求导。</p>
+<p>当前雷达不必重复命中同一个历史点，因为几何分支对齐局部表面，视觉分支投影已有三维点；但原版仍利用最新扫描选择视觉子地图。参考图像按观察方向选择，当前位姿由多点光度残差求解，不能直接复制历史位姿。</p>
+<h2 id="section-5">已核对与仍需验证的边界</h2>
+<p>原版论文与公开代码用于核对参考观测选择、图像块变形及子地图查询关系。具体实现线索与来源放在各篇对应段落，避免把算法概念当成未经检查的部署事实。</p>
+<p>本次没有新增实机精度、延迟或恢复能力测试。地图重载后是否保留完整视觉参考、失去传感器输入后的行为，以及特定环境的融合收益，都仍需要明确版本与数据验证。</p>
+<h2 id="section-6">阅读入口与覆盖说明</h2>
+<p>两篇文章已纳入 <a href="https://pdfstudent.github.io/entry/2026-10-29-slam-index/" rel="noreferrer">SLAM 专题</a>和<a href="https://pdfstudent.github.io/entry/2026-10-29-technical-stack-index/" rel="noreferrer">问题索引</a>，可直接从疑问进入对应解释。</p>
+<p>本次范围限于当前可访问来源中的新增技术讨论；未连接设备及不可取得的历史原文不计为已覆盖。公开内容只包含可复用技术知识，不包含个人规划、私人日程、完整聊天原文或访问配置。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>

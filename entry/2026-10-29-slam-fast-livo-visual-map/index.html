@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="跟踪一个激光地图点从建立到视觉对齐的全过程，解释参考块选择、几何变形、光度求解及当前雷达不必重扫同一点的原因。">
+  <meta property="og:title" content="FAST-LIVO 的地图点和历史图像块怎样约束当前位姿 · PDFstudent 知识库">
+  <meta property="og:description" content="跟踪一个激光地图点从建立到视觉对齐的全过程，解释参考块选择、几何变形、光度求解及当前雷达不必重扫同一点的原因。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>FAST-LIVO 的地图点和历史图像块怎样约束当前位姿 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">1. P 是怎样建立的：先有三维测量，再附加图像观测</a><ol><li class="toc-level-3"><a href="#section-2">1.1 激光点怎样成为世界坐标系中的地图点</a></li><li class="toc-level-3"><a href="#section-3">1.2 几何地图点与视觉地图点保存的信息不同</a></li></ol></li><li class="toc-level-2"><a href="#section-4">2. 新图像到来时，系统怎样找到可用的 P</a><ol><li class="toc-level-3"><a href="#section-5">2.1 从预测位姿出发，而不是全图盲搜</a></li><li class="toc-level-3"><a href="#section-6">2.2 原版实现仍利用最新激光缩小候选范围</a></li><li class="toc-level-3"><a href="#section-7">2.3 投影在画面内不代表当前仍能看到它</a></li></ol></li><li class="toc-level-2"><a href="#section-8">3. 为什么参考图像不是固定的前一帧</a><ol><li class="toc-level-3"><a href="#section-9">3.1 用一条时间线理解 frame-to-map</a></li><li class="toc-level-3"><a href="#section-10">3.2 参考观测怎样选择：比较观察方向</a></li><li class="toc-level-3"><a href="#section-11">3.3 历史位姿不是答案库</a></li></ol></li><li class="toc-level-2"><a href="#section-12">4. 图像块怎样产生连续的位姿修正量</a><ol><li class="toc-level-3"><a href="#section-13">4.1 先处理视角变形，再比较亮度</a></li><li class="toc-level-3"><a href="#section-14">4.2 亮度差怎样连接到相机运动</a></li><li class="toc-level-3"><a href="#section-15">4.3 为什么需要很多点和 IMU 先验</a></li></ol></li><li class="toc-level-2"><a href="#section-16">5. 当前雷达没有再次扫到 P，为什么仍然能工作</a><ol><li class="toc-level-3"><a href="#section-17">5.1 雷达对齐表面，视觉利用历史点的投影</a></li><li class="toc-level-3"><a href="#section-18">5.2 不重扫同一点，与完全失去地图覆盖并不一样</a></li></ol></li><li class="toc-level-2"><a href="#section-19">6. 阅读代码和复盘时，怎样核对理解</a><ol><li class="toc-level-3"><a href="#section-20">6.1 沿数据依赖找证据</a></li><li class="toc-level-3"><a href="#section-21">6.2 哪些结论尚需实测</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-slam-index/">SLAM 技术</a><ol><li><a href="/entry/2026-10-29-slam-pointcloud-diagnostics/">点云链路与高反光异常诊断</a></li><li><a href="/entry/2026-10-29-slam-mapping-keyframes/">Fast-LIO、关键帧与增量建图</a></li><li><a href="/entry/2026-10-29-slam-fast-livo-fusion/">FAST-LIVO 怎样用激光和图像共同修正 IMU 预测</a></li><li><a aria-current="page" href="/entry/2026-10-29-slam-fast-livo-visual-map/">FAST-LIVO 的地图点和历史图像块怎样约束当前位姿</a></li><li><a href="/entry/2026-10-29-slam-relocalization-fusion/">全局重定位与反光地标校验</a></li><li><a href="/entry/2026-10-29-slam-visual-pose/">平面视觉标志姿态与双解消歧</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">1. P 是怎样建立的：先有三维测量，再附加图像观测</a><ol><li class="toc-level-3"><a href="#section-2">1.1 激光点怎样成为世界坐标系中的地图点</a></li><li class="toc-level-3"><a href="#section-3">1.2 几何地图点与视觉地图点保存的信息不同</a></li></ol></li><li class="toc-level-2"><a href="#section-4">2. 新图像到来时，系统怎样找到可用的 P</a><ol><li class="toc-level-3"><a href="#section-5">2.1 从预测位姿出发，而不是全图盲搜</a></li><li class="toc-level-3"><a href="#section-6">2.2 原版实现仍利用最新激光缩小候选范围</a></li><li class="toc-level-3"><a href="#section-7">2.3 投影在画面内不代表当前仍能看到它</a></li></ol></li><li class="toc-level-2"><a href="#section-8">3. 为什么参考图像不是固定的前一帧</a><ol><li class="toc-level-3"><a href="#section-9">3.1 用一条时间线理解 frame-to-map</a></li><li class="toc-level-3"><a href="#section-10">3.2 参考观测怎样选择：比较观察方向</a></li><li class="toc-level-3"><a href="#section-11">3.3 历史位姿不是答案库</a></li></ol></li><li class="toc-level-2"><a href="#section-12">4. 图像块怎样产生连续的位姿修正量</a><ol><li class="toc-level-3"><a href="#section-13">4.1 先处理视角变形，再比较亮度</a></li><li class="toc-level-3"><a href="#section-14">4.2 亮度差怎样连接到相机运动</a></li><li class="toc-level-3"><a href="#section-15">4.3 为什么需要很多点和 IMU 先验</a></li></ol></li><li class="toc-level-2"><a href="#section-16">5. 当前雷达没有再次扫到 P，为什么仍然能工作</a><ol><li class="toc-level-3"><a href="#section-17">5.1 雷达对齐表面，视觉利用历史点的投影</a></li><li class="toc-level-3"><a href="#section-18">5.2 不重扫同一点，与完全失去地图覆盖并不一样</a></li></ol></li><li class="toc-level-2"><a href="#section-19">6. 阅读代码和复盘时，怎样核对理解</a><ol><li class="toc-level-3"><a href="#section-20">6.1 沿数据依赖找证据</a></li><li class="toc-level-3"><a href="#section-21">6.2 哪些结论尚需实测</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-slam-index/">SLAM 技术</a><ol><li><a href="/entry/2026-10-29-slam-pointcloud-diagnostics/">点云链路与高反光异常诊断</a></li><li><a href="/entry/2026-10-29-slam-mapping-keyframes/">Fast-LIO、关键帧与增量建图</a></li><li><a href="/entry/2026-10-29-slam-fast-livo-fusion/">FAST-LIVO 怎样用激光和图像共同修正 IMU 预测</a></li><li><a aria-current="page" href="/entry/2026-10-29-slam-fast-livo-visual-map/">FAST-LIVO 的地图点和历史图像块怎样约束当前位姿</a></li><li><a href="/entry/2026-10-29-slam-relocalization-fusion/">全局重定位与反光地标校验</a></li><li><a href="/entry/2026-10-29-slam-visual-pose/">平面视觉标志姿态与双解消歧</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">SLAM技术 · 2026-10-29</p><h1>FAST-LIVO 的地图点和历史图像块怎样约束当前位姿</h1><p class="article-summary">跟踪一个激光地图点从建立到视觉对齐的全过程，解释参考块选择、几何变形、光度求解及当前雷达不必重扫同一点的原因。</p><div class="tags"><span class="tag">FAST-LIVO</span><span class="tag">视觉地图</span><span class="tag">光度残差</span><span class="tag">参考图像块</span><span class="tag">Frame-to-map</span></div></header><div class="article-body"><p>“把三维点 P 投影到当前图像，再比较图像块”这句话跳过了最关键的一串问题：P 从哪里来？参考图像是上一帧还是建图时保存的？保存的历史位姿是否就是真值？雷达这一次没有扫到 P，比较还能成立吗？</p>
+<p>下面跟踪一个地图点的生命周期，逐层回答这些问题。本文针对原版 FAST-LIVO；共同状态与滤波更新见<a href="https://pdfstudent.github.io/entry/2026-10-29-slam-fast-livo-fusion/" rel="noreferrer">三传感器融合机制</a>。先记住主线：历史激光提供三维位置，历史相机提供参考外观，当前相机提供新的亮度观测，当前状态通过投影把两者联系起来。</p>
+<h2 id="section-1">1. P 是怎样建立的：先有三维测量，再附加图像观测</h2>
+<h3 id="section-2">1.1 激光点怎样成为世界坐标系中的地图点</h3>
+<p>设激光在某次扫描中测到物体表面点 p_L。经运动补偿后，利用外参和当时估计的位姿把它放到世界坐标系：</p>
+<pre><code class="language-text">P_G = T_GI T_IL p_L
+
+T_AB 的含义：从 B 坐标系变换到 A 坐标系
+T_IL：激光到 IMU 的外参
+T_GI：当时 IMU 在世界坐标系中的估计位姿</code></pre>
+<p>P 可以是墙面、箱体或地面上的一个采样位置，并不要求是图像角点。它的深度来自激光测量，不必依赖当前两幅相机图像做三角化。但激光测量、外参和位姿都有误差，因此“有三维坐标”不等于“坐标绝对准确”。</p>
+<h3 id="section-3">1.2 几何地图点与视觉地图点保存的信息不同</h3>
+<p>几何地图用于邻域查询和局部表面拟合；视觉地图还要能回答“从哪个视角看这个点，附近图像是什么样”。不是每个激光点都适合承担后一个任务。投影不在图像内、纹理太弱、位于不稳定的深度边缘等点，不能仅因有深度就变成可靠视觉约束。</p>
+<p>下面是便于理解的数据关系示意，不是序列化文件格式：</p>
+<pre><code class="language-text">地图点 P
+├── 世界坐标 P_G
+├── 历史观测 0
+│   ├── 参考像素位置、图像块或其提取信息
+│   ├── 图像金字塔信息
+│   └── 该次观察的相机位姿估计
+└── 历史观测 1、2、……
+    └── 其他合适观察方向下的参考信息</code></pre>
+<p>历史位姿用于理解拍摄方向和视角变化；图像信息用于后续比较外观。这也说明一份只有 XYZ 或 XYZRGB 的点云文件，并不会自动包含重建上述参考关系所需的全部信息。彩色建图结果和可恢复的视觉跟踪地图，需要分别检查保存接口。</p>
+<h2 id="section-4">2. 新图像到来时，系统怎样找到可用的 P</h2>
+<h3 id="section-5">2.1 从预测位姿出发，而不是全图盲搜</h3>
+<p>IMU 传播先给出相机大致的位置和朝向。在这个预测附近，从地图取出可能可见的候选点，检查它们能否投影到当前图像。对世界系点 P_G：</p>
+<pre><code class="language-text">P_C(x) = T_IC⁻¹ T_GI(x)⁻¹ P_G
+u(x) = π(P_C(x))
+
+基本投影条件：Z_C &gt; 0，且图像块完整落在有效图像范围内</code></pre>
+<p>T_IC 是相机到 IMU 的外参，π 是标定后的投影模型。图像块需要边界余量，只有中心在画面内还不够。预测偏差过大时，真正的纹理可能远离初始投影，局部直接对齐就可能落到错误区域或无法收敛。</p>
+<h3 id="section-6">2.2 原版实现仍利用最新激光缩小候选范围</h3>
+<p>一个容易被概念图掩盖的工程细节是：原版方法利用最近扫描涉及的体素查询视觉地图，随后进行视场和遮挡等筛选。因此，“当前雷达不必再次扫中完全相同的 P”成立，但不能据此推导“视觉分支从此完全不需要新的雷达数据”。候选点获取与单个残差的构造，是不同层次。<a href="https://arxiv.org/html/2203.00893v1#S5.SS2.SSS2" rel="noreferrer">原论文视觉子地图部分</a></p>
+<h3 id="section-7">2.3 投影在画面内不代表当前仍能看到它</h3>
+<p>假设地图点在墙上，现在一辆车停在相机与墙之间。墙点依旧能数学投影到画面内，但那个像素实际上属于车辆。若继续把它与墙面参考块比较，就会给滤波器错误约束。</p>
+<p>因此还要检查深度关系、遮挡、深度不连续以及外观残差。在被检查的公开代码中，参考观测选择之前有深度检查，之后还有图像块误差筛选。具体阈值属于实现配置，不能脱离传感器和版本泛化为通用标准。<a href="https://github.com/hku-mars/FAST-LIVO/blob/main/src/lidar_selection.cpp" rel="noreferrer">子地图选择代码</a></p>
+<h2 id="section-8">3. 为什么参考图像不是固定的前一帧</h2>
+<h3 id="section-9">3.1 用一条时间线理解 frame-to-map</h3>
+<p>以下时间线是教学示例，观测是否加入地图应以实际更新条件为准。</p>
+<div class="table-scroll" role="region" aria-label="对照表" tabindex="0"><table><thead><tr><th scope="col">时刻</th><th scope="col">地图里有什么</th><th scope="col">当前怎样比较</th></tr></thead><tbody><tr><td>t₀</td><td>建立 P，并保存正面观察 Q₀</td><td>为后续图像提供初始参考</td></tr><tr><td>t₁</td><td>P 仍在地图中，满足条件时可加入侧面观察 Q₁</td><td>当前图像与已有合适参考比较</td></tr><tr><td>t₂</td><td>P 关联 Q₀、Q₁ 等历史观测</td><td>若当前接近正面，可再次选 Q₀</td></tr></tbody></table></div>
+<p>所以“历史参考”可以来自初建地图时，也可以来自后续观察。关键是它属于这个地图点的参考集合，不是根据时间固定取上一帧。frame-to-map 表达当前图像直接对齐地图参考；它本身不保证地图没有累积误差，也不能据此宣称消除了漂移。</p>
+<h3 id="section-10">3.2 参考观测怎样选择：比较观察方向</h3>
+<p>设当前预测相机中心为 c，历史观测 j 的相机中心为 c_j。统一采用从地图点指向相机的单位向量：</p>
+<pre><code class="language-text">d_current = (c − P_G) / ‖c − P_G‖
+d_j       = (c_j − P_G) / ‖c_j − P_G‖
+
+选择使 d_currentᵀ d_j 最大的有效历史观测</code></pre>
+<p>单位向量点积越大，观察方向越接近。直观上，正面看一块纹理时，正面参考一般比极斜的侧面参考更合适。在原版公开实现中，<code>Point::getCloseViewObs</code> 使用这种方向相似性，调用方再使用所选参考进行后续处理。它并非先用所有历史块分别求完整位姿、再选最小光度误差的那个结果。<a href="https://github.com/hku-mars/FAST-LIVO/blob/main/src/point.cpp" rel="noreferrer">参考观测选择实现</a></p>
+<h3 id="section-11">3.3 历史位姿不是答案库</h3>
+<p>历史相机位姿只是当时的估计。即使当前视角与某个历史视角很接近，当前相机也可能位于不同距离或有小角度偏差。直接把历史位姿复制过来，会丢掉当前观测包含的连续运动信息。</p>
+<p>因此参考选择解决的是“选哪份外观作比较”；位姿求解解决的是“怎样改变当前状态，使许多比较同时更一致”。这两步不能合并成“找到最像的历史图像块，就得到当前位姿”。历史误差也可能进入地图和参考关系，在当前对齐中把地图点暂时视为固定，并不会使它变成无误差真值。</p>
+<h2 id="section-12">4. 图像块怎样产生连续的位姿修正量</h2>
+<h3 id="section-13">4.1 先处理视角变形，再比较亮度</h3>
+<p>同一小块墙面，正看和斜看时，像素形状与尺度不同。直接把两个固定正方形块逐元素相减，会把几何变形误认为运动估计错误。原版代码通过局部仿射变形及重采样准备参考图像块，可在 <code>getWarpMatrixAffine</code> 和 <code>warpAffine</code> 的调用处核对。<a href="https://github.com/hku-mars/FAST-LIVO/blob/main/src/lidar_selection.cpp" rel="noreferrer">参考块变形实现</a></p>
+<p>这里 A 是像素坐标之间的局部二维变换，不能把“变形参考块”理解为拿一个 2×2 矩阵直接乘整块灰度数组。更清楚的示意写法是：</p>
+<pre><code class="language-text">Q_ref_warped = warp(参考图像、参考像素位置、A、金字塔层级)
+r_i,δ(x) = I_current(u_i(x) + δ) − Q_ref_warped(δ)</code></pre>
+<p>δ 是块内二维像素偏移；i 表示第 i 个地图点。当前图像在非整数像素位置通常需要插值。金字塔由粗到细处理较大像素偏移，但并不意味着初值可以任意错误，也不能靠图像变形修复遮挡或严重光照变化。</p>
+<h3 id="section-14">4.2 亮度差怎样连接到相机运动</h3>
+<p>在局部线性化中，暂时固定准备好的参考块及其变形，对当前采样项有如下链式关系：</p>
+<pre><code class="language-text">∂r / ∂δx = (∂I / ∂u) (∂u / ∂P_C) (∂P_C / ∂δx)
+              图像梯度     投影导数       状态扰动影响</code></pre>
+<p>图像梯度回答像素移动时亮度怎样变化；投影导数回答相机系三维位置变化怎样移动像素；最后一项把位置、姿态扰动连接到相机系点坐标。实际迭代中还需遵循实现的变形、层级和状态更新方式，不能把这条简化链式式子当成全部代码。</p>
+<p>一个数值例子可以帮助理解尺度：假设无畸变针孔相机焦距 f_x = 400 像素，地图点距相机约 Z = 4 m，忽略旋转和深度变化。相机向右平移 0.01 m 时，静止点的投影大约向左移动 400 × 0.01 / 4 = 1 像素。因而像素级偏移可以对应厘米级平移，但这一关系依赖深度和运动方向，不能套用为固定换算率。</p>
+<h3 id="section-15">4.3 为什么需要很多点和 IMU 先验</h3>
+<p>一条黑白边缘对垂直边缘方向的像素位移敏感，对沿边缘滑动可能几乎不敏感。一个块也难以独立区分相机平移和旋转。空间分布、深度和梯度方向不同的多个点，才能共同提供更充分的约束。</p>
+<p>滤波器将这些有效光度残差与预测先验结合，求解同一个状态扰动，再更新当前位姿。这是连续的局部求解，而不是给历史图像块排序后选择某个离散历史姿态。相应加权目标和协方差含义见<a href="https://pdfstudent.github.io/entry/2026-10-29-slam-fast-livo-fusion/" rel="noreferrer">融合机制第 5 节</a>。</p>
+<h2 id="section-16">5. 当前雷达没有再次扫到 P，为什么仍然能工作</h2>
+<h3 id="section-17">5.1 雷达对齐表面，视觉利用历史点的投影</h3>
+<p>机器人位置变化、光束角度变化后，新扫描通常落在表面的其他采样位置。假设墙上的历史点为 P，当前点为 p₁、p₂；它们不重合仍然可以来自同一面墙。</p>
+<pre><code class="language-text">几何约束：当前点 p₁、p₂ → 地图中的局部墙面
+视觉约束：历史地图点 P → 当前图像中的纹理投影
+共同变量：当前机器人状态</code></pre>
+<p>对激光而言，新点只需与局部几何表面相容；对视觉而言，P 的三维坐标已经存在，只要对应表面当前可见、参考外观仍适用，就能建立图像约束。两类残差没有逐点相等的要求。</p>
+<h3 id="section-18">5.2 不重扫同一点，与完全失去地图覆盖并不一样</h3>
+<p>若 P 被遮挡、出了视野、参考角度不合适、纹理消失或候选查询没有纳入它，这个点就不能继续提供可靠约束。又因为原版候选子地图仍利用最新扫描，持续缺少有效激光、视场缺少重叠等情况，要单独验证实际行为。</p>
+<p>因此能够成立的结论是：光束不必精确重访历史坐标。不能从中继续推出：随意断开雷达后仍能无限期可靠定位，或者只加载一份普通点云就能获得同样的视觉能力。</p>
+<h2 id="section-19">6. 阅读代码和复盘时，怎样核对理解</h2>
+<h3 id="section-20">6.1 沿数据依赖找证据</h3>
+<div class="table-scroll" role="region" aria-label="对照表" tabindex="0"><table><thead><tr><th scope="col">要核对的问题</th><th scope="col">可追踪的位置</th><th scope="col">需要确认的关系</th></tr></thead><tbody><tr><td>三维点与历史观测怎样关联</td><td><code>point.cpp</code> 及对应数据结构</td><td>点坐标、观测集合、历史相机位姿</td></tr><tr><td>参考是不是永远上一帧</td><td><code>Point::getCloseViewObs</code></td><td>选择依据是历史观察方向</td></tr><tr><td>候选点为什么被丢弃</td><td><code>lidar_selection.cpp</code></td><td>视场、深度关系、参考有效性和块误差</td></tr><tr><td>A 到底变换什么</td><td><code>getWarpMatrixAffine</code>、<code>warpAffine</code></td><td>像素坐标及参考图像的重采样</td></tr><tr><td>修正量来自哪里</td><td>光度残差及状态更新链</td><td>当前投影随状态改变，多点共同参与</td></tr></tbody></table></div>
+<p>本次核对的是公开原版代码中的上述关键关系，未将某个阈值或默认块大小推广为所有版本的固定规格。复现实验时应记录所使用的提交和配置。</p>
+<h3 id="section-21">6.2 哪些结论尚需实测</h3>
+<p>图像块数量多少合适、遮挡筛选是否足够、特定运动下能否保持跟踪、存图重载后能否恢复参考信息，都需要实际版本和数据验证。本次没有执行这些实验。</p>
+<p>这套机制首先解决连续里程计中的局部对齐。若初始位姿完全未知，或机器人被移动到远离预测的位置，寻找全局候选属于另一个问题，应结合<a href="https://pdfstudent.github.io/entry/2026-10-29-slam-relocalization-fusion/" rel="noreferrer">全局重定位专题</a>分析，不能把“地图里有历史图像”直接等同于具备完整重定位能力。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>

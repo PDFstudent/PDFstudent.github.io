@@ -60,6 +60,6 @@ softmax(QKᵀ / sqrt(d_k)): 3×3
 <h3 id="section-12">预测四步不等于开环执行四步</h3>
 <p>可以预测四步，只执行第一步，再根据新观察重算。执行更长片段能降低推理负担，但要处理轨迹有效期、时间对齐和环境变化。所有点相对当前机器人、逐点增量、冻结局部坐标系这三种表示也不能混用。</p>
 <p>读代码时沿“查询如何创建 → 掩码允许读取什么 → 取哪个隐藏状态 → 动作头形状 → 标签定义 → 实际执行几步”查一遍，才能完整回答为什么加查询、固定查询如何变化，以及哪些输出真的会被执行。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
-  
+
 </body>
 </html>

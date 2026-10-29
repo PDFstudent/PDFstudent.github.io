@@ -61,6 +61,6 @@
 <p>部署失败时保留原正式目录，不做半覆盖。空间不足先报告可清理对象，由维护者确认后再删除旧备份。</p>
 <div class="table-scroll" role="region" aria-label="对照表" tabindex="0"><table><thead><tr><th scope="col">检查项</th><th scope="col">必须记录的内容</th></tr></thead><tbody><tr><td>构建身份</td><td>提交、编译器、sysroot、依赖锁、目标架构</td></tr><tr><td>产物类型</td><td>SDK、应用 install 或完整集成包</td></tr><tr><td>空间峰值</td><td>压缩包、临时解压、新旧版本、备份、日志余量</td></tr><tr><td>激活方式</td><td>版本目录、原子指针、健康检查</td></tr><tr><td>完整性</td><td>文件哈希、包索引、资源发现、动态库和环境前缀</td></tr><tr><td>回滚</td><td>旧版本身份、切换步骤和验证结果</td></tr></tbody></table></div>
 <p>原子部署可抽象为 <code>STAGED→VERIFIED→ACTIVATED→HEALTHY</code>。任何阶段失败都保留旧版本；激活只切换版本指针，回滚则指回旧版本，避免再次复制整棵运行目录。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
-  
+
 </body>
 </html>
