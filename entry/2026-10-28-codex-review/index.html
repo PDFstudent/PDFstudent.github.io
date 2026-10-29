@@ -17,7 +17,7 @@
     <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
   </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">今日概览</a></li><li class="toc-level-2"><a href="#section-2">核心知识与依据</a><ol><li class="toc-level-3"><a href="#section-3">Transformer 输出查询</a></li><li class="toc-level-3"><a href="#section-4">视觉语言动作模型</a></li><li class="toc-level-3"><a href="#section-5">DAgger 数据闭环</a></li><li class="toc-level-3"><a href="#section-6">人形机器人 MPC 与 WBC</a></li></ol></li><li class="toc-level-2"><a href="#section-7">项目进展</a></li><li class="toc-level-2"><a href="#section-8">今日决策</a></li><li class="toc-level-2"><a href="#section-9">未解决问题</a></li><li class="toc-level-2"><a href="#section-10">长期记忆</a></li><li class="toc-level-2"><a href="#section-11">覆盖与省略说明</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">今日概览</a></li><li class="toc-level-2"><a href="#section-2">核心知识与依据</a><ol><li class="toc-level-3"><a href="#section-3">Transformer 输出查询</a></li><li class="toc-level-3"><a href="#section-4">视觉语言动作模型</a></li><li class="toc-level-3"><a href="#section-5">DAgger 数据闭环</a></li><li class="toc-level-3"><a href="#section-6">人形机器人 MPC 与 WBC</a></li></ol></li><li class="toc-level-2"><a href="#section-7">项目进展</a></li><li class="toc-level-2"><a href="#section-8">今日决策</a></li><li class="toc-level-2"><a href="#section-9">未解决问题</a></li><li class="toc-level-2"><a href="#section-10">长期记忆</a></li><li class="toc-level-2"><a href="#section-11">覆盖与省略说明</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">每日复盘 · 2026-10-28</p><h1>2026-10-28 Codex 每日复盘</h1><p class="article-summary">今日围绕个人知识库、Transformer 输出查询、视觉语言动作模型，以及人形机器人 MPC 与 WBC 展开系统学习与工程落地。</p><div class="tags"><span class="tag">每日复盘</span><span class="tag">Transformer</span><span class="tag">VLA</span><span class="tag">机器人控制</span></div></header><div class="article-body"><h2 id="section-1">今日概览</h2>
 <p>今天共有 4 个实际更新且包含实质内容的任务，形成两条主线：一条是把多设备、多窗口对话沉淀为可持续维护的知识库；另一条是从 Transformer 基础机制出发，继续理解视觉语言动作模型和人形机器人运动控制。</p>
-<p>知识库已经完成首次历史全量导入，并切换到“私有源资料加公开脱敏页面”的双仓库结构。技术学习方面，输出查询、动作轨迹预测、DAgger 数据闭环、双系统视觉语言导航，以及 MPC 与 WBC 的上下层关系已经连成一套较完整的认知框架。</p>
+<p>知识库已经完成首批可访问来源的整理，并切换到“私有源资料加公开脱敏页面”的双仓库结构。这不等于全部设备的历史均已取得。技术学习方面，输出查询、动作轨迹预测、DAgger 数据闭环、双系统视觉语言导航，以及 MPC 与 WBC 的上下层关系形成了相互关联的知识主题。</p>
 <h2 id="section-2">核心知识与依据</h2>
 <h3 id="section-3">Transformer 输出查询</h3>
 <p>标准 Transformer 主干通常保持查询序列长度不变。并行预测多个动作时，为每个结果准备一个查询槽位，可以让每个位置独立读取图像、语言和历史状态。</p>
@@ -32,13 +32,13 @@
 <p>MPC 使用相对简化的模型预测未来质心、躯干和接触力，负责“看得远”；WBC 使用完整刚体动力学，以更高频率协调支撑脚、摆动脚和全身关节，负责“做得准”。二者之间还需要步态与接触计划，上游导航只提供目标速度或路径。</p>
 <p>这一架构的难点不只在优化器，而在浮动基座、接触切换、摩擦约束、状态估计、模型误差和执行器带宽的一致性。</p>
 <h2 id="section-7">项目进展</h2>
-<ul><li>完成当前账号可访问的 47 个历史会话的首次全量整理。</li>
+<ul><li>建立首批 47 个历史来源的采集清单，其中 2 个仅有摘要；未取得来源仍待补齐。</li>
 <li>建立历史总览、导航控制、感知定位、具身智能和工程实践专题文章。</li>
 <li>私有仓库继续保存 Markdown 源资料、生成脚本和安全检查规则。</li>
 <li>公开仓库只保存经过脱敏检查的静态网页。</li>
 <li>GitHub Pages 已作为唯一持续更新的网站，旧的实验性托管链路不再参与日常发布。</li></ul>
 <h2 id="section-8">今日决策</h2>
-<ul><li>知识库采用“首次全量导入，此后每日增量维护”。</li>
+<ul><li>知识库采用“已取得来源先整理，每日增量与历史缺口补齐并行”。</li>
 <li>公开页面不设置登录，接受网页公开这一前提，但只发布最少必要的脱敏知识。</li>
 <li>私有源仓库保留，不能用生成后的公开网页仓库替代。</li></ul>
 <h2 id="section-9">未解决问题</h2>
