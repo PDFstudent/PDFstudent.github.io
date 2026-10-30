@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="从“专项数据是否足以区分训练阶段”这一追问出发，用条件概率、监督掩码和代码任务解释中期训练与 SFT 的关系。">
+  <meta property="og:title" content="Mid-training 与 SFT：阶段名称和训练方法为何会重叠 · PDFstudent 知识库">
+  <meta property="og:description" content="从“专项数据是否足以区分训练阶段”这一追问出发，用条件概率、监督掩码和代码任务解释中期训练与 SFT 的关系。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>Mid-training 与 SFT：阶段名称和训练方法为何会重叠 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">三个阶段分别强调什么</a><ol><li class="toc-level-3"><a href="#section-2">阶段侧重点不等于算法边界</a></li><li class="toc-level-3"><a href="#section-3">相同目标函数也能产生不同阶段</a></li></ol></li><li class="toc-level-2"><a href="#section-4">用同一个代码问题比较继续预训练与 SFT</a><ol><li class="toc-level-3"><a href="#section-5">输入组织与监督位置</a></li><li class="toc-level-3"><a href="#section-6">为什么只看问答格式仍不够</a></li></ol></li><li class="toc-level-2"><a href="#section-7">一个配方如何同时出现推理中期训练和后续 SFT</a><ol><li class="toc-level-3"><a href="#section-8">SmolLM3 的有限例证</a></li></ol></li><li class="toc-level-2"><a href="#section-9">读训练配方时怎样形成可检验结论</a><ol><li class="toc-level-3"><a href="#section-10">比较实际训练合同</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a><ol><li><a href="/entry/2026-10-29-vlnce-foundations/">VLN-CE 的任务、模型与地图边界</a></li><li><a href="/entry/2026-10-29-model-action-queries/">Transformer 为什么需要动作查询，以及固定查询如何输出不同动作</a></li><li><a href="/entry/2026-10-29-vln-omtrackvla/">OmTrackVLA 完整网络结构</a></li><li><a href="/entry/2026-10-29-vln-internvla/">InternVLA-N1 双系统架构</a></li><li><a href="/entry/2026-10-29-vln-dagger/">DAgger 如何让导航模型学会从自己的偏差中恢复</a></li><li><a href="/entry/2026-10-29-vln-deployment/">VLN 推理资源与部署架构</a></li><li><a href="/entry/2026-10-29-internvla-evaluation/">从离线推理到闭环：定位 InternVLA 提前停止</a></li><li><a href="/entry/2026-10-29-vlnce-offline-training/">VLN-CE 离线训练：LMDB、DAgger 与 RNN 的时间关系</a></li><li><a href="/entry/2026-10-29-gr00t-action-contract/">GR00T：从视觉语言到具身动作的接口约定</a></li><li><a href="/entry/2026-10-29-vlnce-experiment-evidence/">VLN-CE：损失下降、STOP 失败与闭环证据</a></li><li><a href="/entry/2026-10-29-omtrack-data-training/">OmTrackVLA：从视频滑窗到训练梯度</a></li><li><a href="/entry/2026-10-29-omtrack-closed-loop/">OmTrackVLA：过门失败、目标丢失与五场景评测</a></li><li><a href="/entry/2026-10-29-navigation-metrics-data/">导航数据与指标：场景、episode、轨迹和成功率</a></li><li><a aria-current="page" href="/entry/2026-10-30-training-stages-sft/">Mid-training 与 SFT：阶段名称和训练方法为何会重叠</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">三个阶段分别强调什么</a><ol><li class="toc-level-3"><a href="#section-2">阶段侧重点不等于算法边界</a></li><li class="toc-level-3"><a href="#section-3">相同目标函数也能产生不同阶段</a></li></ol></li><li class="toc-level-2"><a href="#section-4">用同一个代码问题比较继续预训练与 SFT</a><ol><li class="toc-level-3"><a href="#section-5">输入组织与监督位置</a></li><li class="toc-level-3"><a href="#section-6">为什么只看问答格式仍不够</a></li></ol></li><li class="toc-level-2"><a href="#section-7">一个配方如何同时出现推理中期训练和后续 SFT</a><ol><li class="toc-level-3"><a href="#section-8">SmolLM3 的有限例证</a></li></ol></li><li class="toc-level-2"><a href="#section-9">读训练配方时怎样形成可检验结论</a><ol><li class="toc-level-3"><a href="#section-10">比较实际训练合同</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a><ol><li><a href="/entry/2026-10-29-vlnce-foundations/">VLN-CE 的任务、模型与地图边界</a></li><li><a href="/entry/2026-10-29-model-action-queries/">Transformer 为什么需要动作查询，以及固定查询如何输出不同动作</a></li><li><a href="/entry/2026-10-29-vln-omtrackvla/">OmTrackVLA 完整网络结构</a></li><li><a href="/entry/2026-10-29-vln-internvla/">InternVLA-N1 双系统架构</a></li><li><a href="/entry/2026-10-29-vln-dagger/">DAgger 如何让导航模型学会从自己的偏差中恢复</a></li><li><a href="/entry/2026-10-29-vln-deployment/">VLN 推理资源与部署架构</a></li><li><a href="/entry/2026-10-29-internvla-evaluation/">从离线推理到闭环：定位 InternVLA 提前停止</a></li><li><a href="/entry/2026-10-29-vlnce-offline-training/">VLN-CE 离线训练：LMDB、DAgger 与 RNN 的时间关系</a></li><li><a href="/entry/2026-10-29-gr00t-action-contract/">GR00T：从视觉语言到具身动作的接口约定</a></li><li><a href="/entry/2026-10-29-vlnce-experiment-evidence/">VLN-CE：损失下降、STOP 失败与闭环证据</a></li><li><a href="/entry/2026-10-29-omtrack-data-training/">OmTrackVLA：从视频滑窗到训练梯度</a></li><li><a href="/entry/2026-10-29-omtrack-closed-loop/">OmTrackVLA：过门失败、目标丢失与五场景评测</a></li><li><a href="/entry/2026-10-29-navigation-metrics-data/">导航数据与指标：场景、episode、轨迹和成功率</a></li><li><a aria-current="page" href="/entry/2026-10-30-training-stages-sft/">Mid-training 与 SFT：阶段名称和训练方法为何会重叠</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">具身智能 · 2026-10-30</p><h1>Mid-training 与 SFT：阶段名称和训练方法为何会重叠</h1><p class="article-summary">从“专项数据是否足以区分训练阶段”这一追问出发，用条件概率、监督掩码和代码任务解释中期训练与 SFT 的关系。</p><div class="tags"><span class="tag">预训练</span><span class="tag">Mid-training</span><span class="tag">SFT</span><span class="tag">损失函数</span></div></header><div class="article-body"><p>“中期训练用专项数据，SFT 也用专项数据，两者作用不是一样吗？”这个追问指出了一个分类错误：pre-train、mid-train、post-train 通常描述训练流程的位置与目的，SFT 描述如何利用示范进行监督学习。它们可以重叠，不能用“是否专项数据”画出互斥边界。</p>
+<p>本文保留原讨论的澄清过程：最初把中期训练解释为专项能力补强，后续明确修正为“阶段与方法是两个维度”。下面的损失表达是通用解释；文末配方核对属于外部证据，没有新增训练实验。</p>
+<h2 id="section-1">三个阶段分别强调什么</h2>
+<h3 id="section-2">阶段侧重点不等于算法边界</h3>
+<div class="table-scroll" role="region" aria-label="对照表" tabindex="0"><table><thead><tr><th scope="col">阶段</th><th scope="col">通常关注的问题</th><th scope="col">可能采用的数据与方法</th></tr></thead><tbody><tr><td>Pre-training</td><td>怎样建立基础语言、知识和模式表示</td><td>广泛文本、代码等，自回归或其他预训练目标</td></tr><tr><td>Mid-training</td><td>怎样补强专项能力并衔接下一阶段</td><td>领域语料、精选代码、长上下文、推理示范；调整配比、长度、学习率或监督方式</td></tr><tr><td>Post-training</td><td>怎样改善任务行为、指令遵循与偏好</td><td>指令示范、偏好对、奖励反馈；SFT、偏好优化或强化学习</td></tr></tbody></table></div>
+<p>Mid-training 没有一套各团队通用的操作定义。有的配方接近继续预训练，有的强调末期数据课程，有的使用问答和推理示范。后训练也能发展新能力；把阶段划成“前面学知识、最后只学格式”会低估后训练的作用。</p>
+<h3 id="section-3">相同目标函数也能产生不同阶段</h3>
+<p>自回归语言模型可使用下面的目标：</p>
+<pre><code class="language-text">L_LM(θ) = -Σ_t log pθ(z_t | z_&lt;t)</code></pre>
+<p>θ 是可训练参数，z_t 是第 t 个目标 token，z_&lt;t 是它之前的上下文。只统计有效位置，padding 等位置应排除。这个目标既能用于广泛语料，也能用于筛选后的代码、数学或长文档；变化可能主要来自采样分布和训练安排，而不是公式换成了新算法。</p>
+<p>增加专项数据时仍需评估通用能力是否退化。混合比例、训练时机和训练量决定取舍，不能仅凭阶段名字保证迁移收益。</p>
+<h2 id="section-4">用同一个代码问题比较继续预训练与 SFT</h2>
+<h3 id="section-5">输入组织与监督位置</h3>
+<p>设 x 为任务说明，y 为示范答案。条件生成的 SFT 常写为：</p>
+<pre><code class="language-text">L_SFT(θ) = -Σ_t log pθ(y_t | x, y_&lt;t)</code></pre>
+<p>代码语料继续预训练的样本可以是一段源文件，模型根据已有代码预测后续代码；代码 SFT 的样本可以是“实现快速排序”的要求以及示范实现。二者都可能使用 token 交叉熵，但输入条件与监督位置不同。</p>
+<p>更统一的表达是：</p>
+<pre><code class="language-text">L(θ) = -Σ_t m_t log pθ(z_t | z_&lt;t) / Σ_t m_t</code></pre>
+<p>m_t 表示当前位置是否参与 loss。全文语言建模常在所有有效文本位置取 1；回答监督通常令提示位置为 0、回答位置为 1。这个掩码与 attention mask 作用不同：提示不计入 loss，仍可以作为回答预测的可见上下文。示意式假定至少有一个有效监督 token；实际框架还会处理 shift、分隔符和样本打包。</p>
+<h3 id="section-6">为什么只看问答格式仍不够</h3>
+<p>把源文本包进聊天模板并不自动确定 loss 范围；反过来，名叫 mid-training 的步骤也可能使用指令—回答样本及回答掩码。如果数据组织、监督方式都符合 SFT，那么方法层面可以称为 SFT，流程层面仍可能被作者列为中期训练。</p>
+<p>同样，SFT 数据可以覆盖多个通用领域，并不必然是“专项微调”。训练代码、标签掩码和样本分布通常比名字更有解释力。</p>
+<h2 id="section-7">一个配方如何同时出现推理中期训练和后续 SFT</h2>
+<h3 id="section-8">SmolLM3 的有限例证</h3>
+<p>原讨论引用 SmolLM3 作为例子。本轮核对其官方说明：长上下文扩展后，推理中期训练使用约 35B tokens 数据，训练四轮、约 140B tokens，并采用 ChatML 模板；得到的 checkpoint 再进入后续 SFT。它说明问答模板与推理示范可以出现在名为 mid-training 的阶段，不能据此推断所有团队使用相同划分。<a href="https://huggingface.co/blog/smollm3" rel="noreferrer">SmolLM3 官方训练说明</a></p>
+<p>这里没有把原讨论未展示的 loss mask 实现补写成源码事实，也没有把公开配方的收益当作本机复现。</p>
+<h2 id="section-9">读训练配方时怎样形成可检验结论</h2>
+<h3 id="section-10">比较实际训练合同</h3>
+<p>对两个看似相同的阶段，依次明确起始 checkpoint、数据来源和配比、序列长度、监督 token、可训练参数、训练量及评测集合。以代码任务为例，需要分别看代码续写、按指令修改、跨领域能力和遗忘情况；仅见训练 loss 下降不足以判断哪个阶段更有用。</p>
+<p>结论是：SFT 与 mid-training 在具体配方中可以承担相近作用，甚至指向同一步操作。真正值得比较的是训练输入、目标和结果。是否应该增加中期阶段，仍需受控实验，原讨论没有给出针对某个新模型的最优配比。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>

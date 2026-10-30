@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="按导航到准备点、更新目标位姿、闭环接近和状态确认追踪 Docking Server，区分检测、控制、对接和真实充电。">
+  <meta property="og:title" content="Nav2 对接框架：准备点、感知精化与充电确认 · PDFstudent 知识库">
+  <meta property="og:description" content="按导航到准备点、更新目标位姿、闭环接近和状态确认追踪 Docking Server，区分检测、控制、对接和真实充电。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>Nav2 对接框架：准备点、感知精化与充电确认 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">服务器与插件怎样分工</a><ol><li class="toc-level-3"><a href="#section-2">从目标请求到闭环接近</a></li><li class="toc-level-3"><a href="#section-3">对接与导航不是同一个成功条件</a></li></ol></li><li class="toc-level-2"><a href="#section-4">准备点和检测位姿如何变成控制目标</a><ol><li class="toc-level-3"><a href="#section-5">沿目标坐标系计算偏移</a></li><li class="toc-level-3"><a href="#section-6">外部检测与插件处理</a></li></ol></li><li class="toc-level-2"><a href="#section-7">最后一段速度与完成判据怎样配合</a><ol><li class="toc-level-3"><a href="#section-8">曲率减速与控制限制</a></li><li class="toc-level-3"><a href="#section-9">对接状态不自动等于充电状态</a></li></ol></li><li class="toc-level-2"><a href="#section-10">结论与验证边界</a><ol><li class="toc-level-3"><a href="#section-11">三种证据各自回答不同问题</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li><li><a href="/entry/2026-10-29-learned-visual-docking/">无标记视觉精停：学习表示与几何闭环如何协作</a></li><li><a aria-current="page" href="/entry/2026-10-30-nav2-docking/">Nav2 对接框架：准备点、感知精化与充电确认</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">服务器与插件怎样分工</a><ol><li class="toc-level-3"><a href="#section-2">从目标请求到闭环接近</a></li><li class="toc-level-3"><a href="#section-3">对接与导航不是同一个成功条件</a></li></ol></li><li class="toc-level-2"><a href="#section-4">准备点和检测位姿如何变成控制目标</a><ol><li class="toc-level-3"><a href="#section-5">沿目标坐标系计算偏移</a></li><li class="toc-level-3"><a href="#section-6">外部检测与插件处理</a></li></ol></li><li class="toc-level-2"><a href="#section-7">最后一段速度与完成判据怎样配合</a><ol><li class="toc-level-3"><a href="#section-8">曲率减速与控制限制</a></li><li class="toc-level-3"><a href="#section-9">对接状态不自动等于充电状态</a></li></ol></li><li class="toc-level-2"><a href="#section-10">结论与验证边界</a><ol><li class="toc-level-3"><a href="#section-11">三种证据各自回答不同问题</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a><ol><li><a href="/entry/2026-10-29-nav-local-controllers/">RPP、MPPI 与全向底盘控制</a></li><li><a href="/entry/2026-10-29-nav-precision-docking/">视觉精导航与横向微移</a></li><li><a href="/entry/2026-10-29-nav-collision-safety/">代价地图、碰撞检查与障碍等待</a></li><li><a href="/entry/2026-10-29-learned-visual-docking/">无标记视觉精停：学习表示与几何闭环如何协作</a></li><li><a aria-current="page" href="/entry/2026-10-30-nav2-docking/">Nav2 对接框架：准备点、感知精化与充电确认</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">运动控制 · 2026-10-30</p><h1>Nav2 对接框架：准备点、感知精化与充电确认</h1><p class="article-summary">按导航到准备点、更新目标位姿、闭环接近和状态确认追踪 Docking Server，区分检测、控制、对接和真实充电。</p><div class="tags"><span class="tag">Nav2</span><span class="tag">Docking</span><span class="tag">视觉伺服</span><span class="tag">插件</span></div></header><div class="article-body"><p>机器人已导航到充电桩附近，为什么还需要对接服务器？因为地图中的到位只解决接近目标区域，最后一段运动还依赖更精确的相对位姿、设备交互和明确的成功判据。停在几何容差内、接触到设备与真正开始充电是不同事实。</p>
+<p>原讨论询问 Nav2 对接包的作用与实现。本文只保留开源框架机制，省略专用工程的目录、配置和实际启动入口；本轮另外核对公开接口，没有进行真机对接实验。</p>
+<h2 id="section-1">服务器与插件怎样分工</h2>
+<h3 id="section-2">从目标请求到闭环接近</h3>
+<p>DockingServer 编排对接/脱离流程，Navigator 负责接近准备点，DockDatabase 提供目标实例及插件类型，控制器计算最后一段速度，插件提供设备特定感知与状态。上层任务或行为树决定何时调用，代码目录存在并不证明运行中的机器人正在使用这条链路。上游架构说明支持这种分层。<a href="https://api.nav2.org/nav2-rolling/html/md_nav2_docking_README.html" rel="noreferrer">Nav2 Docking 框架说明</a></p>
+<p>典型顺序是：从 dock_id 或请求位姿取得目标，计算准备点，必要时导航过去，获取初始精化位姿，持续更新目标并闭环接近，最后检查对接状态；对于充电目标，还要确认充电开始。失败恢复、超时和重试边界必须按所用版本核对，不能把每个异常都理解为会自动重试。</p>
+<h3 id="section-3">对接与导航不是同一个成功条件</h3>
+<p>准备点导航结束，只表示机器人进入适合对接的区域。若首次感知没有有效目标，不能用地图上的粗位姿替代新鲜测量继续靠近。对于无需充电的工位，任务终止条件可以是机械或几何对接；充电任务则要明确设备反馈是否可信。</p>
+<h2 id="section-4">准备点和检测位姿如何变成控制目标</h2>
+<h3 id="section-5">沿目标坐标系计算偏移</h3>
+<p>原讨论使用的准备点解释为：</p>
+<pre><code class="language-text">x_s = x_d + cos(ψ_d) · Δx
+y_s = y_d + sin(ψ_d) · Δx</code></pre>
+<p>(x_d,y_d,ψ_d) 是对接目标平面位姿，Δx 是其局部 X 轴上的偏移，(x_s,y_s) 是准备点。Δx 为负表示沿目标的负 X 方向，并不是世界坐标的固定“向后”。例如仅作几何演示，ψ_d=π/2、Δx=-0.7 时，准备点位于 y_d-0.7，x 不变。机器人最终朝向还需结合插件的朝向偏移。</p>
+<h3 id="section-6">外部检测与插件处理</h3>
+<p>getRefinedPose 可以使用外部检测的 PoseStamped，也可以在关闭外部检测时使用数据库位置。默认插件使用检测结果，并不意味着它自己从相机图像识别 AprilTag。时间戳有效性、TF 变换、位姿滤波以及标志到实际接触点的偏移，应分别核对。<a href="https://docs.nav2.org/jazzy/tutorials/general_tutorials/using_docking/" rel="noreferrer">Nav2 对接使用说明</a></p>
+<p>原讨论以位置指数滤波说明平滑：</p>
+<pre><code class="language-text">p̂_k = (1-α) p̂_(k-1) + α p_k</code></pre>
+<p>p_k 是本次测量，p̂_k 是滤波结果，α 越小通常越平滑但响应更慢。姿态需要合适的旋转插值，不能把四元数各分量简单当作普通位置。错误的坐标系或标记偏移不会因为滤波更强就变正确。</p>
+<h2 id="section-7">最后一段速度与完成判据怎样配合</h2>
+<h3 id="section-8">曲率减速与控制限制</h3>
+<p>原回答通过 graceful controller 解释接近控制：目标进入机器人坐标系后，根据距离与朝向关系求曲率 κ，再按曲率调节速度。用来解释趋势的关系为：</p>
+<pre><code class="language-text">v = v_max / (1 + β |κ|^λ)
+ω = κ v</code></pre>
+<p>v 为线速度，ω 为角速度，β 与 λ 控制弯曲路径上的减速程度。这不是完整控制器：接近目标减速、速度限幅、运动学能力和碰撞预测仍要叠加。原讨论提到的目标延伸属于控制构造，不能把延伸后的虚拟目标当作实际接触成功条件；具体实现和数值应追随部署版本。</p>
+<p>预测碰撞检查与允许最终接触的区域承担不同职责。若为了接触而忽略一段距离内的碰撞判定，必须明确该区域的几何边界和设备模型，而不是把整个对接过程当成可关闭避障的阶段。</p>
+<h3 id="section-9">对接状态不自动等于充电状态</h3>
+<p>isDocked 可以使用距离或接触/堵转证据；isCharging 则应反映真实电池或设备通信。插件在禁用电池检测时可能把几何对接结果作为模拟成功，这只能说明配置的判据成立。默认占位的 disableCharging 也不意味着硬件已完成断电握手。</p>
+<p>实施前要逐项检查：电流符号约定和门限、反馈新鲜度、传感器失效、重试前如何退出，以及成功或失败后是否真正停止运动。脱离时还应确认设备允许退出及充电状态变化；服务器返回成功不能替代设备层证据。</p>
+<h2 id="section-10">结论与验证边界</h2>
+<h3 id="section-11">三种证据各自回答不同问题</h3>
+<p>公开接口能证明框架提供哪些扩展点；所用版本源码能证明具体分支如何执行；真机日志与独立测量才能证明目标设备完成了运动和充电。本轮只整理原讨论并核对公开机制，未验证某台机器人正在使用哪个插件，也未把任何配置示例作为已测试部署方案。</p>
+<p>与通用视觉搜索、横向微移及停稳交接相关的问题，继续参见 <a href="https://pdfstudent.github.io/entry/2026-10-29-nav-precision-docking/" rel="noreferrer">视觉精导航与横向微移</a>。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>

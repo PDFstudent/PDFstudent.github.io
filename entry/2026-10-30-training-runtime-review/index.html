@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="归档训练阶段与方法、环境迁移与渲染、开源对接框架，并补充场景资产到有效训练轨迹的验证链。">
+  <meta property="og:title" content="训练与运行边界：SFT、EGL 渲染和对接确认 · PDFstudent 知识库">
+  <meta property="og:description" content="归档训练阶段与方法、环境迁移与渲染、开源对接框架，并补充场景资产到有效训练轨迹的验证链。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>训练与运行边界：SFT、EGL 渲染和对接确认 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">训练阶段与方法采用不同分类维度</a><ol><li class="toc-level-3"><a href="#section-2">从追问修正解释</a></li></ol></li><li class="toc-level-2"><a href="#section-3">环境检查需要跨过多层依赖</a><ol><li class="toc-level-3"><a href="#section-4">计算成功之后还要验证图形</a></li></ol></li><li class="toc-level-2"><a href="#section-5">对接成功必须对应真实设备状态</a><ol><li class="toc-level-3"><a href="#section-6">从导航准备点到充电证据</a></li></ol></li><li class="toc-level-2"><a href="#section-7">来源范围与仍待补充的材料</a><ol><li class="toc-level-3"><a href="#section-8">可见范围不代表所有设备</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-technical-stack-index/">历史 Chat 技术知识树与系统索引</a><ol><li><a href="/entry/2026-10-29-slam-index/">SLAM 技术</a></li><li><a href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a></li><li><a href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a></li><li><a href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a></li><li><a href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a></li><li><a href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a></li><li><a href="/entry/2026-10-29-history-backfill/">历史补齐：运动跟踪、VLN 训练与评测证据</a></li><li><a href="/entry/2026-10-29-device-handoff-merge/">跨设备合并：DAgger 标签边界与全身动力学补充</a></li><li><a aria-current="page" href="/entry/2026-10-30-training-runtime-review/">训练与运行边界：SFT、EGL 渲染和对接确认</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">训练阶段与方法采用不同分类维度</a><ol><li class="toc-level-3"><a href="#section-2">从追问修正解释</a></li></ol></li><li class="toc-level-2"><a href="#section-3">环境检查需要跨过多层依赖</a><ol><li class="toc-level-3"><a href="#section-4">计算成功之后还要验证图形</a></li></ol></li><li class="toc-level-2"><a href="#section-5">对接成功必须对应真实设备状态</a><ol><li class="toc-level-3"><a href="#section-6">从导航准备点到充电证据</a></li></ol></li><li class="toc-level-2"><a href="#section-7">来源范围与仍待补充的材料</a><ol><li class="toc-level-3"><a href="#section-8">可见范围不代表所有设备</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-technical-stack-index/">历史 Chat 技术知识树与系统索引</a><ol><li><a href="/entry/2026-10-29-slam-index/">SLAM 技术</a></li><li><a href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a></li><li><a href="/entry/2026-10-29-motion-control-index/">运动控制、精导航与安全</a></li><li><a href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a></li><li><a href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a></li><li><a href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a></li><li><a href="/entry/2026-10-29-history-backfill/">历史补齐：运动跟踪、VLN 训练与评测证据</a></li><li><a href="/entry/2026-10-29-device-handoff-merge/">跨设备合并：DAgger 标签边界与全身动力学补充</a></li><li><a aria-current="page" href="/entry/2026-10-30-training-runtime-review/">训练与运行边界：SFT、EGL 渲染和对接确认</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">每日变化 · 2026-10-30</p><h1>训练与运行边界：SFT、EGL 渲染和对接确认</h1><p class="article-summary">归档训练阶段与方法、环境迁移与渲染、开源对接框架，并补充场景资产到有效训练轨迹的验证链。</p><div class="tags"><span class="tag">SFT</span><span class="tag">EGL</span><span class="tag">Nav2</span><span class="tag">数据验证</span></div></header><div class="article-body"><p>本次于 10 月 31 日凌晨整理 10 月 30 日的新增讨论。几个问题有共同点：一个阶段的成功只证明该阶段的条件满足，不能自动升级为后续链路成功。下面记录新增解释及仍未取得的证据。</p>
+<h2 id="section-1">训练阶段与方法采用不同分类维度</h2>
+<h3 id="section-2">从追问修正解释</h3>
+<p><a href="https://pdfstudent.github.io/entry/2026-10-30-training-stages-sft/" rel="noreferrer">Mid-training 与 SFT</a>保留“专项数据是否足以区分二者”的追问及修正。文章比较条件生成、监督 token 掩码与训练配方，说明中期阶段可以采用 SFT，SFT 也可以学习能力。官方配方仅作为有限例证，没有新增模型效果实验。</p>
+<h2 id="section-3">环境检查需要跨过多层依赖</h2>
+<h3 id="section-4">计算成功之后还要验证图形</h3>
+<p><a href="https://pdfstudent.github.io/entry/2026-10-30-conda-container-egl/" rel="noreferrer">Conda、容器与 EGL</a>整理环境归档与系统依赖的边界，以及“厂商库存在、注册缺失”的诊断链。历史渲染输出与本轮上游源码核对分别标注，单张图片成功未被写成物理仿真或训练完成。</p>
+<p><a href="https://pdfstudent.github.io/entry/2026-10-29-omtrack-data-training/" rel="noreferrer">OmTrackVLA 数据训练专题</a>沿用原地址，补充场景资产、episode、控制器、轨迹和监督样本的关系，以及五步检查中位置不变所限制的结论。全量数据与全参数训练也分别说明，避免重复建立相同主题。</p>
+<h2 id="section-5">对接成功必须对应真实设备状态</h2>
+<h3 id="section-6">从导航准备点到充电证据</h3>
+<p><a href="https://pdfstudent.github.io/entry/2026-10-30-nav2-docking/" rel="noreferrer">Nav2 对接框架</a>说明准备点偏移、精化感知、曲率控制以及对接和充电状态。公开接口证明提供了哪些机制，不能证明某台机器人已经使用或测试通过。</p>
+<h2 id="section-7">来源范围与仍待补充的材料</h2>
+<h3 id="section-8">可见范围不代表所有设备</h3>
+<p>本轮逐回合读取三个新增任务的 41 个回合，技术知识拆分后进入上述文章，私人和内部内容省略。另一个采集端的当日清单尚未收到，不能据此认定它没有新增讨论；之前已收到的两日资料仍保留已验证映射。早期任务欠账和两份缺少用户问题的来源继续等待补齐。</p>
+<p>原始讨论中的源码检查、用户提供的技术输出、助手报告的历史测试、通用解释以及本轮文档核对分别标明。完整轨迹运行和新的模型训练结果没有来源证据，不计入已完成实验。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>
