@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="区分 FollowPath、参考路径与预测轨迹，建立预触发缓存、静态快照和有时效性的状态证据。">
+  <meta property="og:title" content="导航异常录包：从传感器到执行反馈重建原因 · PDFstudent 知识库">
+  <meta property="og:description" content="区分 FollowPath、参考路径与预测轨迹，建立预触发缓存、静态快照和有时效性的状态证据。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>导航异常录包：从传感器到执行反馈重建原因 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">录制对象要围绕因果链组织</a><ol><li class="toc-level-3"><a href="#section-2">输入、决策和实际执行缺一不可</a></li><li class="toc-level-3"><a href="#section-3">零速出现在哪里，比最后看到零速更重要</a></li></ol></li><li class="toc-level-2"><a href="#section-4">FollowPath 为什么不是局部预测路径</a><ol><li class="toc-level-3"><a href="#section-5">三条几何对象分别属于输入与决策</a></li><li class="toc-level-3"><a href="#section-6">topic 存在为何可能一直没有消息</a></li></ol></li><li class="toc-level-2"><a href="#section-7">事件发生后开始录制，为何常常太晚</a><ol><li class="toc-level-3"><a href="#section-8">预触发窗口与低频快照需要不同保存方法</a></li><li class="toc-level-3"><a href="#section-9">频率、时钟与缺失值要保留真实语义</a></li></ol></li><li class="toc-level-2"><a href="#section-10">结论与验证边界</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li><li><a aria-current="page" href="/entry/2026-11-02-navigation-event-recording/">导航异常录包：从传感器到执行反馈重建原因</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">录制对象要围绕因果链组织</a><ol><li class="toc-level-3"><a href="#section-2">输入、决策和实际执行缺一不可</a></li><li class="toc-level-3"><a href="#section-3">零速出现在哪里，比最后看到零速更重要</a></li></ol></li><li class="toc-level-2"><a href="#section-4">FollowPath 为什么不是局部预测路径</a><ol><li class="toc-level-3"><a href="#section-5">三条几何对象分别属于输入与决策</a></li><li class="toc-level-3"><a href="#section-6">topic 存在为何可能一直没有消息</a></li></ol></li><li class="toc-level-2"><a href="#section-7">事件发生后开始录制，为何常常太晚</a><ol><li class="toc-level-3"><a href="#section-8">预触发窗口与低频快照需要不同保存方法</a></li><li class="toc-level-3"><a href="#section-9">频率、时钟与缺失值要保留真实语义</a></li></ol></li><li class="toc-level-2"><a href="#section-10">结论与验证边界</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li><li><a aria-current="page" href="/entry/2026-11-02-navigation-event-recording/">导航异常录包：从传感器到执行反馈重建原因</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">导航算法 · 2026-11-02</p><h1>导航异常录包：从传感器到执行反馈重建原因</h1><p class="article-summary">区分 FollowPath、参考路径与预测轨迹，建立预触发缓存、静态快照和有时效性的状态证据。</p><div class="tags"><span class="tag">ROS 2</span><span class="tag">MCAP</span><span class="tag">Action</span><span class="tag">可观测性</span></div></header><div class="article-body"><p>定位跳变、规划失败和异常停车都可能以“机器人不动”结束，但原因可能出现在不同环节。只录最终速度或最终错误，无法区分控制器主动停车、下游安全处理、指令超时与底盘未执行。原讨论从“哪些 topic 必录”追问到 FollowPath 和 MPPI 可视化条件；本篇保留通用诊断方法，省略内部接口与配置表。</p>
+<h2 id="section-1">录制对象要围绕因果链组织</h2>
+<h3 id="section-2">输入、决策和实际执行缺一不可</h3>
+<p>可以把事件窗口组织为“传感器 → 定位和 TF → 地图与规划 → 局部控制 → 安全处理 → 执行反馈”。每层至少保留输入、输出和状态变化，才能定位信号第一次偏离预期的位置。</p>
+<div class="table-scroll" role="region" aria-label="对照表" tabindex="0"><table><thead><tr><th scope="col">证据层</th><th scope="col">可复用的记录对象</th><th scope="col">能回答的问题</th></tr></thead><tbody><tr><td>几何与时间</td><td><code>/tf</code>、<code>/tf_static</code>、传感器时间戳</td><td>同一时刻各数据是否处于一致坐标系</td></tr><tr><td>定位</td><td>前端里程计、全局位姿、全局修正事件</td><td>是局部估计跳变，还是全局坐标修正</td></tr><tr><td>感知</td><td>原始点云、真正送入 costmap 的点云、IMU</td><td>传感器看到了什么，预处理改变了什么</td></tr><tr><td>规划与碰撞</td><td>完整地图、实际 costmap、footprint、请求与路径</td><td>起终点、障碍与车体几何是否允许通过</td></tr><tr><td>控制</td><td>实际跟踪路径、预测轨迹、上游与最终指令</td><td>控制器想做什么，哪一级修改了指令</td></tr><tr><td>执行</td><td>里程计速度、控制模式、执行器状态</td><td>指令是否到达并被执行</td></tr><tr><td>任务与记录器</td><td>状态、结果、取消、日志、丢包与写盘统计</td><td>任务为何结束，证据是否完整</td></tr></tbody></table></div>
+<p>这里除公共 ROS 名称外都使用语义描述，实际消息名、类型、QoS 与频率必须从所运行系统确认。原始点云与导航输入点云有不同用途：前者追溯传感器和过滤问题，后者还原算法真正收到的观测。显示用点云不能自动替代计算输入。</p>
+<h3 id="section-3">零速出现在哪里，比最后看到零速更重要</h3>
+<p>若控制器输出非零，而安全处理后为零，应检查保护原因和控制权；若最终指令非零但实际速度近零，则检查执行模式、通信和硬件反馈；若控制器已输出零，还需区分到达目标、正常等待、不可行控制和任务取消。多个节点共享输出时，仅靠消息值无法识别发令者，应记录来源和原因事件。</p>
+<p>定位也应采用同样方法：全局位姿突变时比较局部里程计、<code>map→odom</code> 与修正事件，不能只看一条全局轨迹就断言前端失效。底盘里程计是另一观测来源，并非独立真值。</p>
+<h2 id="section-4">FollowPath 为什么不是局部预测路径</h2>
+<h3 id="section-5">三条几何对象分别属于输入与决策</h3>
+<p><code>/plan</code> 常用于展示全局规划结果；FollowPath 的 Goal.path 是实际交给控制器的跟踪目标；MPPI 的最优预测轨迹是当前控制序列在模型中的未来运动。平滑、路径替换和坐标变换会使它们不同，不能互相代替。</p>
+<p>FollowPath 是 Action 接口。Status 与 Feedback 可作为隐藏 topic 记录，但 Goal、Result、Cancel 涉及服务交互，不能因为记录了两个 topic 就认为整个 Action 已保存。应检查所用版本是否支持且已启用 introspection；否则需要在合适端点镜像请求和返回。实际记录方式须验证消息内容，而非只验证名字出现在白名单里。</p>
+<p>原讨论曾把 FollowPath 作为关键证据补充，随后明确用户主要想看局部控制器输出的轨迹。精简第一版录制可以先聚焦预测轨迹，但必须承认缺少完整 Action 时无法精确重建所有请求、取消和失败结果。</p>
+<h3 id="section-6">topic 存在为何可能一直没有消息</h3>
+<p>原讨论的助手报告：所读 MPPI 分支用 <code>visualize</code> 控制最优轨迹、候选轨迹与变换后参考路径的发布，并进一步检查订阅者数量。因此发布者创建与实际发送是两个条件。只录最优轨迹、避免订阅大量候选 Marker，可能降低开销；这一结论限于当时所读分支，本轮没有重新测量真机负载或确认所有 Nav2 版本行为。</p>
+<p>验收时观察实际消息数、时间戳和处理开销；不要为了采集诊断数据而悄悄改变控制周期。预测轨迹本身仍是模型预测，不是执行后的真实路径。</p>
+<h2 id="section-7">事件发生后开始录制，为何常常太晚</h2>
+<h3 id="section-8">预触发窗口与低频快照需要不同保存方法</h3>
+<p>异常后的状态往往已经是保护结果，原因出现在之前。原讨论提出以异常前 60 秒、后 20 秒作为初始窗口；这只是待验证的容量方案，不是所有故障的固定标准。若各路有效带宽为 B_i，窗口长度为 T，粗略数据量为 T×ΣB_i，再加序列化、索引及冗余开销。压缩率、磁盘吞吐与并发事件也需实测。</p>
+<p>静态 TF、地图、任务目标、参数和最新路径可能在窗口前很久发布，环形缓存未必仍有它们。每包需补齐有效快照并记录快照时间及版本。<code>/parameter_events</code> 是变化流，不能替代完整初始参数；增量 costmap 必须与匹配的完整基图一起保存。</p>
+<p>原讨论还提醒：周期发布的 costmap 不一定正好是某次失败计算用到的版本。要求精确重放时，应记录计算对应的输入版本或快照，而非把最近的一帧视为完全相同输入。</p>
+<h3 id="section-9">频率、时钟与缺失值要保留真实语义</h3>
+<p>配置频率、实际发布频率与录制器接收频率是三件事；TF 多发布者更不能用单一频率描述每条变换。时钟漂移、排队延迟及 QoS 不兼容会造成看似完整、实际错位的记录。验收需检查每路覆盖时长、丢失统计、队列积压及写盘错误。</p>
+<p>pc-01 的历史交接补充了日志设计：观测应带来源、frame 和更新时间；“不适用”“从未收到”“已过期”“有效零值”必须区分。任务切换后不能沿用旧目标反馈。平面直线误差与航向差可写为：</p>
+<pre><code class="language-text">d = sqrt((x_goal-x)^2 + (y_goal-y)^2)
+e_yaw = atan2(sin(yaw_goal-yaw), cos(yaw_goal-yaw))</code></pre>
+<p>d 不是绕障路径剩余长度；计算前应统一坐标系。预停靠点与最终停靠点也不能共用一个未注明目标的误差字段。低频人读日志可以汇总状态，但不能替代短时控制波动的高频证据。</p>
+<h2 id="section-10">结论与验证边界</h2>
+<p>录制清单的价值在于能否连接输入、决策、门控和执行，而不是 topic 数量。复盘前先验证记录器本身，再讨论算法根因。本篇融合本机原始问答与采集端脱敏交接；分支源码行为是原讨论报告，窗口长度是方案，公式是通用解释，本轮未执行机器人录包或控制实验。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>

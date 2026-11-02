@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="从 PPO 似然比到可微想象轨迹，展开世界模型、Actor、Critic 的训练与雅可比链条。">
+  <meta property="og:title" content="SuperMimic 与 PPO：回报梯度怎样穿过世界模型 · PDFstudent 知识库">
+  <meta property="og:description" content="从 PPO 似然比到可微想象轨迹，展开世界模型、Actor、Critic 的训练与雅可比链条。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>SuperMimic 与 PPO：回报梯度怎样穿过世界模型 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">PPO 也有梯度，但不对物理转移求导</a><ol><li class="toc-level-3"><a href="#section-2">优势与概率比提供更新信号</a></li><li class="toc-level-3"><a href="#section-3">世界模型采样与世界模型反传仍需区分</a></li></ol></li><li class="toc-level-2"><a href="#section-4">世界模型与策略交替学习不同对象</a><ol><li class="toc-level-3"><a href="#section-5">转移数据回答动作的后果，参考动作回答期望目标</a></li></ol></li><li class="toc-level-2"><a href="#section-6">为什么想象回报需要末端 Critic</a><ol><li class="toc-level-3"><a href="#section-7">有限窗口只显式计算一段未来</a></li><li class="toc-level-3"><a href="#section-8">Critic 回归目标不能随同一次拟合自由移动</a></li></ol></li><li class="toc-level-2"><a href="#section-9">三因子链式法则怎样扩展到多步</a><ol><li class="toc-level-3"><a href="#section-10">先让矩阵形状一致</a></li><li class="toc-level-3"><a href="#section-11">后续策略也随状态变化</a></li><li class="toc-level-3"><a href="#section-12">固定权重仍应允许输入导数存在</a></li></ol></li><li class="toc-level-2"><a href="#section-13">速度收益与部署边界怎样读</a><ol><li class="toc-level-3"><a href="#section-14">吞吐、想象步数与完整时间有不同分母</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a><ol><li><a href="/entry/2026-10-29-model-mpc-wbc/">人形机器人 MPC 与 WBC</a></li><li><a href="/entry/2026-10-29-sonic-supermimic/">SONIC 与 SuperMimic：运动跟踪的两种训练路线</a></li><li><a href="/entry/2026-10-29-sonic-gr00t-interface/">GR00T 怎样通过 SONIC 控制全身动作</a></li><li><a aria-current="page" href="/entry/2026-11-02-supermimic-policy-gradients/">SuperMimic 与 PPO：回报梯度怎样穿过世界模型</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">PPO 也有梯度，但不对物理转移求导</a><ol><li class="toc-level-3"><a href="#section-2">优势与概率比提供更新信号</a></li><li class="toc-level-3"><a href="#section-3">世界模型采样与世界模型反传仍需区分</a></li></ol></li><li class="toc-level-2"><a href="#section-4">世界模型与策略交替学习不同对象</a><ol><li class="toc-level-3"><a href="#section-5">转移数据回答动作的后果，参考动作回答期望目标</a></li></ol></li><li class="toc-level-2"><a href="#section-6">为什么想象回报需要末端 Critic</a><ol><li class="toc-level-3"><a href="#section-7">有限窗口只显式计算一段未来</a></li><li class="toc-level-3"><a href="#section-8">Critic 回归目标不能随同一次拟合自由移动</a></li></ol></li><li class="toc-level-2"><a href="#section-9">三因子链式法则怎样扩展到多步</a><ol><li class="toc-level-3"><a href="#section-10">先让矩阵形状一致</a></li><li class="toc-level-3"><a href="#section-11">后续策略也随状态变化</a></li><li class="toc-level-3"><a href="#section-12">固定权重仍应允许输入导数存在</a></li></ol></li><li class="toc-level-2"><a href="#section-13">速度收益与部署边界怎样读</a><ol><li class="toc-level-3"><a href="#section-14">吞吐、想象步数与完整时间有不同分母</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-robot-control-index/">人形机器人动力学与全身控制</a><ol><li><a href="/entry/2026-10-29-model-mpc-wbc/">人形机器人 MPC 与 WBC</a></li><li><a href="/entry/2026-10-29-sonic-supermimic/">SONIC 与 SuperMimic：运动跟踪的两种训练路线</a></li><li><a href="/entry/2026-10-29-sonic-gr00t-interface/">GR00T 怎样通过 SONIC 控制全身动作</a></li><li><a aria-current="page" href="/entry/2026-11-02-supermimic-policy-gradients/">SuperMimic 与 PPO：回报梯度怎样穿过世界模型</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">人形机器人 · 2026-11-02</p><h1>SuperMimic 与 PPO：回报梯度怎样穿过世界模型</h1><p class="article-summary">从 PPO 似然比到可微想象轨迹，展开世界模型、Actor、Critic 的训练与雅可比链条。</p><div class="tags"><span class="tag">SuperMimic</span><span class="tag">PPO</span><span class="tag">BPTT</span><span class="tag">世界模型</span></div></header><div class="article-body"><p>同样奖励机器人接近参考动作，PPO 与 SuperMimic 为何有不同训练过程？这组追问来自采集端 10 月 30 日的完整脱敏交接，本机读取的是交接而非该设备原始聊天。重点是更新方向如何得到，而不是重复项目概览；概览见 <a href="https://pdfstudent.github.io/entry/2026-10-29-sonic-supermimic/" rel="noreferrer">SONIC 与 SuperMimic</a>。</p>
+<h2 id="section-1">PPO 也有梯度，但不对物理转移求导</h2>
+<h3 id="section-2">优势与概率比提供更新信号</h3>
+<p>PPO 采样动作、收集回报，再以优势估计衡量动作相对基线的效果。其策略梯度涉及 grad_theta log pi_theta(a|o) A_hat，无需模拟器提供下一状态对动作的导数。常见裁剪代理目标写为：</p>
+<pre><code class="language-text">rho_t = pi_theta(a_t|o_t) / pi_old(a_t|o_t)
+L_clip = E[min(rho_t A_hat_t,
+              clip(rho_t, 1-epsilon, 1+epsilon) A_hat_t)]</code></pre>
+<p>rho 比较同一已采样动作在新旧策略下的概率；epsilon 限制代理目标中过大的有利变化，并不严格保证真实策略距离。把 PPO 称为“猜方向”容易误导，它对策略网络有明确梯度，只是没有沿物理状态转移反传。</p>
+<h3 id="section-3">世界模型采样与世界模型反传仍需区分</h3>
+<p>可以在学习的模型里生成数据，再用 PPO 更新；也可以把策略输出、模型转移和奖励组成图，对想象回报求导。前者可能改善采样吞吐，后者改变梯度估计机制。模型内梯度的局部敏感性并不保证真实环境方向正确，策略可能利用模型偏差。</p>
+<h2 id="section-4">世界模型与策略交替学习不同对象</h2>
+<h3 id="section-5">转移数据回答动作的后果，参考动作回答期望目标</h3>
+<p>设状态为 s、动作 a、环境上下文 xi、参考目标 g，模型参数 omega。模型可以描述后继状态、奖励、观测和终止：</p>
+<pre><code class="language-text">s_hat_next = f_omega(s_hat, a, xi)
+r_hat_next = r_omega(s_hat, a, g)
+o_bar_hat  = h_omega(s_hat, xi)
+d_hat      = d_omega(s_hat, g)</code></pre>
+<p>这里 h 表示观测映射，避免与参考目标 g 混用。部分输出可以解析计算，并非每个头都必须有一个可训练网络及损失。模型拟合依据模拟器执行后记录的转移；动作捕捉与重定向轨迹则定义希望实现的运动，不直接等于正确电机控制标签。</p>
+<p>模型拟合可用日志动作连续展开，约束多步预测误差；策略训练则在模型预测状态上生成新动作。两类窗口服务不同目标，不应混用。采集端的论文核对报告模型拟合窗口 k=8、策略想象窗口 H=32；这些是该论文设定，不是任意世界模型的固定超参数。</p>
+<p>当前策略改变访问分布后，需要新模拟器转移覆盖新动作和状态。模型只在一次策略更新内固定，而非训练开始前拟合一次后永不更新。这一点也与本轮核对的<a href="https://supermimic.github.io/" rel="noreferrer">官方项目说明</a>一致。</p>
+<h2 id="section-6">为什么想象回报需要末端 Critic</h2>
+<h3 id="section-7">有限窗口只显式计算一段未来</h3>
+<p>令 gamma 为折扣、c 为累计存活权重，V_psi 为价值估计，一个说明机制的短窗口目标是：</p>
+<pre><code class="language-text">c_hat_0 = 1
+c_hat_(t+1) = c_hat_t (1-d_hat_(t+1))
+J_hat = E[sum(t=0..H-1) gamma^t c_hat_t r_hat_(t+1)
+          + gamma^H c_hat_H V_psi(s_hat_H,g_H,xi)]
+L_actor = -J_hat</code></pre>
+<p>世界模型预测“动作以后发生什么”，Critic 估计窗口以外的后续回报。继续延长模型展开会增加计算、存储与累计偏差；价值近似降低展开需求，却也有自己的估计误差。终止权重对目标的影响还取决于奖励符号，不能一律说某方向必然更好。</p>
+<h3 id="section-8">Critic 回归目标不能随同一次拟合自由移动</h3>
+<p>可用带 bootstrap 的 lambda-return 说明价值学习：</p>
+<pre><code class="language-text">R_H = V_H
+R_t = r_(t+1) + gamma(1-d_(t+1))
+      * ((1-lambda)V_(t+1) + lambda R_(t+1))
+L_value = sum_t (V_psi(s_t,g_t,xi) - stop_gradient(R_t))^2</code></pre>
+<p>lambda 组合短 bootstrap 与长回报展开。固定回归目标不意味着 Actor 更新时也切断 Critic 对输入状态的导数；两次优化的目的不同。这里是概念公式，不把想象回报称为实际机器人测得的回报。</p>
+<h2 id="section-9">三因子链式法则怎样扩展到多步</h2>
+<h3 id="section-10">先让矩阵形状一致</h3>
+<p>采用列向量梯度，沿参数 → 动作 → 后继状态 → 回报的一条路径：</p>
+<pre><code class="language-text">grad_theta J_path = (partial a / partial theta)^T
+                    (partial s_next / partial a)^T
+                    grad_s_next J</code></pre>
+<p>参数、动作、状态维数分别为 n_theta、n_a、n_s，三因子形状为 n_theta×n_a、n_a×n_s、n_s×1。策略雅可比描述参数如何改变动作；动力学动作雅可比描述动作如何改变状态；最后一项描述状态变化怎样影响回报。具体关节动作的物理效果依赖姿态和接触，教学直觉不能替代模型或实验。</p>
+<h3 id="section-11">后续策略也随状态变化</h3>
+<p>记 A_t=partial f/partial s、B_t=partial f/partial a。只有后续动作固定时，两步传播才可简写为 A_(t+1)B_t。闭环策略使下一动作取决于状态，状态方向导数还包括：</p>
+<pre><code class="language-text">D_t = A_t + B_t (partial pi / partial o) (partial o / partial s)</code></pre>
+<p>多步 BPTT 应经过闭环图，并累加共享策略参数在各步对动作的直接影响。奖励可能直接依赖动作，观测映射影响未来动作，终止头改变存活权重，末端价值也有输入导数；三因子示意不是完整目标的全部依赖路径。</p>
+<h3 id="section-12">固定权重仍应允许输入导数存在</h3>
+<p>更新模型用 grad_omega L_WM；更新 Actor 时固定 omega，但保留模型对动作与状态的导数。固定 y=2x 的系数仍有 dy/dx=2，就是最简单的例子。若把整个模型前向放入 no_grad 或提前 detach 预测状态，就可能切断 Actor 的学习路径。</p>
+<p>Actor 优化器只更新 theta；模型与 Critic 的参数冻结策略要与输入梯度需求分别检查。本文没有执行对应代码的梯度测试，不能据公式声称某实现已正确。</p>
+<h2 id="section-13">速度收益与部署边界怎样读</h2>
+<h3 id="section-14">吞吐、想象步数与完整时间有不同分母</h3>
+<p>官方项目报告实际批量下模型 rollout 吞吐超过 MuJoCo Warp 的 10 倍；约 64 倍指达到 PPO-WM 最佳训练回报所需的想象步数。二者不能相乘冒充端到端训练时间，完整计时还要包括真实模拟器采集、模型拟合及 Actor/Critic 更新。<a href="https://supermimic.github.io/" rel="noreferrer">项目的计算口径说明</a></p>
+<p>部署通常使用已学策略、观测处理、参考编码、动作缩放与低层控制，不需要每个控制周期重新训练世界模型。若改做在线规划或适应，模型可能再次参与，那是另一设计。采集端核对及本轮公开说明都不是本机模型复现实验；模型偏差、外推状态与真实执行能力仍需独立验证。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>
