@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="串起安装、快照、挂载卷、版本化数据和 GPU 渲染验证，区分文件存在与运行证据。">
+  <meta property="og:title" content="容器安装、镜像快照与数据版本：运行环境究竟保存了什么 · PDFstudent 知识库">
+  <meta property="og:description" content="串起安装、快照、挂载卷、版本化数据和 GPU 渲染验证，区分文件存在与运行证据。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>容器安装、镜像快照与数据版本：运行环境究竟保存了什么 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">安装改变容器，快照保留状态，构建定义复用</a><ol><li class="toc-level-3"><a href="#section-2">一条 FROM 不会重放终端历史</a></li><li class="toc-level-3"><a href="#section-3">挂载内容不能靠保存环境来保全</a></li></ol></li><li class="toc-level-2"><a href="#section-4">数据卷与数据集版本解决不同问题</a><ol><li class="toc-level-3"><a href="#section-5">可变工作存储与实验输入身份</a></li><li class="toc-level-3"><a href="#section-6">MCAP 与 LeRobot 不是简单换后缀</a></li></ol></li><li class="toc-level-2"><a href="#section-7">“GPU 可用”至少有四个独立层次</a><ol><li class="toc-level-3"><a href="#section-8">算子与图形栈分别测试</a></li><li class="toc-level-3"><a href="#section-9">只为已使用能力解释警告</a></li></ol></li><li class="toc-level-2"><a href="#section-10">结论与证据边界</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li><li><a href="/entry/2026-10-29-ros-tf-frequency/">ROS 2 的 TF 频率与仿真时钟回跳</a></li><li><a href="/entry/2026-10-29-mixed-precision-inference/">混合精度与推理引擎：参数存储、算子计算和控制误差</a></li><li><a href="/entry/2026-10-30-conda-container-egl/">Conda 迁移到容器后：为什么 CUDA 可用而 EGL 渲染失败</a></li><li><a aria-current="page" href="/entry/2026-11-03-runtime-assets/">容器安装、镜像快照与数据版本：运行环境究竟保存了什么</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">安装改变容器，快照保留状态，构建定义复用</a><ol><li class="toc-level-3"><a href="#section-2">一条 FROM 不会重放终端历史</a></li><li class="toc-level-3"><a href="#section-3">挂载内容不能靠保存环境来保全</a></li></ol></li><li class="toc-level-2"><a href="#section-4">数据卷与数据集版本解决不同问题</a><ol><li class="toc-level-3"><a href="#section-5">可变工作存储与实验输入身份</a></li><li class="toc-level-3"><a href="#section-6">MCAP 与 LeRobot 不是简单换后缀</a></li></ol></li><li class="toc-level-2"><a href="#section-7">“GPU 可用”至少有四个独立层次</a><ol><li class="toc-level-3"><a href="#section-8">算子与图形栈分别测试</a></li><li class="toc-level-3"><a href="#section-9">只为已使用能力解释警告</a></li></ol></li><li class="toc-level-2"><a href="#section-10">结论与证据边界</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li><li><a href="/entry/2026-10-29-ros-tf-frequency/">ROS 2 的 TF 频率与仿真时钟回跳</a></li><li><a href="/entry/2026-10-29-mixed-precision-inference/">混合精度与推理引擎：参数存储、算子计算和控制误差</a></li><li><a href="/entry/2026-10-30-conda-container-egl/">Conda 迁移到容器后：为什么 CUDA 可用而 EGL 渲染失败</a></li><li><a aria-current="page" href="/entry/2026-11-03-runtime-assets/">容器安装、镜像快照与数据版本：运行环境究竟保存了什么</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">工程实践 · 2026-11-03</p><h1>容器安装、镜像快照与数据版本：运行环境究竟保存了什么</h1><p class="article-summary">串起安装、快照、挂载卷、版本化数据和 GPU 渲染验证，区分文件存在与运行证据。</p><div class="tags"><span class="tag">训练</span><span class="tag">数据</span><span class="tag">验证</span></div></header><div class="article-body"><p>在运行容器的终端安装完依赖，随后又构建一个镜像，看起来像做了两次环境安装。原问题的关键在于三种对象不同：启动容器的原始镜像、容器运行时改变的文件系统，以及保存这些改变后生成的新镜像。</p>
+<h2 id="section-1">安装改变容器，快照保留状态，构建定义复用</h2>
+<h3 id="section-2">一条 FROM 不会重放终端历史</h3>
+<p>普通容器内安装会写入可写层，原始基础镜像不会因此改变。平台若提供保存容器文件系统的快照功能，新快照可以包含已安装的软件；再通过 <code>FROM</code> 引用该快照，就是继承已有内容，不是重新执行此前的安装命令。</p>
+<p>通用示意为：基础镜像 → 运行容器 → 安装与检查 → 保存快照 → 发布可引用版本 → 新容器复用。快照适合保存已验证状态，但它本身不说明状态如何产生。要可重建，还应保留依赖锁定、安装步骤、基础版本与验证方法；标签可能被重新指向，严格复现应记录内容身份。</p>
+<h3 id="section-3">挂载内容不能靠保存环境来保全</h3>
+<p>卷或外部数据挂载的生命周期与容器层不同。常见容器快照不包含挂载卷内容，具体平台若支持其他保存机制也应单独核对。不能因为训练进程能读取数据，就认为数据已经进入环境镜像。</p>
+<p>依赖环境、代码、数据、预训练权重和输出结果各有身份。把它们分开管理，可避免环境升级悄悄替换实验输入；保存后的镜像还需启动全新容器验证，避免测试依赖旧容器残留文件或未声明挂载。</p>
+<h2 id="section-4">数据卷与数据集版本解决不同问题</h2>
+<h3 id="section-5">可变工作存储与实验输入身份</h3>
+<p>数据卷适合持续写入、中间处理和共享缓存，但同一路径的字节可以改变。数据集版本用于给一批输入建立稳定引用；版本名称不自动保证不可变，仍要核对平台语义和实际文件哈希。</p>
+<p>例如采集得到的原始记录先进入工作存储，经完整性、时间同步、质量筛选后形成训练版本。训练记录应同时指向源数据身份、处理代码及参数，才能解释转换后的样本从哪里来。持久化也不代表永久保留，还取决于保留策略和访问权限。</p>
+<h3 id="section-6">MCAP 与 LeRobot 不是简单换后缀</h3>
+<p>MCAP 可承载相机、状态、控制命令与时间戳等消息；LeRobot 格式更接近按 episode 组织的训练数据。转换需要确定观测与动作的时间对齐、坐标系、单位、动作空间、视频引用和缺失帧处理。已经是 LeRobot 格式，也不能省略模型输入字段和标签含义检查。</p>
+<p>原始数据和转换结果应分开保存并保持对应关系。发现时间偏移或动作单位错误时，能从原始记录重新处理，不必重新采集。机器人也不必直接挂载训练平台数据卷；可通过采集服务或对象存储导入，具体接入方法需要实际验证。</p>
+<h2 id="section-7">“GPU 可用”至少有四个独立层次</h2>
+<h3 id="section-8">算子与图形栈分别测试</h3>
+<p>库成功导入只证明一部分依赖关系；CUDA 张量计算进一步证明所选算子能在设备上执行。它不证明 EGL/OpenGL 初始化和场景渲染可用，也不证明物理仿真或模型推理能完成。</p>
+<p>原讨论先检查运行依赖和实际 CUDA 计算，再构造 RGB 相机、加载场景、设置位姿、读取图像。通用图像检查应包括形状、类型、有限数值、内容变化与落盘可读性。像素标准差大于某个阈值可排除部分纯色失败，但阈值只是启发式，不能单独证明相机位置或场景正确。</p>
+<h3 id="section-9">只为已使用能力解释警告</h3>
+<p>缺少语义标注可能不影响只请求 RGB 的测试，却会影响依赖语义观测的任务。验证报告应明确 <code>rendering_tested</code>、<code>physics_tested</code>、<code>model_inference_tested</code> 等能力范围。RGB 渲染通过后，仍需加载模型、执行动作并核对闭环终态。</p>
+<p>缺少代码挂载是另一种独立失败：即使镜像与数据都正确，启动入口可能根本不存在。通用 shell 写法 <code>${CODE_ROOT:?missing code input}</code> 可以在变量缺失时提前失败，但还要检查文件可读、实际版本以及所需资源存在。</p>
+<h2 id="section-10">结论与证据边界</h2>
+<p>本篇提取原讨论中的通用运行机制，省略内部平台、地址、路径与资源配置。原回合包含依赖检查和 RGB 渲染输出，本轮只读取这些历史证据，没有重新执行同类测试。环境复用的最终证据应来自新容器和明确输入，而非旧会话中的一个成功标志。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="区分梯度探针、优化器更新、保存重载、数据拒收和后处理失败，建立可以核对的训练证据。">
+  <meta property="og:title" content="反向传播通过之后：怎样证明微调确实发生 · PDFstudent 知识库">
+  <meta property="og:description" content="区分梯度探针、优化器更新、保存重载、数据拒收和后处理失败，建立可以核对的训练证据。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>反向传播通过之后：怎样证明微调确实发生 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">梯度探针回答哪些问题</a><ol><li class="toc-level-3"><a href="#section-2">从可读取到可求导</a></li><li class="toc-level-3"><a href="#section-3">更新参数比例不能直接换算显存</a></li></ol></li><li class="toc-level-2"><a href="#section-4">微批次、更新步数和耗时怎样对应</a><ol><li class="toc-level-3"><a href="#section-5">梯度累积不会把每批都变成一次更新</a></li><li class="toc-level-3"><a href="#section-6">总耗时不能用一次探针时长乘更新次数</a></li></ol></li><li class="toc-level-2"><a href="#section-7">从更新到闭环仍有几道证据</a><ol><li class="toc-level-3"><a href="#section-8">保存成功不是参数正确的充分条件</a></li></ol></li><li class="toc-level-2"><a href="#section-9">执行失败、数据部分有效与任务失败要分开</a><ol><li class="toc-level-3"><a href="#section-10">拒收样本可以是正常质量控制</a></li><li class="toc-level-3"><a href="#section-11">推理完成后，绘图仍可能失败</a></li></ol></li><li class="toc-level-2"><a href="#section-12">结论与证据边界</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a><ol><li><a href="/entry/2026-10-29-vlnce-foundations/">VLN-CE 的任务、模型与地图边界</a></li><li><a href="/entry/2026-10-29-model-action-queries/">Transformer 为什么需要动作查询，以及固定查询如何输出不同动作</a></li><li><a href="/entry/2026-10-29-vln-omtrackvla/">OmTrackVLA 完整网络结构</a></li><li><a href="/entry/2026-10-29-vln-internvla/">InternVLA-N1 双系统架构</a></li><li><a href="/entry/2026-10-29-vln-dagger/">DAgger 如何让导航模型学会从自己的偏差中恢复</a></li><li><a href="/entry/2026-10-29-vln-deployment/">VLN 推理资源与部署架构</a></li><li><a href="/entry/2026-10-29-internvla-evaluation/">从离线推理到闭环：定位 InternVLA 提前停止</a></li><li><a href="/entry/2026-10-29-vlnce-offline-training/">VLN-CE 离线训练：LMDB、DAgger 与 RNN 的时间关系</a></li><li><a href="/entry/2026-10-29-gr00t-action-contract/">GR00T：从视觉语言到具身动作的接口约定</a></li><li><a href="/entry/2026-10-29-vlnce-experiment-evidence/">VLN-CE：损失下降、STOP 失败与闭环证据</a></li><li><a href="/entry/2026-10-29-omtrack-data-training/">OmTrackVLA：从视频滑窗到训练梯度</a></li><li><a href="/entry/2026-10-29-omtrack-closed-loop/">OmTrackVLA：过门失败、目标丢失与五场景评测</a></li><li><a href="/entry/2026-10-29-navigation-metrics-data/">导航数据与指标：场景、episode、轨迹和成功率</a></li><li><a href="/entry/2026-10-30-training-stages-sft/">Mid-training 与 SFT：阶段名称和训练方法为何会重叠</a></li><li><a href="/entry/2026-11-02-training-jobs-rl/">训练任务如何组织：配置、执行记录与强化学习循环</a></li><li><a href="/entry/2026-11-02-checkpoint-evaluation/">评测到底加载哪份权重：checkpoint、NPZ 与有效点指标</a></li><li><a href="/entry/2026-11-03-dualvln-supervision/">DualVLN 微调：专家像素标签、冻结主干与可训练条件</a></li><li><a aria-current="page" href="/entry/2026-11-03-finetune-verification/">反向传播通过之后：怎样证明微调确实发生</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">梯度探针回答哪些问题</a><ol><li class="toc-level-3"><a href="#section-2">从可读取到可求导</a></li><li class="toc-level-3"><a href="#section-3">更新参数比例不能直接换算显存</a></li></ol></li><li class="toc-level-2"><a href="#section-4">微批次、更新步数和耗时怎样对应</a><ol><li class="toc-level-3"><a href="#section-5">梯度累积不会把每批都变成一次更新</a></li><li class="toc-level-3"><a href="#section-6">总耗时不能用一次探针时长乘更新次数</a></li></ol></li><li class="toc-level-2"><a href="#section-7">从更新到闭环仍有几道证据</a><ol><li class="toc-level-3"><a href="#section-8">保存成功不是参数正确的充分条件</a></li></ol></li><li class="toc-level-2"><a href="#section-9">执行失败、数据部分有效与任务失败要分开</a><ol><li class="toc-level-3"><a href="#section-10">拒收样本可以是正常质量控制</a></li><li class="toc-level-3"><a href="#section-11">推理完成后，绘图仍可能失败</a></li></ol></li><li class="toc-level-2"><a href="#section-12">结论与证据边界</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-vln-index/">具身模型、VLN 与数据闭环</a><ol><li><a href="/entry/2026-10-29-vlnce-foundations/">VLN-CE 的任务、模型与地图边界</a></li><li><a href="/entry/2026-10-29-model-action-queries/">Transformer 为什么需要动作查询，以及固定查询如何输出不同动作</a></li><li><a href="/entry/2026-10-29-vln-omtrackvla/">OmTrackVLA 完整网络结构</a></li><li><a href="/entry/2026-10-29-vln-internvla/">InternVLA-N1 双系统架构</a></li><li><a href="/entry/2026-10-29-vln-dagger/">DAgger 如何让导航模型学会从自己的偏差中恢复</a></li><li><a href="/entry/2026-10-29-vln-deployment/">VLN 推理资源与部署架构</a></li><li><a href="/entry/2026-10-29-internvla-evaluation/">从离线推理到闭环：定位 InternVLA 提前停止</a></li><li><a href="/entry/2026-10-29-vlnce-offline-training/">VLN-CE 离线训练：LMDB、DAgger 与 RNN 的时间关系</a></li><li><a href="/entry/2026-10-29-gr00t-action-contract/">GR00T：从视觉语言到具身动作的接口约定</a></li><li><a href="/entry/2026-10-29-vlnce-experiment-evidence/">VLN-CE：损失下降、STOP 失败与闭环证据</a></li><li><a href="/entry/2026-10-29-omtrack-data-training/">OmTrackVLA：从视频滑窗到训练梯度</a></li><li><a href="/entry/2026-10-29-omtrack-closed-loop/">OmTrackVLA：过门失败、目标丢失与五场景评测</a></li><li><a href="/entry/2026-10-29-navigation-metrics-data/">导航数据与指标：场景、episode、轨迹和成功率</a></li><li><a href="/entry/2026-10-30-training-stages-sft/">Mid-training 与 SFT：阶段名称和训练方法为何会重叠</a></li><li><a href="/entry/2026-11-02-training-jobs-rl/">训练任务如何组织：配置、执行记录与强化学习循环</a></li><li><a href="/entry/2026-11-02-checkpoint-evaluation/">评测到底加载哪份权重：checkpoint、NPZ 与有效点指标</a></li><li><a href="/entry/2026-11-03-dualvln-supervision/">DualVLN 微调：专家像素标签、冻结主干与可训练条件</a></li><li><a aria-current="page" href="/entry/2026-11-03-finetune-verification/">反向传播通过之后：怎样证明微调确实发生</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">具身智能 · 2026-11-03</p><h1>反向传播通过之后：怎样证明微调确实发生</h1><p class="article-summary">区分梯度探针、优化器更新、保存重载、数据拒收和后处理失败，建立可以核对的训练证据。</p><div class="tags"><span class="tag">训练</span><span class="tag">数据</span><span class="tag">验证</span></div></header><div class="article-body"><p>一个组件完成前向、反向传播，另一个组件再运行短程训练，它们是否重复？不重复。反向传播产生梯度，优化器才依据梯度和状态更新参数。前者验证能否训练，后者才可能形成新的模型。</p>
+<h2 id="section-1">梯度探针回答哪些问题</h2>
+<h3 id="section-2">从可读取到可求导</h3>
+<p>训练前可先确认全部样本能被 DataLoader 读取，再用代表性或最长输入执行前向、反向，检查损失有限、预期模块梯度存在且有限，并记录峰值显存。选最长输入是压力测试思路，但不是对所有张量形状、动态分支与增强的绝对上界证明。</p>
+<p>只调用 <code>loss.backward()</code> 而没有 <code>optimizer.step()</code>，参数一般不会按梯度更新；但训练模式的某些 buffer 仍可能变化，因此“完整状态完全不变”也应通过状态比较确认。检查报告与可部署微调权重是不同产物，不能把探针结果标为训练完成。</p>
+<h3 id="section-3">更新参数比例不能直接换算显存</h3>
+<p>冻结大部分模型后，完整权重仍可能常驻设备。显存还包括可训练参数的梯度、激活、优化器状态、临时工作区及分配器缓存。首次优化步骤可能才创建部分状态，反向探针的峰值不能直接当作完整训练峰值。</p>
+<p>应区分 allocated 与 reserved；二者也不等于进程全部 GPU 使用量。需要在完整更新、保存以及必要的重载过程中观测峰值，再决定 batch、累积步数、精度或设备配置。本篇不公布内部资源余量或运行测量值。</p>
+<h2 id="section-4">微批次、更新步数和耗时怎样对应</h2>
+<h3 id="section-5">梯度累积不会把每批都变成一次更新</h3>
+<p>设每个微批大小为 b，累积 k 个微批后更新一次，数据并行副本数为 w，在满批、无跳步等条件下，有效批大小约为 bkw。U 次更新通常需要 Uk 次微批前后向；尾批、溢出跳步和恢复状态会改变实际计数，应从日志核对。</p>
+<p>示意：b=2、k=3、w=1，计划 10 次更新，对应约 30 个微批、60 个样本访问，不代表 60 条独立轨迹。重复滑窗的统计独立性另见 <a href="https://pdfstudent.github.io/entry/2026-10-29-omtrack-data-training/" rel="noreferrer">数据与缓存专题</a>。这些是教学数字，不是原运行结果。</p>
+<h3 id="section-6">总耗时不能用一次探针时长乘更新次数</h3>
+<p>一个可解释的估计模型是：</p>
+<pre><code class="language-text">T_total = T_queue + T_setup + T_validate + U*k*T_micro + T_save + T_post</code></pre>
+<p>排队、环境准备、全量数据校验、模型加载与保存可能占大头。若探针额外遍历数据选取最长样本，而正式训练没有该步骤，二者固定开销也不同。只有拿到稳定微批速度后才可收窄估计，不能把预估写成实测。</p>
+<h2 id="section-7">从更新到闭环仍有几道证据</h2>
+<h3 id="section-8">保存成功不是参数正确的充分条件</h3>
+<p>检查实际优化次数与预期参数差异，保存 checkpoint，再在新模型实例严格重载。验证加载身份、训练与评测划分、预处理一致性；流水线下游应引用本次上游产物并核对哈希，不能仅凭连线认定读到了新模型。</p>
+<p>短程更新主要验证工程链路，不预设模型能力提升。专家条件下离线损失、模型自选目标后的闭环表现与真机安全，是不同层次的结论。保持固定独立诊断集，有助于区分环境变化与模型变化；诊断集也不是官方完整基准。</p>
+<h2 id="section-9">执行失败、数据部分有效与任务失败要分开</h2>
+<h3 id="section-10">拒收样本可以是正常质量控制</h3>
+<p>回放结束后有些轨迹没有有效目标窗口，按既定规则拒收，并不必然代表程序失败。报告应分别记录尝试数、有效轨迹数、窗口数、拒收原因及几何和读取检查。<code>partial</code> 不能被统一解释为“成功”或“失败”，必须看其覆盖对象。</p>
+<h3 id="section-11">推理完成后，绘图仍可能失败</h3>
+<p>若全部 episode 结果已经写出，但汇总绘图数组越界，任务状态可能是失败而推理产物完整。应逐条核对清单、日志与结果身份，再决定只重跑后处理；缺证据时不能跳过推理补跑。</p>
+<p>对于每页 c 个子图、共 N 条记录，页数为 ceil(N/c)，页号 floor(i/c)，页内位置 i mod c。这个分页公式避免第 c+1 条越界，还要关闭未使用的空子图、及时释放图对象，并检查各条输出可读。</p>
+<p>源码修复后，绑定旧提交的任务不会自动更新。修复验证应记录代码身份与实际执行版本，不能只说仓库里已有修复。</p>
+<h2 id="section-12">结论与证据边界</h2>
+<p>原讨论报告了反向探针、后处理恢复及后续短程更新的提交，但最后可见消息尚不足以证明后续训练完成。本轮没有重跑模型实验，文章只保留可复用机制，省略内部结果和操作记录。判定微调完成至少需要真实更新、保存重载和对应评测；“任务运行中”或“梯度正常”都不能替代它们。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>
