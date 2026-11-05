@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="合并两端讨论，区分包时间、逐点时间、扫描跨度和到达延迟，解释换话题无法完成雷达适配。">
+  <meta property="og:title" content="点云时间契约：MID-360、Airy 与首末点基准 · PDFstudent 知识库">
+  <meta property="og:description" content="合并两端讨论，区分包时间、逐点时间、扫描跨度和到达延迟，解释换话题无法完成雷达适配。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>点云时间契约：MID-360、Airy 与首末点基准 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">先检查信息有没有在传输中丢失</a><ol><li class="toc-level-3"><a href="#section-2">原始包、SDK 对象和 ROS 消息不是同一层</a></li><li class="toc-level-3"><a href="#section-3">丢掉逐点时间后，转换器不能无损补回来</a></li></ol></li><li class="toc-level-2"><a href="#section-4">MID-360 与 Airy 的时间差异应该在哪层比较</a><ol><li class="toc-level-3"><a href="#section-5">单位、分辨率和同步精度分别记录</a></li><li class="toc-level-3"><a href="#section-6">相对时间换算必须与真实字段单位对应</a></li></ol></li><li class="toc-level-2"><a href="#section-7">到达延迟很小，为什么仍可能整帧错位</a><ol><li class="toc-level-3"><a href="#section-8">扫描跨度与接收延迟的推导</a></li><li class="toc-level-3"><a href="#section-9">完整时间契约还包括排序与过滤</a></li></ol></li><li class="toc-level-2"><a href="#section-10">从解析到融合的验收边界</a><ol><li class="toc-level-3"><a href="#section-11">逐项核对，再用运动场景验证</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-slam-index/">SLAM 技术</a><ol><li><a href="/entry/2026-10-29-slam-pointcloud-diagnostics/">点云链路与高反光异常诊断</a></li><li><a href="/entry/2026-10-29-slam-mapping-keyframes/">Fast-LIO、关键帧与增量建图</a></li><li><a href="/entry/2026-10-29-slam-fast-livo-fusion/">FAST-LIVO 怎样用激光和图像共同修正 IMU 预测</a></li><li><a href="/entry/2026-10-29-slam-fast-livo-visual-map/">FAST-LIVO 的地图点和历史图像块怎样约束当前位姿</a></li><li><a href="/entry/2026-10-29-slam-relocalization-fusion/">全局重定位与反光地标校验</a></li><li><a href="/entry/2026-10-29-slam-visual-pose/">平面视觉标志姿态与双解消歧</a></li><li><a href="/entry/2026-11-04-cartographer-fastlio/">Cartographer 与 FAST-LIO：全局建图和局部里程计怎样比较</a></li><li><a href="/entry/2026-11-05-livo-frontend-contract/">FAST-LIVO2 接入现有导航：替换前端要守住哪些接口</a></li><li><a aria-current="page" href="/entry/2026-11-05-lidar-time-contract/">点云时间契约：MID-360、Airy 与首末点基准</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">先检查信息有没有在传输中丢失</a><ol><li class="toc-level-3"><a href="#section-2">原始包、SDK 对象和 ROS 消息不是同一层</a></li><li class="toc-level-3"><a href="#section-3">丢掉逐点时间后，转换器不能无损补回来</a></li></ol></li><li class="toc-level-2"><a href="#section-4">MID-360 与 Airy 的时间差异应该在哪层比较</a><ol><li class="toc-level-3"><a href="#section-5">单位、分辨率和同步精度分别记录</a></li><li class="toc-level-3"><a href="#section-6">相对时间换算必须与真实字段单位对应</a></li></ol></li><li class="toc-level-2"><a href="#section-7">到达延迟很小，为什么仍可能整帧错位</a><ol><li class="toc-level-3"><a href="#section-8">扫描跨度与接收延迟的推导</a></li><li class="toc-level-3"><a href="#section-9">完整时间契约还包括排序与过滤</a></li></ol></li><li class="toc-level-2"><a href="#section-10">从解析到融合的验收边界</a><ol><li class="toc-level-3"><a href="#section-11">逐项核对，再用运动场景验证</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-slam-index/">SLAM 技术</a><ol><li><a href="/entry/2026-10-29-slam-pointcloud-diagnostics/">点云链路与高反光异常诊断</a></li><li><a href="/entry/2026-10-29-slam-mapping-keyframes/">Fast-LIO、关键帧与增量建图</a></li><li><a href="/entry/2026-10-29-slam-fast-livo-fusion/">FAST-LIVO 怎样用激光和图像共同修正 IMU 预测</a></li><li><a href="/entry/2026-10-29-slam-fast-livo-visual-map/">FAST-LIVO 的地图点和历史图像块怎样约束当前位姿</a></li><li><a href="/entry/2026-10-29-slam-relocalization-fusion/">全局重定位与反光地标校验</a></li><li><a href="/entry/2026-10-29-slam-visual-pose/">平面视觉标志姿态与双解消歧</a></li><li><a href="/entry/2026-11-04-cartographer-fastlio/">Cartographer 与 FAST-LIO：全局建图和局部里程计怎样比较</a></li><li><a href="/entry/2026-11-05-livo-frontend-contract/">FAST-LIVO2 接入现有导航：替换前端要守住哪些接口</a></li><li><a aria-current="page" href="/entry/2026-11-05-lidar-time-contract/">点云时间契约：MID-360、Airy 与首末点基准</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">SLAM技术 · 2026-11-05</p><h1>点云时间契约：MID-360、Airy 与首末点基准</h1><p class="article-summary">合并两端讨论，区分包时间、逐点时间、扫描跨度和到达延迟，解释换话题无法完成雷达适配。</p><div class="tags"><span class="tag">点云</span><span class="tag">时间同步</span><span class="tag">MID-360</span><span class="tag">Airy</span></div></header><div class="article-body"><p>更换雷达后点云能在界面显示，是否就能直接用于激光惯性去畸变？两端讨论分别从 MID-360 与 Airy 的时间格式，以及 SDK 到 ROS 的消息转换追问这个问题。结论是：订阅成功、字段可解析和字段语义正确，是三层不同条件。重命名话题只能解决第一层中的名称匹配。</p>
+<h2 id="section-1">先检查信息有没有在传输中丢失</h2>
+<h3 id="section-2">原始包、SDK 对象和 ROS 消息不是同一层</h3>
+<p>数据包经解码、标定和组帧后形成点云对象，再由适配器发布 ROS 消息。已组帧的笛卡尔点云并不是未解析的原始网络包。SDK 内存结构、PCL 点类型与 PointCloud2 也没有自动相同的布局。</p>
+<p>PointCloud2 的 <code>fields</code>、字段偏移、类型、<code>point_step</code>、<code>row_step</code>、宽高与字节序共同定义布局。解析器不能只按某个本地结构体的大小强制解释所有消息。即使都叫 PointCloud2，一条消息可能有 ring 和 timestamp，另一条只有 XYZI。</p>
+<h3 id="section-3">丢掉逐点时间后，转换器不能无损补回来</h3>
+<p>运动去畸变需要知道每个点在扫描期间何时测得。中间对象只保留 XYZI 时，后续换消息类型不会恢复真实发射时间。按点序和固定周期估算时间需要扫描规律、点顺序及丢包假设，只能标为估计，不能冒充测量值。字段是否能通过配置启用，还取决于发布封装是否保留相关能力；底层 SDK 支持不等于最终消息支持。</p>
+<h2 id="section-4">MID-360 与 Airy 的时间差异应该在哪层比较</h2>
+<h3 id="section-5">单位、分辨率和同步精度分别记录</h3>
+<p><a href="https://livox-wiki-en.readthedocs.io/en/latest/tutorials/new_product/mid360/livox_eth_protocol_mid360.html" rel="noreferrer">Livox MID-360 协议</a>规定包时间代表包内首点，时间字段采用纳秒单位，并区分未同步与外部同步的时间来源。原讨论对 Airy 解码器的调查报告包头秒与微秒部分，以及驱动按 double 秒表达逐点时间；具体发布链仍应核对版本、点类型和封装转换。<a href="https://github.com/RoboSense-LiDAR/rs_driver/blob/main/src/rs_driver/driver/decoder/decoder_RSAIRY.hpp" rel="noreferrer">Airy 官方解码实现</a></p>
+<p>纳秒单位不等于纳秒级绝对精度，微秒字段也不能被直接解释成与另一雷达相差千倍的同步误差。同步性能取决于共同时间源、偏移、抖动和实际采样时间的对应关系；两台设备支持 PTP，不表示未经配置就已同步，更不表示相机自动加入了同一时基。</p>
+<h3 id="section-6">相对时间换算必须与真实字段单位对应</h3>
+<p>以需要相对毫秒的接口为例：</p>
+<pre><code class="language-text">纳秒绝对时间：Δt_ms = (t_i_ns - t_ref_ns) / 1e6
+秒绝对时间：  Δt_ms = (t_i_s  - t_ref_s)  * 1e3</code></pre>
+<p>这两式只是单位换算，不包含时钟校准。若驱动字段已经是相对时间，不能再次减去绝对帧头。原回答曾发现预处理分支直接写定换算，而不是统一使用某个 YAML 单位参数，因此应沿实际代码读取位置检查，不能只修改参数名字。</p>
+<p><a href="https://github.com/RoboSense-LiDAR/rs_driver/blob/main/doc/intro/04_parameter_intro.md" rel="noreferrer">RoboSense 参数文档</a>明确区分 <code>use_lidar_clock</code> 与 <code>ts_first_point</code>：前者选择雷达或主机时间，后者选择首点或末点作为点云时间。选择雷达时间是时间源决策，并不是同步完成的证据。</p>
+<h2 id="section-7">到达延迟很小，为什么仍可能整帧错位</h2>
+<h3 id="section-8">扫描跨度与接收延迟的推导</h3>
+<p>令 t0 为首点测量时刻，t1 为末点时刻，t2 为接收记录时刻，且三者已转换到可比较的时基：</p>
+<pre><code class="language-text">S = t1 - t0
+L_end = t2 - t1
+L_start = t2 - t0 = S + L_end</code></pre>
+<p>教学例子：扫描跨度为 80 毫秒、末点之后的发布接收耗时为 5 毫秒，使用末点帧头会看到 5 毫秒，改用首点会看到 85 毫秒。实际数据流没有因此变慢，变化的是计时起点。这些数值不是现场测量。</p>
+<p>若算法把帧头当首点，却收到末点时间，再加上正的逐点偏移，整帧就会向后错开约一个扫描跨度。10 Hz 对应的周期约为 100 毫秒，但实际跨度仍由切帧、丢包及有效点范围决定，不能只用频率倒数代替逐点检查。</p>
+<h3 id="section-9">完整时间契约还包括排序与过滤</h3>
+<p>第 i 点可写成 t_i=t_ref+Δt_i。应明确参考点、偏移正负、单位、点排序和与 IMU 的重叠时间。若读取器用最后一点估计扫描结束，重排或过滤可能破坏这个假设；若用过滤后首点代替原始扫描首点，也可能改变基准。</p>
+<p>主机接收时间与物理采样时间之间含网络、调度及缓存延迟。传感器时钟和接收者时钟还有偏差或漂移时，简单相减将混入时钟误差。低到达差值、稳定发布频率、静止点云清晰，都不足以独立证明运动去畸变正确。</p>
+<h2 id="section-10">从解析到融合的验收边界</h2>
+<h3 id="section-11">逐项核对，再用运动场景验证</h3>
+<p>先确认实际消息字段、点时间范围、帧头来源、IMU 单位和外参，再检查运动期间的几何一致性。新雷达的点密度和视场变化也会影响处理负载与环境可观测性，不能把适配成功等同于精度提升。IMU 提供加速度和角速度仍需核对最终 ROS 输出单位，不应沿用旧设备的重复转换。</p>
+<p>本篇基于本机原问答及另一采集端的脱敏技术交接，后者不是主机直接读取的原文。公开协议和参数文档用于核对具体定义；本轮没有连接雷达、测同步精度或修改驱动。内部设备信息和现场测量不进入公开结论。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>
