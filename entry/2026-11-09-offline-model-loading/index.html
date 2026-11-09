@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="从子进程退出回溯到 tokenizer 的仓库类型查询，区分缓存文件、模型身份和离线加载契约。">
+  <meta property="og:title" content="离线模型已缓存，为什么 tokenizer 仍然访问网络 · PDFstudent 知识库">
+  <meta property="og:description" content="从子进程退出回溯到 tokenizer 的仓库类型查询，区分缓存文件、模型身份和离线加载契约。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>离线模型已缓存，为什么 tokenizer 仍然访问网络 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">从父进程错误回到第一条致命异常</a><ol><li class="toc-level-3"><a href="#section-2">警告与终止原因分开解释</a></li></ol></li><li class="toc-level-2"><a href="#section-3">仓库 ID 和本地快照目录为什么行为不同</a><ol><li class="toc-level-3"><a href="#section-4">固定版本的源码证据</a></li><li class="toc-level-3"><a href="#section-5">缓存不是预先算好的视觉特征</a></li></ol></li><li class="toc-level-2"><a href="#section-6">修复加载之后，验证到哪一步才算完成</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li><li><a href="/entry/2026-10-29-ros-tf-frequency/">ROS 2 的 TF 频率与仿真时钟回跳</a></li><li><a href="/entry/2026-11-05-robot-visualization/">远程机器人可视化：连通、话题与画面为何要分层验收</a></li><li><a href="/entry/2026-11-09-visual-marker-geometry/">视觉标签制版：像素、检测尺寸、静区与安装孔</a></li><li><a aria-current="page" href="/entry/2026-11-09-offline-model-loading/">离线模型已缓存，为什么 tokenizer 仍然访问网络</a></li><li><a href="/entry/2026-10-29-mixed-precision-inference/">混合精度与推理引擎：参数存储、算子计算和控制误差</a></li><li><a href="/entry/2026-10-30-conda-container-egl/">Conda 迁移到容器后：为什么 CUDA 可用而 EGL 渲染失败</a></li><li><a href="/entry/2026-11-03-runtime-assets/">容器安装、镜像快照与数据版本：运行环境究竟保存了什么</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">从父进程错误回到第一条致命异常</a><ol><li class="toc-level-3"><a href="#section-2">警告与终止原因分开解释</a></li></ol></li><li class="toc-level-2"><a href="#section-3">仓库 ID 和本地快照目录为什么行为不同</a><ol><li class="toc-level-3"><a href="#section-4">固定版本的源码证据</a></li><li class="toc-level-3"><a href="#section-5">缓存不是预先算好的视觉特征</a></li></ol></li><li class="toc-level-2"><a href="#section-6">修复加载之后，验证到哪一步才算完成</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li><li><a href="/entry/2026-10-29-ros-tf-frequency/">ROS 2 的 TF 频率与仿真时钟回跳</a></li><li><a href="/entry/2026-11-05-robot-visualization/">远程机器人可视化：连通、话题与画面为何要分层验收</a></li><li><a href="/entry/2026-11-09-visual-marker-geometry/">视觉标签制版：像素、检测尺寸、静区与安装孔</a></li><li><a aria-current="page" href="/entry/2026-11-09-offline-model-loading/">离线模型已缓存，为什么 tokenizer 仍然访问网络</a></li><li><a href="/entry/2026-10-29-mixed-precision-inference/">混合精度与推理引擎：参数存储、算子计算和控制误差</a></li><li><a href="/entry/2026-10-30-conda-container-egl/">Conda 迁移到容器后：为什么 CUDA 可用而 EGL 渲染失败</a></li><li><a href="/entry/2026-11-03-runtime-assets/">容器安装、镜像快照与数据版本：运行环境究竟保存了什么</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">工程实践 · 2026-11-09</p><h1>离线模型已缓存，为什么 tokenizer 仍然访问网络</h1><p class="article-summary">从子进程退出回溯到 tokenizer 的仓库类型查询，区分缓存文件、模型身份和离线加载契约。</p><div class="tags"><span class="tag">技术复盘</span><span class="tag">验证边界</span></div></header><div class="article-body"><p>权重已经下载、离线模式已经开启，策略服务仍在启动时退出。问题不一定在权重读取：processor 和 tokenizer 的初始化也可能根据仓库 ID 查询模型元信息。11 月 9 日的原讨论先看到父进程报告策略服务退出，随后提供的日志才暴露真正的末端异常。</p>
+<h2 id="section-1">从父进程错误回到第一条致命异常</h2>
+<h3 id="section-2">警告与终止原因分开解释</h3>
+<p>父进程只知道子进程没有启动成功，不能据此认定显存不足。实际提供的日志沿着 <code>Qwen3VLProcessor → tokenizer → _patch_mistral_regex → is_base_mistral → model_info</code> 最后到达 <code>OfflineModeIsEnabled</code>。前面的 FlashAttention dtype 警告值得另查，但它不是该堆栈显示的终止位置。本次归档读取了所附日志，没有重新启动模型服务。</p>
+<p>这条链解释了看似矛盾的现象：本地存在 tokenizer 文件，不代表所有加载辅助逻辑都只用本地文件。一个加载调用可以先命中缓存，再因模型类型识别进入 Hub 元信息请求。</p>
+<h2 id="section-3">仓库 ID 和本地快照目录为什么行为不同</h2>
+<h3 id="section-4">固定版本的源码证据</h3>
+<p>在 Transformers v4.57.3 的 tokenizer 基类中，Mistral 正则修补路径会判断输入是不是本地目录；对远端仓库标识，相关分支可能调用 <code>model_info</code> 查询模型类型。使用本地路径能让该判断走本地分支。这是特定版本的源码解释，不是所有 Transformers 版本都会这样失败的承诺。<a href="https://github.com/huggingface/transformers/blob/v4.57.3/src/transformers/tokenization_utils_base.py" rel="noreferrer">版本源码</a></p>
+<p>一种可复现的离线策略是先把仓库身份解析为已缓存快照，再把本地目录交给 processor：</p>
+<pre><code class="language-python">from huggingface_hub import snapshot_download
+from transformers import AutoProcessor
+
+snapshot = snapshot_download(
+    repo_id=model_id,
+    revision=revision,
+    cache_dir=cache_dir,
+    local_files_only=True,
+)
+processor = AutoProcessor.from_pretrained(
+    snapshot,
+    local_files_only=True,
+)</code></pre>
+<p><code>model_id</code> 指定仓库，<code>revision</code> 固定版本，<code>cache_dir</code> 选择缓存，<code>local_files_only=True</code> 禁止用下载弥补缺失。若该版本快照没有缓存，第一步应该明确失败，而非临时改用其他版本。这个片段说明接口语义；完整运行还要检查所需文件和自定义组件是否齐全。</p>
+<h3 id="section-5">缓存不是预先算好的视觉特征</h3>
+<p>Cosmos 等基础模型缓存存的是配置、tokenizer、processor 与权重等资产。每张新图像仍要经过在线前向计算。构建基础骨干后再加载 GR00T checkpoint，是实例化结构并恢复最终参数的过程，不等于同时运行两个彼此独立的决策策略。最终采用哪些参数，应以加载顺序、缺失键和覆盖键为准。</p>
+<h2 id="section-6">修复加载之后，验证到哪一步才算完成</h2>
+<p>仅执行 processor 初始化可以证明元信息查询问题绕过了，不能证明策略前向、环境动作或任务成功。应逐层检查 processor、权重恢复、单批前向、环境闭环和任务指标，并记录每一步使用的版本。</p>
+<p>后续原讨论报告了完整策略闭环和短训练检查，详见 <a href="https://pdfstudent.github.io/entry/2026-11-05-groot-libero-benchmark/" rel="noreferrer">GR00T 与 LIBERO 验证</a>。它们是原回答中的运行报告；本次知识库任务只验证文章生成和发布。模型加载成功仍不能证明训练或泛化指标达到目标。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>
