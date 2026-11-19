@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="从路线恢复与连接问题推导射线投影和左法向，区分几何连续、引用完整与实际加载。">
+  <meta property="og:title" content="路线资产修改：投影、侧移与运行时生效 · PDFstudent 知识库">
+  <meta property="og:description" content="从路线恢复与连接问题推导射线投影和左法向，区分几何连续、引用完整与实际加载。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>路线资产修改：投影、侧移与运行时生效 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">从日志恢复的路线能保留多少信息</a><ol><li class="toc-level-3"><a href="#section-2">输入契约与精度上限</a></li><li class="toc-level-3"><a href="#section-3">资源结构与运动约束分开建模</a></li></ol></li><li class="toc-level-2"><a href="#section-4">点到射线的投影与连接姿态</a><ol><li class="toc-level-3"><a href="#section-5">先求直线投影，再检查约束域</a></li><li class="toc-level-3"><a href="#section-6">一个公共端点不证明整条路线闭环</a></li></ol></li><li class="toc-level-2"><a href="#section-7">沿行进方向左移，怎样处理接缝</a><ol><li class="toc-level-3"><a href="#section-8">左法向随路线方向变化</a></li><li class="toc-level-3"><a href="#section-9">结构、几何、可执行性是不同验收</a></li></ol></li><li class="toc-level-2"><a href="#section-10">文件更新后，谁在什么时候读取它</a><ol><li class="toc-level-3"><a href="#section-11">磁盘、任务快照和进程缓存</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li><li><a href="/entry/2026-11-02-navigation-event-recording/">导航异常录包：从传感器到执行反馈重建原因</a></li><li><a aria-current="page" href="/entry/2026-11-19-route-geometry/">路线资产修改：投影、侧移与运行时生效</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">从日志恢复的路线能保留多少信息</a><ol><li class="toc-level-3"><a href="#section-2">输入契约与精度上限</a></li><li class="toc-level-3"><a href="#section-3">资源结构与运动约束分开建模</a></li></ol></li><li class="toc-level-2"><a href="#section-4">点到射线的投影与连接姿态</a><ol><li class="toc-level-3"><a href="#section-5">先求直线投影，再检查约束域</a></li><li class="toc-level-3"><a href="#section-6">一个公共端点不证明整条路线闭环</a></li></ol></li><li class="toc-level-2"><a href="#section-7">沿行进方向左移，怎样处理接缝</a><ol><li class="toc-level-3"><a href="#section-8">左法向随路线方向变化</a></li><li class="toc-level-3"><a href="#section-9">结构、几何、可执行性是不同验收</a></li></ol></li><li class="toc-level-2"><a href="#section-10">文件更新后，谁在什么时候读取它</a><ol><li class="toc-level-3"><a href="#section-11">磁盘、任务快照和进程缓存</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-navigation-index/">路线规划与导航系统</a><ol><li><a href="/entry/2026-10-29-nav-global-planning/">全局规划、指定路线与重规划策略</a></li><li><a href="/entry/2026-10-29-nav-lifecycle-config/">配置分层、生命周期与故障恢复</a></li><li><a href="/entry/2026-11-02-navigation-event-recording/">导航异常录包：从传感器到执行反馈重建原因</a></li><li><a aria-current="page" href="/entry/2026-11-19-route-geometry/">路线资产修改：投影、侧移与运行时生效</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">导航算法 · 2026-11-19</p><h1>路线资产修改：投影、侧移与运行时生效</h1><p class="article-summary">从路线恢复与连接问题推导射线投影和左法向，区分几何连续、引用完整与实际加载。</p><div class="tags"><span class="tag">技术复盘</span><span class="tag">验证边界</span></div></header><div class="article-body"><p>路线文件能被解析，不等于机器人可以按它安全运行。11 月 16 日的迟到交接包含从日志恢复路线、计算连接点、局部侧移和替换地图等问题。这里按数据恢复、几何构造、运行加载三步串联；原始工程与现场数据不公开。</p>
+<h2 id="section-1">从日志恢复的路线能保留多少信息</h2>
+<h3 id="section-2">输入契约与精度上限</h3>
+<p>先检查参数需要的是目录还是地图 YAML 文件。路径存在只能证明文件系统对象存在，不能证明对象类型符合解析器的输入契约。恢复时依据日志真实保留的点序、坐标和朝向，并用实际资产解析器检查 schema、地图引用与注册关联。</p>
+<p>如果坐标只打印到毫米位、朝向只打印到十分之一度，多写几位小数不会恢复被舍弃的信息。这是日志量化精度的上限，也不是测量准确度保证。源回执报告恢复文件通过解析检查；本轮没有重跑该解析器或路线实验。</p>
+<h3 id="section-3">资源结构与运动约束分开建模</h3>
+<p>单点与多点路线描述资源结构，允许横移与前向受限描述运动约束。同一几何结构可以由不同控制策略执行，因此一个类型字段不宜同时表达两件事。默认行为应核对解析器，不能从名称猜测。</p>
+<p>重新编号时，应分别检查标识引用与几何不变量：引用是否仍指向预期资源，点序、位置、yaw 是否保持。被忽略的资产修改可能不出现在普通 git diff 中，文件时间也不足以单独证明修改归属；需结合操作记录和实际文件范围。</p>
+<h2 id="section-4">点到射线的投影与连接姿态</h2>
+<h3 id="section-5">先求直线投影，再检查约束域</h3>
+<p>给定末段 A→B 和点 C，令 d=B−A，要求 d·d&gt;0。最小化 <code>f(t)=||C−A−td||²</code>，令导数为零，得到：</p>
+<pre><code class="language-text">t = ((C−A)·d)/(d·d)
+H = A+td</code></pre>
+<p>无限直线允许任意 t，从 A 指向 B 的射线要求 t≥0，线段还要求 t≤1。t&lt;0 时垂足不在射线上；射线最近点可取 A，但那是约束最小距离问题的端点解，不能继续称为垂线交点。可用 <code>(C−H)·d≈0</code> 校验垂直性，容限应随坐标尺度与数值精度设置。</p>
+<p>整理算例：A=(0,0)、B=(2,0)、C=(3,1)，t=1.5，H=(3,0)。它落在射线上，却不在线段 AB 内；线段最近点是 B。算例只解释约束差异，不对应现场坐标。</p>
+<h3 id="section-6">一个公共端点不证明整条路线闭环</h3>
+<p>将同一 H 作为前一路线终点与后一路线起点，只保证该点的位置接续。分别保存时应防止舍入差异；若要求姿态相接，还要显式约束 yaw。沿原末段延伸可选 <code>yaw=atan2(B_y−A_y,B_x−A_x)</code>，但投影运算本身并不决定车头朝向，全向底盘的位移方向也可以不同于航向。</p>
+<p>源讨论把连接描述为闭环，实际可支持的结论更窄：公共端点被报告一致。整条路线是否闭合、切向是否连续、曲率是否可执行、是否无碰撞仍需分别验证。</p>
+<h2 id="section-7">沿行进方向左移，怎样处理接缝</h2>
+<h3 id="section-8">左法向随路线方向变化</h3>
+<p>令 L=||d||&gt;0，单位切向 u=(dx/L,dy/L)，二维右手坐标中的左法向 n=(−dy/L,dx/L)。侧移 s 后 <code>p′=p+sn</code>。斜路线的左移通常同时改变 x、y，不能固定对世界坐标某一轴加减 s。纯平移保持已有 yaw；它不会自动生成新的合理朝向。</p>
+<p>只移动前几个点时，必须重新计算最后一个移动点到第一个未移动点的长度、航向和转角，并同步更新重复表示的站点与路线点。碰撞检查应覆盖完整 footprint 扫掠，点自身与障碍分离仍可能车体相撞。</p>
+<h3 id="section-9">结构、几何、可执行性是不同验收</h3>
+<p>解析通过证明结构和引用满足规则，共享端点证明局部位置相接，静态碰撞检查仅覆盖指定地图与几何模型。它们都不能自动覆盖动态障碍、实际跟踪误差和执行器约束。源回执报告过几何及静态检查，本轮只整理这些证据的含义。</p>
+<h2 id="section-10">文件更新后，谁在什么时候读取它</h2>
+<h3 id="section-11">磁盘、任务快照和进程缓存</h3>
+<p>逐任务读取与进程启动时缓存有不同刷新时机，已运行任务可能继续使用旧快照。确认生效需回答读取者、读取时机、缓存策略和是否支持显式刷新，不能统一说所有修改都立即生效或都必须重启。</p>
+<p>地图还应逐级核对图像、发布的占据栅格和 costmap 静态层。像素行方向、原点、分辨率及阈值转换必须正确，不能直接把灰度字节当占据概率。完整地图编辑边界见<a href="https://pdfstudent.github.io/entry/2026-10-29-nav-collision-safety/" rel="noreferrer">碰撞与代价地图专题</a>。</p>
+<p>本篇来源为采集端逐回合脱敏交接；公式推导与算例属于整理解释，工程检查属于历史报告。没有新增机器人实测结果。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>

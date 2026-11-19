@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="从标识符命名空间与入口盲区解释请求诊断，区分拒绝、执行终态和历史结果重放。">
+  <meta property="og:title" content="导航请求为何被拒绝：类型、阶段与幂等日志 · PDFstudent 知识库">
+  <meta property="og:description" content="从标识符命名空间与入口盲区解释请求诊断，区分拒绝、执行终态和历史结果重放。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>导航请求为何被拒绝：类型、阶段与幂等日志 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">合法数字为什么仍然找不到目标</a><ol><li class="toc-level-3"><a href="#section-2">请求类型先决定查找哪个资源集合</a></li><li class="toc-level-3"><a href="#section-3">协议声明、实现和当前可用性分别确认</a></li></ol></li><li class="toc-level-2"><a href="#section-4">入口日志为什么要在校验之前</a><ol><li class="toc-level-3"><a href="#section-5">接收、受理与调度不是同一个事件</a></li><li class="toc-level-3"><a href="#section-6">替换策略需要连接两次生命周期</a></li></ol></li><li class="toc-level-2"><a href="#section-7">结束日志如何避免污染成功率</a><ol><li class="toc-level-3"><a href="#section-8">请求拒绝与执行失败分别计数</a></li><li class="toc-level-3"><a href="#section-9">幂等重放返回历史结果，不是再次执行</a></li></ol></li><li class="toc-level-2"><a href="#section-10">哪些已经验证，哪些仍待检查</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li><li><a href="/entry/2026-10-29-ros-tf-frequency/">ROS 2 的 TF 频率与仿真时钟回跳</a></li><li><a href="/entry/2026-11-05-robot-visualization/">远程机器人可视化：连通、话题与画面为何要分层验收</a></li><li><a href="/entry/2026-11-09-visual-marker-geometry/">视觉标签制版：像素、检测尺寸、静区与安装孔</a></li><li><a href="/entry/2026-11-09-offline-model-loading/">离线模型已缓存，为什么 tokenizer 仍然访问网络</a></li><li><a href="/entry/2026-10-29-mixed-precision-inference/">混合精度与推理引擎：参数存储、算子计算和控制误差</a></li><li><a href="/entry/2026-10-30-conda-container-egl/">Conda 迁移到容器后：为什么 CUDA 可用而 EGL 渲染失败</a></li><li><a href="/entry/2026-11-03-runtime-assets/">容器安装、镜像快照与数据版本：运行环境究竟保存了什么</a></li><li><a aria-current="page" href="/entry/2026-11-19-request-lifecycle/">导航请求为何被拒绝：类型、阶段与幂等日志</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">合法数字为什么仍然找不到目标</a><ol><li class="toc-level-3"><a href="#section-2">请求类型先决定查找哪个资源集合</a></li><li class="toc-level-3"><a href="#section-3">协议声明、实现和当前可用性分别确认</a></li></ol></li><li class="toc-level-2"><a href="#section-4">入口日志为什么要在校验之前</a><ol><li class="toc-level-3"><a href="#section-5">接收、受理与调度不是同一个事件</a></li><li class="toc-level-3"><a href="#section-6">替换策略需要连接两次生命周期</a></li></ol></li><li class="toc-level-2"><a href="#section-7">结束日志如何避免污染成功率</a><ol><li class="toc-level-3"><a href="#section-8">请求拒绝与执行失败分别计数</a></li><li class="toc-level-3"><a href="#section-9">幂等重放返回历史结果，不是再次执行</a></li></ol></li><li class="toc-level-2"><a href="#section-10">哪些已经验证，哪些仍待检查</a></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li><li><a href="/entry/2026-10-29-ros-tf-frequency/">ROS 2 的 TF 频率与仿真时钟回跳</a></li><li><a href="/entry/2026-11-05-robot-visualization/">远程机器人可视化：连通、话题与画面为何要分层验收</a></li><li><a href="/entry/2026-11-09-visual-marker-geometry/">视觉标签制版：像素、检测尺寸、静区与安装孔</a></li><li><a href="/entry/2026-11-09-offline-model-loading/">离线模型已缓存，为什么 tokenizer 仍然访问网络</a></li><li><a href="/entry/2026-10-29-mixed-precision-inference/">混合精度与推理引擎：参数存储、算子计算和控制误差</a></li><li><a href="/entry/2026-10-30-conda-container-egl/">Conda 迁移到容器后：为什么 CUDA 可用而 EGL 渲染失败</a></li><li><a href="/entry/2026-11-03-runtime-assets/">容器安装、镜像快照与数据版本：运行环境究竟保存了什么</a></li><li><a aria-current="page" href="/entry/2026-11-19-request-lifecycle/">导航请求为何被拒绝：类型、阶段与幂等日志</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">工程实践 · 2026-11-19</p><h1>导航请求为何被拒绝：类型、阶段与幂等日志</h1><p class="article-summary">从标识符命名空间与入口盲区解释请求诊断，区分拒绝、执行终态和历史结果重放。</p><div class="tags"><span class="tag">技术复盘</span><span class="tag">验证边界</span></div></header><div class="article-body"><p>界面显示“目标不存在”，不一定说明目标文件丢失；没有调度日志，也不等于客户端没有发出请求。11 月 18 日的交接围绕这两类误判，把请求语义、状态机和日志串到同一证据链。</p>
+<h2 id="section-1">合法数字为什么仍然找不到目标</h2>
+<h3 id="section-2">请求类型先决定查找哪个资源集合</h3>
+<p>接收端通常先按请求类型分支，再解释标识符。相同整数在不同命名空间里可能代表不同资源，甚至没有对应项。因此顺序应是：类型与资源类别是否一致、目标是否存在、错误转换是否准确、请求是否已进入执行阶段。</p>
+<p>若在接收校验时已拒绝，就没有证据证明控制器运行失败。诊断应同时保存原始失败阶段和对外错误含义，避免第二层错误映射把接口问题伪装成运动问题。</p>
+<h3 id="section-3">协议声明、实现和当前可用性分别确认</h3>
+<p>枚举值可能只是保留定义，分发器仍可明确拒绝。能力表应区分已定义、已实现和当前可用；位姿字段还需明确坐标系、米与弧度等单位。某类型不消费的字段即使为零，也不代表目标位于原点。</p>
+<p>例如资源型请求中闲置的位姿字段，不能当作直接位姿型请求的目标解释。这个例子说明字段的有效域，不对应某个私有协议。</p>
+<h2 id="section-4">入口日志为什么要在校验之前</h2>
+<h3 id="section-5">接收、受理与调度不是同一个事件</h3>
+<p>请求依次经历接收、校验、受理、等待、调度和结束。若首条日志写在调度点，校验失败或等待阶段都可能没有输出。应先记录收到请求，再以相同关联标识连接后续事件；入口事件不能命名为已开始执行。</p>
+<p>分隔线方便人工阅读，机器检索仍依赖阶段、类型和关联标识。记录字段应满足排障需要，同时省略凭据和无关身份信息，不能为追求完整而原样输出整个请求。</p>
+<h3 id="section-6">替换策略需要连接两次生命周期</h3>
+<p>拒绝新请求、排队等待、取消旧请求后启动新请求是不同策略。“允许替换”不意味着两个任务同时运行。排查时应把旧任务终止与新请求受理连接起来，避免把后续合法运动解释成残留指令。</p>
+<h2 id="section-7">结束日志如何避免污染成功率</h2>
+<h3 id="section-8">请求拒绝与执行失败分别计数</h3>
+<p>运行中的任务可能成功、失败、取消或被替换；另有请求在受理前被拒绝。把拒绝统计为执行失败，会让人误以为控制器曾运行，也会改变成功率的分母。日志应同时覆盖请求拒绝和任务终态，不能只在正常完成分支增加输出。</p>
+<p>耗时也需要起算点。接收到结束包含校验和排队，调度到结束才接近实际执行窗口；两种指标都可以保留，但不可混报。</p>
+<h3 id="section-9">幂等重放返回历史结果，不是再次执行</h3>
+<p>同一请求的重放可能直接返回已存结果。需要显式区分新执行与重放，并保留原任务的关联关系；仅看到两次成功响应不足以证明执行了两次。已有消费者依赖旧格式时，可先兼容保留旧输出，再增加结构化事件逐步迁移。</p>
+<h2 id="section-10">哪些已经验证，哪些仍待检查</h2>
+<p>历史回执报告增加入口、拒绝、终态和重放输出，并通过差异格式检查；完整编译被缺失依赖阻断。这只证明编辑与所列检查完成，不能写成编译、运行和日志覆盖全部通过。</p>
+<p>本次主机读取的是采集端脱敏交接，没有读取该工程源码或重新编译。后续应分别验证正常成功、提交拒绝、执行失败、取消、替换和幂等重放是否产生一致关联的事件，再检查耗时和统计分母。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>
