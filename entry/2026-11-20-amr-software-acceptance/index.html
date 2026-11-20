@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="把操作系统、驱动、底盘 SDK 与 ROS 2 能力连接到可测条件，区分文档声明、集成通过和运行验收。">
+  <meta property="og:title" content="AMR 软件怎样验收：从接口能力到故障恢复 · PDFstudent 知识库">
+  <meta property="og:description" content="把操作系统、驱动、底盘 SDK 与 ROS 2 能力连接到可测条件，区分文档声明、集成通过和运行验收。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pdfstudent.github.io">
+  <title>AMR 软件怎样验收：从接口能力到故障恢复 · PDFstudent 知识库</title>
+  <link rel="stylesheet" href="/assets/site.css?v=f77c20b32b24">
+</head>
+<body>
+  <div class="shell"><header class="site-header">
+    <a href="/" class="brand" aria-label="返回首页"><span class="brand-mark">PS</span><span>PDFstudent · 知识库</span></a>
+    <nav class="nav" aria-label="主导航"><a href="/">首页</a><a href="/topics/">主题</a><a href="/about/">关于</a><span class="visibility-pill">公开笔记</span></nav>
+  </header><main class="page-main article-page"><a class="back" href="/">← 返回首页</a><div class="article-layout"><aside class="article-sidebar"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">从平台到运动接口，先明确责任边界</a><ol><li class="toc-level-3"><a href="#section-2">驱动输出数据，SDK 定义可调用的行为</a></li><li class="toc-level-3"><a href="#section-3">运动命令需要期限、反馈和明确的失效动作</a></li></ol></li><li class="toc-level-2"><a href="#section-4">ROS 2 接线正确以后，还要验证哪些语义</a><ol><li class="toc-level-3"><a href="#section-5">消息、坐标与任务接口共同构成契约</a></li><li class="toc-level-3"><a href="#section-6">性能指标必须带测量条件</a></li></ol></li><li class="toc-level-2"><a href="#section-7">故障注入与版本恢复为什么必须一起验收</a><ol><li class="toc-level-3"><a href="#section-8">正常运行通过，仍可能在退出路径失效</a></li><li class="toc-level-3"><a href="#section-9">一套版本清单比单个二进制更接近可复现交付</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li><li><a href="/entry/2026-10-29-ros-tf-frequency/">ROS 2 的 TF 频率与仿真时钟回跳</a></li><li><a href="/entry/2026-11-05-robot-visualization/">远程机器人可视化：连通、话题与画面为何要分层验收</a></li><li><a href="/entry/2026-11-09-visual-marker-geometry/">视觉标签制版：像素、检测尺寸、静区与安装孔</a></li><li><a href="/entry/2026-11-09-offline-model-loading/">离线模型已缓存，为什么 tokenizer 仍然访问网络</a></li><li><a href="/entry/2026-10-29-mixed-precision-inference/">混合精度与推理引擎：参数存储、算子计算和控制误差</a></li><li><a href="/entry/2026-10-30-conda-container-egl/">Conda 迁移到容器后：为什么 CUDA 可用而 EGL 渲染失败</a></li><li><a href="/entry/2026-11-03-runtime-assets/">容器安装、镜像快照与数据版本：运行环境究竟保存了什么</a></li><li><a href="/entry/2026-11-19-request-lifecycle/">导航请求为何被拒绝：类型、阶段与幂等日志</a></li><li><a href="/entry/2026-11-20-map-editor-event-loop/">地图编辑器卡住或空白：事件重入、缓存与保存边界</a></li><li><a aria-current="page" href="/entry/2026-11-20-amr-software-acceptance/">AMR 软件怎样验收：从接口能力到故障恢复</a></li></ol></nav></aside><details class="mobile-article-nav"><summary>目录与专题导航</summary><div class="mobile-article-nav-content"><nav class="article-toc" aria-label="本文目录"><strong>本文目录</strong><ol><li class="toc-level-2"><a href="#section-1">从平台到运动接口，先明确责任边界</a><ol><li class="toc-level-3"><a href="#section-2">驱动输出数据，SDK 定义可调用的行为</a></li><li class="toc-level-3"><a href="#section-3">运动命令需要期限、反馈和明确的失效动作</a></li></ol></li><li class="toc-level-2"><a href="#section-4">ROS 2 接线正确以后，还要验证哪些语义</a><ol><li class="toc-level-3"><a href="#section-5">消息、坐标与任务接口共同构成契约</a></li><li class="toc-level-3"><a href="#section-6">性能指标必须带测量条件</a></li></ol></li><li class="toc-level-2"><a href="#section-7">故障注入与版本恢复为什么必须一起验收</a><ol><li class="toc-level-3"><a href="#section-8">正常运行通过，仍可能在退出路径失效</a></li><li class="toc-level-3"><a href="#section-9">一套版本清单比单个二进制更接近可复现交付</a></li></ol></li></ol></nav><nav class="series-nav" aria-label="专题导航"><strong>专题导航</strong><a class="series-parent" href="/entry/2026-10-29-engineering-index/">机器人工程交付与诊断</a><ol><li><a href="/entry/2026-10-29-eng-debug-ci/">日志时间线、版本确认与 CI 诊断</a></li><li><a href="/entry/2026-10-29-eng-build-deploy/">构建产物、完整部署与回滚</a></li><li><a href="/entry/2026-10-29-eng-linux-ops/">Linux 权限、软件包与桌面环境</a></li><li><a href="/entry/2026-10-29-ros-tf-frequency/">ROS 2 的 TF 频率与仿真时钟回跳</a></li><li><a href="/entry/2026-11-05-robot-visualization/">远程机器人可视化：连通、话题与画面为何要分层验收</a></li><li><a href="/entry/2026-11-09-visual-marker-geometry/">视觉标签制版：像素、检测尺寸、静区与安装孔</a></li><li><a href="/entry/2026-11-09-offline-model-loading/">离线模型已缓存，为什么 tokenizer 仍然访问网络</a></li><li><a href="/entry/2026-10-29-mixed-precision-inference/">混合精度与推理引擎：参数存储、算子计算和控制误差</a></li><li><a href="/entry/2026-10-30-conda-container-egl/">Conda 迁移到容器后：为什么 CUDA 可用而 EGL 渲染失败</a></li><li><a href="/entry/2026-11-03-runtime-assets/">容器安装、镜像快照与数据版本：运行环境究竟保存了什么</a></li><li><a href="/entry/2026-11-19-request-lifecycle/">导航请求为何被拒绝：类型、阶段与幂等日志</a></li><li><a href="/entry/2026-11-20-map-editor-event-loop/">地图编辑器卡住或空白：事件重入、缓存与保存边界</a></li><li><a aria-current="page" href="/entry/2026-11-20-amr-software-acceptance/">AMR 软件怎样验收：从接口能力到故障恢复</a></li></ol></nav></div></details><article class="article-main"><header class="article-header"><p class="eyebrow">工程实践 · 2026-11-20</p><h1>AMR 软件怎样验收：从接口能力到故障恢复</h1><p class="article-summary">把操作系统、驱动、底盘 SDK 与 ROS 2 能力连接到可测条件，区分文档声明、集成通过和运行验收。</p><div class="tags"><span class="tag">技术复盘</span><span class="tag">验证边界</span></div></header><div class="article-body"><p>一套 AMR 软件声称支持 Linux、传感器、底盘 SDK 和导航，怎样证明它们能组成可维护的系统？11 月 20 日讨论提出的关键要求是：每项能力都要对应接口、版本、故障行为和验证证据。下面整理为通用验收方法，内容属于需求建议，没有新增底盘或导航实测。</p>
+<h2 id="section-1">从平台到运动接口，先明确责任边界</h2>
+<h3 id="section-2">驱动输出数据，SDK 定义可调用的行为</h3>
+<p>操作系统层需要明确 Ubuntu、内核和硬件兼容范围，以及设备初始化、网络、时间同步、权限、启动守护和异常恢复。驱动层则面对 IMU、激光雷达、相机、编码器、电机、BMS、急停与防撞输入；CAN/CAN FD、串口、USB、以太网和 GPIO 是不同的传输与控制边界，不能用“都能连上”替代协议和故障码定义。</p>
+<p>以传感器为例，验收既包括初始化和参数配置，也包括时间戳、频率、同步和健康状态。收到一个数据包只证明某次通信成功，持续且新鲜的有效数据才足以支撑下游估计。异常状态应能区分失联、数据过期、硬件故障和配置错误，避免由业务层猜测零值含义。</p>
+<h3 id="section-3">运动命令需要期限、反馈和明确的失效动作</h3>
+<p>底盘 SDK 应定义速度命令、模式切换、状态查询、配置、急停与故障复位，以及适用的差速、全向或转向运动学。接口调用成功不等于运动完成：必须把命令接收、执行状态和实际反馈区分。</p>
+<p>整理示例：某命令带有效期，命令停止更新后，接收端应按约定触发失效行为；同时记录命令时间、接收时间、反馈和状态变化，验证断链或进程退出后是否进入预期状态。通信断开、超期、超速或加速度约束各自如何处理，需要明确定义，不能把“有急停接口”当作所有异常均安全的证据。本文不指定未经系统评估的统一阈值，也不构成安全认证结论。</p>
+<h2 id="section-4">ROS 2 接线正确以后，还要验证哪些语义</h2>
+<h3 id="section-5">消息、坐标与任务接口共同构成契约</h3>
+<p>Topic、Service、Action、参数和 TF 应有完整定义，包含单位、坐标系、频率、时间和错误返回。消息类型一致仍可能出现米与毫米、度与弧度或 frame 方向混淆。SLAM、定位、规划、避障、重定位和恢复需要明确输入前提与输出状态，导航请求被接受也不代表最终到达。</p>
+<p>验收应逐级检查设备数据、标定、反馈、TF、接口与任务行为。若基础坐标链错误，直接调整规划器权重可能只是掩盖问题。可复用的部署与激活检查见<a href="https://pdfstudent.github.io/entry/2026-10-29-eng-build-deploy/" rel="noreferrer">构建产物和回滚</a>。</p>
+<h3 id="section-6">性能指标必须带测量条件</h3>
+<p>控制周期、端到端延迟、速度和位姿误差、资源使用都应说明输入负载、设备版本、测量窗口与统计方式。只记录平均延迟会遗漏短时长尾，单次速度误差也不能代表不同速度和负载条件。CPU、内存、网络和存储应与消息新鲜度、任务完成情况一起观察。</p>
+<p>原讨论没有给出已达成的数值指标。因此合理做法是先约定可测条件和通过标准，再运行验收；不能把示例目标包装成已经实现的性能。</p>
+<h2 id="section-7">故障注入与版本恢复为什么必须一起验收</h2>
+<h3 id="section-8">正常运行通过，仍可能在退出路径失效</h3>
+<p>测试应覆盖通信中断、传感器异常、进程崩溃、重启与持续运行，再检查恢复条件、错误清除和命令归属。单元、集成、系统和回归测试各覆盖不同范围；静态检查或编译通过不能替代真实接口行为。</p>
+<p>例如设备恢复通信后，要确认旧命令是否被错误复用、下游是否仍持有陈旧状态、任务是否需要重新受理。日志需能连接时间、模块、故障码与上下文，必要时提供可回放的脱敏证据。可观测性应服务排障，不能以保存凭据或完整敏感请求换取便利。</p>
+<h3 id="section-9">一套版本清单比单个二进制更接近可复现交付</h3>
+<p>操作系统、驱动、固件、SDK、ROS 节点、配置和模型共同决定运行版本，硬件与标定也须在私有设备台账中关联。变更记录应包含已知问题、兼容范围、构建方法、回滚和恢复步骤；权限控制、认证、备份和第三方组件管理是相应的运维要求。</p>
+<p>最终应分别记录“文档声明支持”“指定版本集成通过”“指定工况实测通过”。这三种证据强度不同；本篇只形成通用要求与验证框架，不声称任何实际系统已经通过全部验收。</p></div></article></div></main><footer class="footer"><span>PDFstudent · Codex Knowledge Vault</span><span>脱敏发布 · 自动更新 · GitHub Pages</span></footer></div>
+
+</body>
+</html>
